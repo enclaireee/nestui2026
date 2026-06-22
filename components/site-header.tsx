@@ -9,7 +9,7 @@ const navLinks = [
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full px-4 pt-3 sm:pt-4">
-      <nav className="relative mx-auto flex h-12 max-w-3xl items-center justify-between rounded-full border border-white/15 bg-[#0C342C]/80 pl-4 pr-2 shadow-lg shadow-black/10 ring-1 ring-white/5 sm:pl-5">
+      <nav className="relative mx-auto flex h-12 max-w-4xl items-center justify-between rounded-full border border-white/15 bg-[#0C342C]/80 pl-4 pr-2 shadow-lg shadow-black/10 ring-1 ring-white/5 sm:pl-5">
         {/* Brand */}
         <Link href="/branding/mainpage" className="flex items-center gap-2">
           <Image
