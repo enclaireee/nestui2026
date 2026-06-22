@@ -62,11 +62,16 @@
   * {
     @apply border-border;
   }
+  /* Backdrop behind everything matches the footer so no black shows
+     through (e.g. the reveal-footer gap or overscroll bounce). */
+  html,
   body {
-    @apply bg-background text-foreground;
+    background-color: #0c342c;
+  }
+  body {
+    @apply text-foreground;
   }
 
-  /* Highlighting any text shows a dark-green block with white text. */
   ::selection {
     background-color: #0c342c;
     color: #ffffff;
@@ -76,7 +81,6 @@
     color: #ffffff;
   }
 
-  /* ...but don't apply the selection effect to images. */
   img {
     -webkit-user-select: none;
     user-select: none;

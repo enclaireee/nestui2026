@@ -1,16 +1,24 @@
+"use client";
+
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 
 const navLinks = [
   { label: "Home", href: "/branding/mainpage" },
   { label: "About us", href: "/branding/aboutpage" },
+  { label: "Registration", href: "/branding/registration" },
 ];
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full px-4 pt-3 sm:pt-4">
+    <motion.header
+      initial={{ y: -24, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="sticky top-0 z-50 w-full px-4 pt-3 sm:pt-4"
+    >
       <nav className="relative mx-auto flex h-12 max-w-4xl items-center justify-between rounded-full border border-white/15 bg-[#0C342C]/80 pl-4 pr-2 shadow-lg shadow-black/10 ring-1 ring-white/5 sm:pl-5">
-        {/* Brand */}
         <Link href="/branding/mainpage" className="flex items-center gap-2">
           <Image
             src="/nestlogo.webp"
@@ -31,7 +39,6 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        {/* Center navigation */}
         <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link
@@ -44,7 +51,6 @@ export function SiteHeader() {
           ))}
         </div>
 
-        {/* Login */}
         <Link
           href="/auth/login"
           className="rounded-full bg-white/95 px-5 py-1.5 text-sm font-semibold text-[#0C342C] shadow-sm transition-colors hover:bg-white"
@@ -52,6 +58,6 @@ export function SiteHeader() {
           Login
         </Link>
       </nav>
-    </header>
+    </motion.header>
   );
 }

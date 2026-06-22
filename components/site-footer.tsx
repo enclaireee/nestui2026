@@ -5,8 +5,7 @@ import Link from "next/link";
 export function SiteFooter() {
   return (
     <footer className="w-full bg-[#0C342C] text-white">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-5 sm:flex-row sm:items-center sm:gap-4">
-        {/* Brand */}
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-10 sm:flex-row sm:items-center sm:gap-4">
         <div className="flex items-center gap-3">
           <Image
             src="/nestlogo.webp"
@@ -38,7 +37,6 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Socials + Contact */}
         <div className="flex flex-col items-center gap-4 sm:items-end sm:gap-2">
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold text-emerald-300">
