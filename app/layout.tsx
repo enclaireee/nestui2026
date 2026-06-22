@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
@@ -13,11 +13,40 @@ export const metadata: Metadata = {
   description: "A clean Next.js starter.",
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Default font for the whole app. Drop the file(s) in app/fonts/.
+// We only have the Semibold file, so we tell the browser this one face
+// covers the full weight range (100–900). Any font-weight (font-light,
+// font-bold, etc.) will render using this file instead of breaking.
+const oddval = localFont({
+  variable: "--font-oddval",
   display: "swap",
-  subsets: ["latin"],
+  src: [
+    {
+      path: "./fonts/Oddval-Semibold.ttf",
+      weight: "100 900",
+      style: "normal",
+    },
+    // When you get more real weights, replace the single entry above with
+    // one entry per file, e.g.:
+    // { path: "./fonts/Oddval-Regular.ttf", weight: "400", style: "normal" },
+    // { path: "./fonts/Oddval-Bold.ttf", weight: "700", style: "normal" },
+  ],
 });
+
+// Optional alternate font, available as the `font-geller` utility in Tailwind.
+// Uncomment once you've added a Geller file to app/fonts/, then re-add
+// `${geller.variable}` to the <body> className below.
+// const geller = localFont({
+//   variable: "--font-geller",
+//   display: "swap",
+//   src: [
+//     {
+//       path: "./fonts/Geller-Regular.ttf",
+//       weight: "400",
+//       style: "normal",
+//     },
+//   ],
+// });
 
 export default function RootLayout({
   children,
@@ -26,7 +55,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body
+        className={`${oddval.variable} font-sans antialiased`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
