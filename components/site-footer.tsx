@@ -65,11 +65,11 @@ export function SiteFooter() {
           </div>
 
           <Link
-            href="mailto:user@gmail.com"
+            href="mailto:nestui.ft@gmail.com"
             className="flex items-center gap-2 text-xs font-semibold text-white transition-colors hover:text-emerald-300"
           >
             <Mail className="h-4 w-4 text-emerald-300" />
-            user@gmail.com
+            nestui.ft@gmail.com
           </Link>
         </div>
       </div>
