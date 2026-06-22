@@ -65,4 +65,26 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Highlighting any text shows a dark-green block with white text. */
+  ::selection {
+    background-color: #0c342c;
+    color: #ffffff;
+  }
+  ::-moz-selection {
+    background-color: #0c342c;
+    color: #ffffff;
+  }
+
+  /* ...but don't apply the selection effect to images. */
+  img {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  img::selection {
+    background-color: transparent;
+  }
+  img::-moz-selection {
+    background-color: transparent;
+  }
 }
