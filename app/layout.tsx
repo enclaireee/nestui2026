@@ -9,8 +9,9 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "App",
-  description: "A clean Next.js starter.",
+  title: "NEST UI 2026",
+  description:
+    "National Electrical Summit (NEST) UI 2026 — Shaping the Future of Healthcare Through Intelligent and Inclusive Innovation.",
 };
 
 // Default font for the whole app. Drop the file(s) in app/fonts/.

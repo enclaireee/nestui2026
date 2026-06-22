@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 export default function MainPage() {
   return (
     <main
-      className="min-h-screen flex flex-col items-center bg-cover bg-center bg-no-repeat bg-fixed"
+      className="min-h-screen flex flex-col items-center bg-top bg-no-repeat bg-[length:100%_auto]"
       style={{ backgroundImage: "url('/mainpagebackground.webp')" }}
     >
       <div className="flex-1 w-full flex flex-col items-center">
