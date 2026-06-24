@@ -2,8 +2,6 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { RevealFooter } from "@/components/reveal-footer";
-import { SiteHeader } from "@/components/site-header";
 import { fadeUp, staggerContainer } from "@/lib/motion";
 
 type ComingSoonProps = {
@@ -13,15 +11,12 @@ type ComingSoonProps = {
 
 export function ComingSoon({ label = "Registration" }: ComingSoonProps) {
   return (
-    <>
-      <main
-        className="relative z-10 min-h-screen flex flex-col items-center bg-[#0C342C] bg-top bg-no-repeat bg-[length:100%_auto]"
-        style={{ backgroundImage: "url('/aboutbackground.webp')" }}
-      >
-        <div className="flex-1 w-full flex flex-col items-center">
-          <SiteHeader />
-
-          <div className="flex-1 w-full max-w-5xl flex flex-col justify-center px-6 py-28 sm:py-40">
+    <main
+      className="min-h-screen flex flex-col items-center bg-[#0C342C] bg-top bg-no-repeat bg-[length:100%_auto]"
+      style={{ backgroundImage: "url('/aboutbackground.webp')" }}
+    >
+      <div className="flex-1 w-full flex flex-col items-center">
+        <div className="flex-1 w-full max-w-5xl flex flex-col justify-center px-6 py-28 sm:py-40">
             <motion.div
               variants={staggerContainer}
               initial="hidden"
@@ -85,8 +80,5 @@ export function ComingSoon({ label = "Registration" }: ComingSoonProps) {
           </div>
         </div>
       </main>
-
-      <RevealFooter />
-    </>
   );
 }
