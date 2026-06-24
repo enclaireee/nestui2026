@@ -73,7 +73,11 @@ export default function RootLayout({
               color instead of the bare canvas. */}
           <div className="relative z-10 bg-[#0C342C]">
             <SiteHeader />
-            {children}
+            {/* Pull pages up under the sticky header so their background image
+                fills to the very top instead of leaving a dark band where the
+                header reserved its flow height. The header is translucent and
+                reads over the page background. */}
+            <div className="-mt-[60px] sm:-mt-16">{children}</div>
           </div>
           <RevealFooter />
         </ThemeProvider>

@@ -1,5 +1,6 @@
 import CompetitionSection from "./section/competition";
 import TimelineSection from "./section/timeline";
+import CtaSection from "./section/cta";
 
 export default function MainPage() {
   return (
@@ -11,6 +12,8 @@ export default function MainPage() {
         <CompetitionSection />
 
         <TimelineSection />
+
+        <CtaSection />
       </div>
     </main>
   );

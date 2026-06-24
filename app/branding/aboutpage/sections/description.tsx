@@ -11,7 +11,7 @@ export function Description() {
       initial="hidden"
       whileInView="show"
       viewport={inViewOnce}
-      className="flex w-full flex-col items-center pt-10 pb-12 sm:pt-14 sm:pb-16"
+      className="flex w-full flex-col items-center pt-20 pb-12 sm:pt-24 sm:pb-16"
     >
       <motion.div variants={fadeUp} className="w-full max-w-4xl">
         <Image
