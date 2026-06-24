@@ -62,7 +62,33 @@
   * {
     @apply border-border;
   }
+  /* Backdrop behind everything matches the footer so no black shows
+     through (e.g. the reveal-footer gap or overscroll bounce). */
+  html,
   body {
-    @apply bg-background text-foreground;
+    background-color: #0c342c;
+  }
+  body {
+    @apply text-foreground;
+  }
+
+  ::selection {
+    background-color: #0c342c;
+    color: #ffffff;
+  }
+  ::-moz-selection {
+    background-color: #0c342c;
+    color: #ffffff;
+  }
+
+  img {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  img::selection {
+    background-color: transparent;
+  }
+  img::-moz-selection {
+    background-color: transparent;
   }
 }

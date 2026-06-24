@@ -1,6 +1,3 @@
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-
 export default function ProtectedLayout({
   children,
 }: {
@@ -8,12 +5,8 @@ export default function ProtectedLayout({
 }) {
   return (
     <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col items-center">
-        <SiteHeader />
-        <div className="flex-1 w-full max-w-5xl flex flex-col p-5">
-          {children}
-        </div>
-        <SiteFooter />
+      <div className="flex-1 w-full max-w-5xl flex flex-col p-5">
+        {children}
       </div>
     </main>
   );
