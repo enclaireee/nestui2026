@@ -34,10 +34,8 @@ export function Hero() {
   const { days, hours, minutes } = useCountdown(DEADLINE);
 
   return (
-    <section className="flex w-fit flex-col items-start justify-center px-10 pb-6 border border-white rounded-3xl backdrop-blur-xl">
-      {/* ── Top row: logo + text ─────────────────────────────────────── */}
+    <section className="flex w-fit self-center flex-col items-center justify-center px-10 pb-6 mt-10 border border-white rounded-3xl backdrop-blur-xl">
       <div className="flex w-full flex-col items-center gap-10 md:flex-row md:items-center md:gap-16">
-        {/* Nest logo */}
         <div className="w-full drop-shadow-2xl sm:h-96 sm:w-96 md:h-[400px] md:w-[400px]">
           <Image
             src="/nestlogo.webp"
@@ -49,7 +47,6 @@ export function Hero() {
           />
         </div>
 
-        {/* Right column */}
         <div className="w-[800px] flex flex-1 flex-col items-start">
           {/* Title */}
           <Image
@@ -60,7 +57,6 @@ export function Hero() {
             priority
             className="w-max h-auto drop-shadow-2xl"
           />
-          {/* Description */}
           <p className="mt-2 text-base sm:text-xl md:text-2xl font-semibold leading-relaxed bg-gradient-to-b from-[#0C342CC2] via-[#186757] to-[#009477] bg-clip-text text-transparent">
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
           </p>
@@ -68,19 +64,15 @@ export function Hero() {
             Harum, eos hic officia, deserunt exercitationem, sunt provident itaque debitis minima praesentium
           </p>
 
-          {/* Registration closes label */}
           <div className="relative mt-6">
-            {/* Shadow layer */}
             <p className="absolute pb-3 text-base sm:text-3xl md:text-5xl font-semibold leading-relaxed text-[#0C342CC2] blur-[6px] opacity-100 select-none">
               Registration closes in
             </p>
-            {/* Gradient layer */}
             <p className="relative pb-3 text-base sm:text-3xl md:text-5xl font-semibold leading-relaxed bg-gradient-to-r from-[#E3EF26] to-[#FFFDEE] bg-clip-text text-transparent">
               Registration closes in
             </p>
           </div>
 
-          {/* Date + time */}
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 sm:text-xl md:text-4xl font-semibold">
             <span className="relative flex items-center gap-1 pb-2">
               <span className="absolute flex items-center gap-1 text-[#0C342CC2] blur-[4px] opacity-100 select-none">
@@ -117,15 +109,38 @@ export function Hero() {
             </span>
           </div>
 
-          {/* ── Countdown ───────────────────────────────────────────── */}
           <div className="relative flex items-center justify-center w-[650px] h-[200px]">
-            {/* Single blob background for all blobs */}
+            <Image
+              src="/fluid.svg"
+              alt=""
+              width={230}
+              height={230}
+              aria-hidden="true"
+              className="absolute -left-32 -bottom-10 opacity-90 pointer-events-none"
+            />
+            <Image
+              src="/Ellipse 5.svg"
+              alt=""
+              width={176}
+              height={185}
+              aria-hidden="true"
+              className="absolute right-[128px] -bottom-10 opacity-90 pointer-events-none"
+            />
+            <Image
+              src="/Group 3.svg"
+              alt=""
+              width={176}
+              height={185}
+              aria-hidden="true"
+              className="absolute -right-24 bottom-10 opacity-90 pointer-events-none"
+            />
             <Image
               src="/Ellipse 2.svg"
               alt="countdown"
               fill
               className="object-contain"
             />
+
             <div className="relative z-10 flex items-center gap-12 px-8 py-4">
               <CountdownBlob value={Pad(days)} label="Days" />
               <Colon />
@@ -152,7 +167,6 @@ export function Hero() {
   );
 }
 
-/* ── Sub-components ─────────────────────────────────────────────────── */
 
 function CountdownBlob({ value, label }: { value: string; label: string }) {
   return (

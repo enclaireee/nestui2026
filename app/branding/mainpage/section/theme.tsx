@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-
 export function Theme() {
     return (
         <section className="flex flex-col w-full mt-10 px-6 py-12 items-center overflow-hidden">

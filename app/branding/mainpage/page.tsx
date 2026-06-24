@@ -11,7 +11,7 @@ export default function MainPage() {
       className="min-h-screen flex flex-col items-center bg-top bg-no-repeat bg-[length:100%_auto]"
       style={{ backgroundImage: "url('/mainpagebackground.webp')" }}
     >
-      <div className="flex-1 w-full max-w-6xl flex flex-col p-5 gap-16 md:gap-24 my-8">
+      <div className="flex-1 justify-center w-full max-w-6xl flex flex-col p-5 gap-16 md:gap-24 my-8">
         <Hero />
 
         <Theme />
