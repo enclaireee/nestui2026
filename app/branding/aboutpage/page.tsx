@@ -1,5 +1,6 @@
 import { Description } from "./sections/description";
 import { Vision } from "./sections/vision";
+import CtaSection from "../mainpage/section/cta";
 
 export default function AboutPage() {
   return (
@@ -10,6 +11,7 @@ export default function AboutPage() {
       <div className="flex-1 w-full max-w-5xl flex flex-col p-5">
         <Description />
         <Vision />
+        <CtaSection />
       </div>
     </main>
   );
