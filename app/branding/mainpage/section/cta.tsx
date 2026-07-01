@@ -13,7 +13,7 @@ export default function CtaSection() {
           fontWeight: 600,
           fontSize: "clamp(36px, 5vw, 56px)",
           lineHeight: "115%",
-          color: "#FFF478",
+          color: "rgb(var(--brand-butter))",
           textShadow: "4px 4px 35px rgba(0, 0, 0, 0.35)",
         }}
       >
@@ -46,10 +46,10 @@ export default function CtaSection() {
           padding: "20px 60px",
           borderRadius: "9999px",
           background:
-            "linear-gradient(180deg, rgba(255, 253, 238, 0.14) 0%, rgba(124, 165, 74, 0.18) 40%, rgba(12, 52, 44, 0.28) 100%)",
-          border: "1.5px solid rgba(227, 239, 38, 0.65)",
+            "linear-gradient(180deg, rgb(var(--brand-cream) / 0.14) 0%, rgba(124, 165, 74, 0.18) 40%, rgb(var(--brand-green) / 0.28) 100%)",
+          border: "1.5px solid rgb(var(--brand-lime) / 0.65)",
           boxShadow:
-            "0 10px 22px rgba(7, 52, 44, 0.45), inset 0 1px 1px rgba(255, 253, 238, 0.25), inset 0 -8px 16px rgba(7, 52, 44, 0.35)",
+            "0 10px 22px rgb(var(--brand-green) / 0.45), inset 0 1px 1px rgb(var(--brand-cream) / 0.25), inset 0 -8px 16px rgb(var(--brand-green) / 0.35)",
           backdropFilter: "blur(2px)",
           WebkitBackdropFilter: "blur(2px)",
         }}
@@ -60,8 +60,8 @@ export default function CtaSection() {
             fontWeight: 600,
             fontSize: "clamp(20px, 2.4vw, 28px)",
             lineHeight: "115%",
-            color: "#F4F4A0",
-            textShadow: "0 2px 4px rgba(7, 52, 44, 0.55)",
+            color: "rgb(var(--brand-butter-soft))",
+            textShadow: "0 2px 4px rgb(var(--brand-green) / 0.55)",
           }}
         >
           Become Our Partner

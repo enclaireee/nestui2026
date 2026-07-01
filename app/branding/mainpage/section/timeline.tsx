@@ -60,8 +60,8 @@ const TimelineTitle: React.FC<{ className?: string }> = ({ className }) => (
         y2="208.568"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stopColor="#FFFDEE" />
-        <stop offset="1" stopColor="#E3EF26" />
+        <stop stopColor="rgb(var(--brand-cream))" />
+        <stop offset="1" stopColor="rgb(var(--brand-lime))" />
       </linearGradient>
     </defs>
   </svg>
@@ -71,7 +71,12 @@ const TimelineTitle: React.FC<{ className?: string }> = ({ className }) => (
 const CloverIcon: React.FC<{ className?: string; showGlow?: boolean }> = ({
   className,
   showGlow = false,
-}) => (
+}) => {
+  // Unique gradient ids per instance — duplicate ids break paint refs when the
+  // first definition sits in a display:none subtree (desktop block on mobile).
+  const uid = React.useId().replace(/:/g, "");
+  const g0 = `clover0-${uid}`, g1 = `clover1-${uid}`, g2 = `clover2-${uid}`, g3 = `clover3-${uid}`, gc = `cloverGlow-${uid}`;
+  return (
   <svg
     className={className || "w-[120px] h-[120px] md:w-[179px] md:h-[179px]"}
     viewBox="0 0 179 179"
@@ -79,36 +84,37 @@ const CloverIcon: React.FC<{ className?: string; showGlow?: boolean }> = ({
     xmlns="http://www.w3.org/2000/svg"
   >
     <defs>
-      <linearGradient id="paint0_linear_clover" x1="99.3326" y1="3.02025" x2="172.825" y2="82.8891" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#0E8057" />
-        <stop offset="1" stopColor="#C8ED04" />
+      <linearGradient id={g0} x1="99.3326" y1="3.02025" x2="172.825" y2="82.8891" gradientUnits="userSpaceOnUse">
+        <stop stopColor="rgb(var(--brand-emerald))" />
+        <stop offset="1" stopColor="rgb(var(--brand-lime-bright))" />
       </linearGradient>
-      <linearGradient id="paint1_linear_clover" x1="99.3326" y1="175.51" x2="172.825" y2="95.6412" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#C8ED04" />
-        <stop offset="1" stopColor="#0E8057" />
+      <linearGradient id={g1} x1="99.3326" y1="175.51" x2="172.825" y2="95.6412" gradientUnits="userSpaceOnUse">
+        <stop stopColor="rgb(var(--brand-lime-bright))" />
+        <stop offset="1" stopColor="rgb(var(--brand-emerald))" />
       </linearGradient>
-      <linearGradient id="paint2_linear_clover" x1="79.1976" y1="3.02025" x2="5.70492" y2="82.8891" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#C8ED04" />
-        <stop offset="1" stopColor="#0E8057" />
+      <linearGradient id={g2} x1="79.1976" y1="3.02025" x2="5.70492" y2="82.8891" gradientUnits="userSpaceOnUse">
+        <stop stopColor="rgb(var(--brand-lime-bright))" />
+        <stop offset="1" stopColor="rgb(var(--brand-emerald))" />
       </linearGradient>
-      <linearGradient id="paint3_linear_clover" x1="79.1976" y1="175.51" x2="5.70492" y2="95.6412" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#0E8057" />
-        <stop offset="1" stopColor="#C8ED04" />
+      <linearGradient id={g3} x1="79.1976" y1="175.51" x2="5.70492" y2="95.6412" gradientUnits="userSpaceOnUse">
+        <stop stopColor="rgb(var(--brand-emerald))" />
+        <stop offset="1" stopColor="rgb(var(--brand-lime-bright))" />
       </linearGradient>
-      <radialGradient id="centerGlow" cx="0.5" cy="0.5" r="0.5">
-        <stop offset="0%" stopColor="#FFFDEE" stopOpacity="0.9" />
-        <stop offset="100%" stopColor="#E3EF26" stopOpacity="0" />
+      <radialGradient id={gc} cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0%" stopColor="rgb(var(--brand-cream))" stopOpacity="0.9" />
+        <stop offset="100%" stopColor="rgb(var(--brand-lime))" stopOpacity="0" />
       </radialGradient>
     </defs>
 
-    <path d="M112.085 0C99.4818 0 89.2651 10.2167 89.2651 22.8197V66.4455C89.2651 79.0484 99.4818 89.2651 112.085 89.2651H155.711C168.314 89.2651 178.53 79.0484 178.53 66.4455C178.53 53.8425 168.314 43.6258 155.711 43.6258H134.904V22.8197C134.904 10.2167 124.688 0 112.085 0Z" fill="url(#paint0_linear_clover)" fillOpacity="0.44" />
-    <path d="M112.085 178.53C99.4818 178.53 89.2651 168.314 89.2651 155.711V112.085C89.2651 99.4819 99.4818 89.2651 112.085 89.2651H155.711C168.314 89.2651 178.53 99.4819 178.53 112.085C178.53 124.688 168.314 134.904 155.711 134.904H134.904V155.711C134.904 168.314 124.688 178.53 112.085 178.53Z" fill="url(#paint1_linear_clover)" />
-    <path d="M66.4455 0C79.0484 0 89.2651 10.2167 89.2651 22.8197V66.4455C89.2651 79.0484 79.0484 89.2651 66.4455 89.2651H22.8197C10.2167 89.2651 7.62939e-06 79.0484 7.62939e-06 66.4455C7.62939e-06 53.8425 10.2167 43.6258 22.8197 43.6258H43.6258V22.8197C43.6258 10.2167 53.8425 0 66.4455 0Z" fill="url(#paint2_linear_clover)" />
-    <path d="M66.4455 178.53C79.0484 178.53 89.2651 168.314 89.2651 155.711V112.085C89.2651 99.4819 79.0484 89.2651 66.4455 89.2651H22.8197C10.2167 89.2651 7.62939e-06 99.4819 7.62939e-06 112.085C7.62939e-06 124.688 10.2167 134.904 22.8197 134.904H43.6258V155.711C43.6258 168.314 53.8425 178.53 66.4455 178.53Z" fill="url(#paint3_linear_clover)" />
+    <path d="M112.085 0C99.4818 0 89.2651 10.2167 89.2651 22.8197V66.4455C89.2651 79.0484 99.4818 89.2651 112.085 89.2651H155.711C168.314 89.2651 178.53 79.0484 178.53 66.4455C178.53 53.8425 168.314 43.6258 155.711 43.6258H134.904V22.8197C134.904 10.2167 124.688 0 112.085 0Z" fill={`url(#${g0})`} fillOpacity="0.44" />
+    <path d="M112.085 178.53C99.4818 178.53 89.2651 168.314 89.2651 155.711V112.085C89.2651 99.4819 99.4818 89.2651 112.085 89.2651H155.711C168.314 89.2651 178.53 99.4819 178.53 112.085C178.53 124.688 168.314 134.904 155.711 134.904H134.904V155.711C134.904 168.314 124.688 178.53 112.085 178.53Z" fill={`url(#${g1})`} />
+    <path d="M66.4455 0C79.0484 0 89.2651 10.2167 89.2651 22.8197V66.4455C89.2651 79.0484 79.0484 89.2651 66.4455 89.2651H22.8197C10.2167 89.2651 7.62939e-06 79.0484 7.62939e-06 66.4455C7.62939e-06 53.8425 10.2167 43.6258 22.8197 43.6258H43.6258V22.8197C43.6258 10.2167 53.8425 0 66.4455 0Z" fill={`url(#${g2})`} />
+    <path d="M66.4455 178.53C79.0484 178.53 89.2651 168.314 89.2651 155.711V112.085C89.2651 99.4819 79.0484 89.2651 66.4455 89.2651H22.8197C10.2167 89.2651 7.62939e-06 99.4819 7.62939e-06 112.085C7.62939e-06 124.688 10.2167 134.904 22.8197 134.904H43.6258V155.711C43.6258 168.314 53.8425 178.53 66.4455 178.53Z" fill={`url(#${g3})`} />
 
-    {showGlow && <circle cx="89.5" cy="89.5" r="32" fill="url(#centerGlow)" />}
+    {showGlow && <circle cx="89.5" cy="89.5" r="32" fill={`url(#${gc})`} />}
   </svg>
-);
+  );
+};
 
 interface MilestoneNodeProps {
   id: string;
@@ -142,9 +148,9 @@ const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details,
         >
           <defs>
             <path id={`arc-${id}`} d={arcPath} />
-            <linearGradient id="goldGradientText" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="4.89%" stopColor="#FFFDEE" />
-              <stop offset="97.74%" stopColor="#E3EF26" />
+            <linearGradient id={`goldGradientText-${id}`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="4.89%" stopColor="rgb(var(--brand-cream))" />
+              <stop offset="97.74%" stopColor="rgb(var(--brand-lime))" />
             </linearGradient>
           </defs>
           <text
@@ -154,7 +160,7 @@ const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details,
               fontWeight: 600,
               letterSpacing: "0.5px",
             }}
-            fill="url(#goldGradientText)"
+            fill={`url(#goldGradientText-${id})`}
           >
             <textPath href={`#arc-${id}`} startOffset="50%" textAnchor="middle">
               {date}
@@ -171,7 +177,7 @@ const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details,
             fontSize: "clamp(26px, 3vw, 36px)",
             lineHeight: "110%",
             fontWeight: 600,
-            background: "linear-gradient(214.92deg, #FFFDEE 4.89%, #E3EF26 97.74%)",
+            background: "linear-gradient(214.92deg, rgb(var(--brand-cream)) 4.89%, rgb(var(--brand-lime)) 97.74%)",
             WebkitBackgroundClip: "text",
             textShadow: "0px 4px 20px rgba(5, 79, 0, 0.6)",
           }}
@@ -181,9 +187,9 @@ const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details,
 
         {details && (
           <div className="flex items-stretch gap-4 mt-3 text-left w-full pl-2">
-            <div className="w-[5px] bg-gradient-to-b from-[#FFFDEE] to-[#E3EF26] rounded-full flex-shrink-0" />
+            <div className="w-[5px] bg-gradient-to-b from-brand-cream to-brand-lime rounded-full flex-shrink-0" />
             <div
-              className="flex flex-col justify-between text-[#FFFFFF] text-[18px] md:text-[20px] font-semibold leading-[1.2] drop-shadow-md"
+              className="flex flex-col justify-between text-white text-[18px] md:text-[20px] font-semibold leading-[1.2] drop-shadow-md"
               style={{ fontFamily: "'SF Pro', ui-sans-serif, sans-serif" }}
             >
               {details.map((detail, idx) => (
@@ -221,13 +227,13 @@ export default function TimelineSection() {
           >
             <defs>
               <linearGradient id="ribbonGrad" x1="988.83" y1="308.82" x2="866.84" y2="888.566" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#FFFDEE" />
-                <stop offset="1" stopColor="#E3EF26" />
+                <stop stopColor="rgb(var(--brand-cream))" />
+                <stop offset="1" stopColor="rgb(var(--brand-lime))" />
               </linearGradient>
               <linearGradient id="blurGrad" x1="500.314" y1="435.576" x2="1031.09" y2="1030.39" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#E3EF26" />
-                <stop offset="0.557692" stopColor="#076653" />
-                <stop offset="0.928728" stopColor="#0C342C" />
+                <stop stopColor="rgb(var(--brand-lime))" />
+                <stop offset="0.557692" stopColor="rgb(var(--brand-teal))" />
+                <stop offset="0.928728" stopColor="rgb(var(--brand-green))" />
               </linearGradient>
               <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="12" result="blur" />
@@ -261,7 +267,7 @@ export default function TimelineSection() {
         >
           <MilestoneNode
             id="milestone-1"
-            date="12 July - 14 August"
+            date="13 July - 14 August"
             title={
               <>
                 Open Registration
@@ -294,7 +300,7 @@ export default function TimelineSection() {
         >
           <MilestoneNode
             id="milestone-3"
-            date="12/12/2026"
+            date="3 October"
             title="Main Event"
             details={[
               "Final Presentation",
@@ -309,40 +315,106 @@ export default function TimelineSection() {
       </div>
 
       {/* ======================================================= */}
-      {/* MOBILE LAYOUT                                             */}
+      {/* MOBILE LAYOUT — custom serpentine neon "vine" ribbon     */}
       {/* ======================================================= */}
-      <div className="relative md:hidden flex flex-col items-center gap-32 mt-12 w-full pb-20 transform-gpu">
-        <div className="w-full pl-4 mb-8 z-20 flex justify-start">
-          <TimelineTitle className="w-[80%] max-w-[380px] h-auto" />
+      <div className="relative md:hidden w-full pb-6 transform-gpu">
+        <div className="w-full pl-4 mb-1 z-20 flex justify-start">
+          <TimelineTitle className="w-[72%] max-w-[320px] h-auto" />
         </div>
 
-        <div className="absolute top-32 bottom-0 left-1/2 -translate-x-1/2 w-3 bg-gradient-to-b from-[#FFFDEE] via-[#C8ED04] to-[#FFFDEE] rounded-full shadow-[0_0_20px_rgba(227,239,38,0.6)] z-0" />
+        {/* Aspect-locked stage: ribbon SVG + nodes share one coordinate space (340 x 1040) */}
+        <div className="relative w-full max-w-[360px] mx-auto aspect-[340/1040]">
 
-        {[
-          { date: "12 July - 14 August", title: "Open Registration\n& Preliminary", hasList: false, glow: false },
-          { date: "25 Agustus - 8 September", title: "Semifinal", hasList: false, glow: false },
-          { date: "12/12/2026", title: "Main Event", hasList: true, glow: true },
-        ].map((item, idx) => (
-          <div key={idx} className="relative z-10 flex flex-col items-center text-center">
-            <MilestoneNode
-              id={`mobile-milestone-${idx}`}
-              date={item.date}
-              title={item.title}
-              details={
-                item.hasList
-                  ? [
-                    "Final Presentation",
-                    "Booth Exhibition",
-                    "Main Conference",
-                    "Awarding",
-                  ]
-                  : undefined
-              }
-              rotateLabelDeg={0}
-              showGlow={item.glow}
-            />
+          {(() => {
+            // single source of truth for the winding path (rendered as 4 stacked strokes)
+            const pathD =
+              "M170 14 C 180 80 86 116 102 180 C 118 262 250 372 232 490 C 216 604 138 676 150 800 C 158 892 170 948 170 1010";
+            return (
+          <svg
+            viewBox="0 0 340 1040"
+            className="absolute inset-0 w-full h-full overflow-visible pointer-events-none z-0"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <defs>
+              <linearGradient id="ribbonGradM" x1="170" y1="0" x2="170" y2="1040" gradientUnits="userSpaceOnUse">
+                <stop stopColor="rgb(var(--brand-cream))" />
+                <stop offset="0.5" stopColor="rgb(var(--brand-lime-bright))" />
+                <stop offset="1" stopColor="rgb(var(--brand-cream))" />
+              </linearGradient>
+              <linearGradient id="ambientGradM" x1="0" y1="150" x2="340" y2="860" gradientUnits="userSpaceOnUse">
+                <stop stopColor="rgb(var(--brand-lime))" />
+                <stop offset="0.55" stopColor="rgb(var(--brand-teal))" />
+                <stop offset="1" stopColor="rgb(var(--brand-green))" />
+              </linearGradient>
+              <filter id="neonGlowM" x="-40%" y="-10%" width="180%" height="120%">
+                <feGaussianBlur stdDeviation="7" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* Soft ambient green wash hugging the path */}
+            <path d={pathD} fill="none" stroke="url(#ambientGradM)" strokeWidth="90" strokeLinecap="round" className="blur-[50px] opacity-50" />
+            {/* Main glowing ribbon body */}
+            <path d={pathD} fill="none" stroke="url(#ribbonGradM)" strokeWidth="13" strokeLinecap="round" filter="url(#neonGlowM)" />
+            {/* Glossy inner highlight */}
+            <path d={pathD} fill="none" stroke="rgb(var(--brand-cream))" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
+            {/* Travelling dashed stitch */}
+            <path d={pathD} fill="none" stroke="rgb(var(--brand-teal))" strokeWidth="1.6" strokeDasharray="2 13" strokeLinecap="round" opacity="0.6" />
+
+            {/* Decorative sparkles along the vine */}
+            {[
+              { x: 258, y: 130, s: 0.9 },
+              { x: 78, y: 320, s: 0.7 },
+              { x: 268, y: 545, s: 0.8 },
+              { x: 82, y: 700, s: 0.9 },
+              { x: 250, y: 905, s: 0.7 },
+            ].map((sp, i) => (
+              <path
+                key={i}
+                d="M0 -12 C 1.3 -3.4 3.4 -1.3 12 0 C 3.4 1.3 1.3 3.4 0 12 C -1.3 3.4 -3.4 1.3 -12 0 C -3.4 -1.3 -1.3 -3.4 0 -12 Z"
+                transform={`translate(${sp.x} ${sp.y}) scale(${sp.s})`}
+                fill="rgb(var(--brand-cream))"
+                opacity="0.85"
+                style={{ filter: "drop-shadow(0 0 5px rgb(var(--brand-lime)))" }}
+              />
+            ))}
+          </svg>
+            );
+          })()}
+
+          {/* Decorative small clover leaves growing off the vine */}
+          <div className="absolute z-[1]" style={{ left: "80%", top: "27%", transform: "translate(-50%,-50%) rotate(20deg)" }}>
+            <CloverIcon className="w-[34px] h-[34px] opacity-25" />
           </div>
-        ))}
+          <div className="absolute z-[1]" style={{ left: "18%", top: "62%", transform: "translate(-50%,-50%) rotate(-25deg)" }}>
+            <CloverIcon className="w-[30px] h-[30px] opacity-20" />
+          </div>
+
+          {/* Milestone nodes pinned to the ribbon's bends */}
+          {[
+            { left: "30%", top: "17.3%", date: "13 July - 14 August", title: (<>Open Registration<br />& Preliminary</>), glow: false, details: undefined as string[] | undefined },
+            { left: "68.2%", top: "47.1%", date: "25 Agustus - 8 September", title: "Semifinal", glow: false, details: undefined },
+            { left: "44.1%", top: "76.9%", date: "3 October", title: "Main Event", glow: true, details: ["Final Presentation", "Booth Exhibition", "Main Conference", "Awarding"] },
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              className="absolute z-10"
+              style={{ left: item.left, top: item.top, transform: "translate(-50%, -50%)" }}
+            >
+              <MilestoneNode
+                id={`mobile-milestone-${idx}`}
+                date={item.date}
+                title={item.title}
+                details={item.details}
+                rotateLabelDeg={0}
+                showGlow={item.glow}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

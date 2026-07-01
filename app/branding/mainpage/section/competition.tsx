@@ -61,8 +61,8 @@ const CompetitionTitle: React.FC<{ className?: string }> = ({ className }) => (
         y2="204.946"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stopColor="#FFFDEE" />
-        <stop offset="1" stopColor="#E3EF26" />
+        <stop stopColor="rgb(var(--brand-cream))" />
+        <stop offset="1" stopColor="rgb(var(--brand-lime))" />
       </linearGradient>
     </defs>
   </svg>
@@ -113,7 +113,7 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
             fontWeight: 600,
             fontSize: "35px",
             lineHeight: "115%",
-            color: "#0C342C",
+            color: "rgb(var(--brand-green))",
           }}
         >
           {logoText}
@@ -160,7 +160,7 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
           style={{
             width: "214px",
             height: "48px",
-            background: "linear-gradient(214.92deg, #FFFDEE 4.89%, #E3EF26 97.74%)",
+            background: "linear-gradient(214.92deg, rgb(var(--brand-cream)) 4.89%, rgb(var(--brand-lime)) 97.74%)",
             borderRadius: "10px",
           }}
         >
@@ -170,12 +170,12 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
               fontWeight: 700,
               fontSize: "16px",
               lineHeight: "19px",
-              color: "#076653",
+              color: "rgb(var(--brand-teal))",
             }}
           >
             See Details
           </span>
-          <ArrowRight className="h-5 w-5 stroke-[3] text-[#076653]" />
+          <ArrowRight className="h-5 w-5 stroke-[3] text-brand-teal" />
         </button>
       </div>
     </div>
@@ -203,7 +203,7 @@ export default function CompetitionSection() {
               fontWeight: 600,
               fontSize: "35px",
               lineHeight: "54px",
-              color: "#FFF478",
+              color: "rgb(var(--brand-butter))",
               textShadow: "4px 4px 35px rgba(0, 0, 0, 0.35)",
             }}
           >
@@ -215,16 +215,16 @@ export default function CompetitionSection() {
             <CompetitionCard
               title="Medhack"
               logoText="logo lomba"
-              titleGradient="linear-gradient(227.28deg, #E3EF26 8.58%, #076653 52.85%, #0C342C 87.95%)"
+              titleGradient="linear-gradient(227.28deg, rgb(var(--brand-lime)) 8.58%, rgb(var(--brand-teal)) 52.85%, rgb(var(--brand-green)) 87.95%)"
               description="Kompetisi hackathon berkelompok (3–5 peserta) yang menantang peserta mengembangkan solusi bisnis berbasis teknologi kesehatan melalui perancangan model bisnis dan digital product yang inovatif serta berdampak."
-              descGradient="linear-gradient(269.27deg, #FFFDEE 69.75%, #E3EF26 155.54%)"
+              descGradient="linear-gradient(269.27deg, rgb(var(--brand-cream)) 69.75%, rgb(var(--brand-lime)) 155.54%)"
             />
             <CompetitionCard
               title="Healthineer"
               logoText="logo lomba"
-              titleGradient="linear-gradient(227.28deg, #E3EF26 8.58%, #076653 52.85%, #0C342C 87.95%)"
+              titleGradient="linear-gradient(227.28deg, rgb(var(--brand-lime)) 8.58%, rgb(var(--brand-teal)) 52.85%, rgb(var(--brand-green)) 87.95%)"
               description="Kompetisi berkelompok (3–5 peserta) untuk mengembangkan solusi teknologi kesehatan dalam bentuk karya tulis dan prototipe yang inovatif, aplikatif, serta berpotensi untuk diimplementasikan."
-              descGradient="linear-gradient(269.27deg, #FFFDEE 69.75%, #E3EF26 155.54%)"
+              descGradient="linear-gradient(269.27deg, rgb(var(--brand-cream)) 69.75%, rgb(var(--brand-lime)) 155.54%)"
             />
           </div>
         </div>
@@ -240,7 +240,7 @@ export default function CompetitionSection() {
               fontWeight: 600,
               fontSize: "35px",
               lineHeight: "54px",
-              color: "#FFF478",
+              color: "rgb(var(--brand-butter))",
               textShadow: "4px 4px 35px rgba(0, 0, 0, 0.37)",
             }}
           >
@@ -251,9 +251,9 @@ export default function CompetitionSection() {
             <CompetitionCard
               title="Healthynovation"
               logoText="logo lomba"
-              titleGradient="linear-gradient(72.46deg, #E2FBCE -51.59%, #E3EF26 -46.93%, #076653 45.25%)"
+              titleGradient="linear-gradient(72.46deg, rgb(var(--brand-cream)) -51.59%, rgb(var(--brand-lime)) -46.93%, rgb(var(--brand-teal)) 45.25%)"
               description="Kompetisi karya tulis ilmiah bagi siswa SMA/sederajat (1–3 peserta) yang mendorong lahirnya gagasan inovatif dalam menjawab tantangan kesehatan melalui karya tulis dan poster ilmiah."
-              descGradient="linear-gradient(260.23deg, #FFFDEE 60.52%, #E3EF26 128%)"
+              descGradient="linear-gradient(260.23deg, rgb(var(--brand-cream)) 60.52%, rgb(var(--brand-lime)) 128%)"
             />
           </div>
         </div>
