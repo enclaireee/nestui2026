@@ -110,7 +110,7 @@ export function Hero() {
         className="mt-7 transition-all hover:scale-105 hover:brightness-105 active:scale-100"
       >
         <Image
-          src="/explore Now.svg"
+          src="/Explore Now.svg"
           alt="Explore Now"
           width={200}
           height={60}
