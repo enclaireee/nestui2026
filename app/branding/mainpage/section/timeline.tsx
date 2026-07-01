@@ -356,7 +356,7 @@ export default function TimelineSection() {
             </defs>
 
             {/* Soft ambient green wash hugging the path */}
-            <path d={pathD} fill="none" stroke="url(#ambientGradM)" strokeWidth="90" strokeLinecap="round" className="blur-[50px] opacity-50" />
+            <path d={pathD} fill="none" stroke="url(#ambientGradM)" strokeWidth="40" strokeLinecap="round" className="blur-[22px] opacity-50" />
             {/* Main glowing ribbon body */}
             <path d={pathD} fill="none" stroke="url(#ribbonGradM)" strokeWidth="13" strokeLinecap="round" filter="url(#neonGlowM)" />
             {/* Glossy inner highlight */}
