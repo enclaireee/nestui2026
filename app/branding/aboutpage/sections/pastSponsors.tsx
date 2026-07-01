@@ -27,7 +27,7 @@ export function PastSponsors() {
         >
           {Array.from({ length: 15 }).map((_, i) => (
             <div key={i} className="flex justify-center items-center h-24 sm:h-40 rounded-xl bg-gray-200 text-black text-xs sm:text-base text-center hover:scale-105 hover:shadow-lg transition-all duration-500">
-              Logo Sponsor
+              Logo Sponsor -
             </div>
           ))}
         </motion.div>
