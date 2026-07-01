@@ -29,7 +29,7 @@ export function Vision() {
             className="bg-clip-text text-center text-4xl font-bold tracking-wide text-transparent sm:text-left sm:text-5xl"
             style={{
               backgroundImage:
-                "linear-gradient(180deg, #FEFCE8 0%, #BEF264 100%)",
+                "linear-gradient(180deg, rgb(var(--brand-cream)) 0%, rgb(var(--brand-lime-soft)) 100%)",
             }}
           >
             OUR VISION

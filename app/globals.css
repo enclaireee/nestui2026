@@ -4,6 +4,25 @@
 
 @layer base {
   :root {
+    /* ===================================================================
+       BRAND PALETTE — single source of truth.
+       Stored as space-separated RGB channels so Tailwind opacity
+       modifiers work (e.g. `text-brand-green/[0.76]`, `border-brand-lime/60`)
+       and inline styles / SVG can use `rgb(var(--brand-x))`.
+       Every brand color in the app must reference one of these.
+       =================================================================== */
+    --brand-green: 12 52 44;          /* #0C342C  deep forest — primary surface */
+    --brand-teal: 7 102 83;           /* #076653  mid teal — buttons, gradients */
+    --brand-teal-mid: 24 103 87;      /* #186757  teal gradient mid */
+    --brand-emerald: 14 128 87;       /* #0E8057  emerald gradient */
+    --brand-emerald-bright: 0 148 119;/* #009477  bright emerald gradient end */
+    --brand-lime: 227 239 38;         /* #E3EF26  primary accent */
+    --brand-lime-bright: 200 237 4;   /* #C8ED04  lime highlight */
+    --brand-lime-soft: 190 242 100;   /* #BEF264  soft lime */
+    --brand-cream: 255 253 238;       /* #FFFDEE  light surface / soft white */
+    --brand-butter: 255 244 120;      /* #FFF478  warm accent heading */
+    --brand-butter-soft: 244 244 160; /* #F4F4A0  warm accent (light) */
+
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -66,18 +85,18 @@
      through (e.g. the reveal-footer gap or overscroll bounce). */
   html,
   body {
-    background-color: #0c342c;
+    background-color: rgb(var(--brand-green));
   }
   body {
     @apply text-foreground;
   }
 
   ::selection {
-    background-color: #0c342c;
+    background-color: rgb(var(--brand-green));
     color: #ffffff;
   }
   ::-moz-selection {
-    background-color: #0c342c;
+    background-color: rgb(var(--brand-green));
     color: #ffffff;
   }
 
@@ -90,5 +109,23 @@
   }
   img::-moz-selection {
     background-color: transparent;
+  }
+}
+
+@layer components {
+  /* Brand gradient text: lime → cream, clipped to the glyphs.
+     Reused across the hero (countdown, headings). Pair with a
+     `bg-gradient-to-*` utility only when a non-default direction is needed;
+     this defaults to left→right. */
+  .text-gradient-brand {
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--brand-lime)),
+      rgb(var(--brand-cream))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
 }

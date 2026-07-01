@@ -36,30 +36,15 @@ const oddval = localFont({
   ],
 });
 
-// Optional alternate font, available as the `font-geller` utility in Tailwind.
-// Uncomment once you've added a Geller file to app/fonts/, then re-add
-// `${geller.variable}` to the <body> className below.
-// const geller = localFont({
-//   variable: "--font-geller",
-//   display: "swap",
-//   src: [
-//     {
-//       path: "./fonts/Geller-Regular.ttf",
-//       weight: "400",
-//       style: "normal",
-//     },
-//   ],
-// });
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth" data-scroll-behavior="smooth">
       <body
-        className={`${oddval.variable} font-sans antialiased bg-[#0C342C]`}
+        className={`${oddval.variable} font-sans antialiased bg-brand-green`}
       >
         <ThemeProvider
           attribute="class"
@@ -71,7 +56,7 @@ export default function RootLayout({
               RevealFooter (z-0) until you scroll to the bottom. The persistent
               header lives inside so its translucent bar reads over the brand
               color instead of the bare canvas. */}
-          <div className="relative z-10 bg-[#0C342C]">
+          <div className="relative z-10 bg-brand-green">
             <SiteHeader />
             {/* Pull pages up under the sticky header so their background image
                 fills to the very top instead of leaving a dark band where the
