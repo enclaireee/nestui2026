@@ -18,7 +18,9 @@ export function StepIndicator({ currentStep, className }: StepIndicatorProps) {
       <Image
         src={imageSrc}
         alt={`Step ${stepNumber} Indicator`}
-        className="w-48 sm:w-64 md:w-80 h-auto object-contain drop-shadow-lg"
+        width={600}
+        height={600}
+        className="w-72 sm:w-96 md:w-[500px] lg:w-[600px] h-auto object-contain drop-shadow-lg"
       />
     </div>
   );

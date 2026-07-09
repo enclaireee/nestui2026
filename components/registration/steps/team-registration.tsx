@@ -11,7 +11,7 @@ interface TeamRegistrationProps {
 
 export function TeamRegistration({ onNext }: TeamRegistrationProps) {
   const [competitionType, setCompetitionType] = useState<string | null>(null);
-  
+
   const competitionTypes = [
     { id: "type1", label: "Type 1" }, // Adjust labels based on actual needs
     { id: "type2", label: "Type 2" },
@@ -56,8 +56,8 @@ export function TeamRegistration({ onNext }: TeamRegistrationProps) {
         </label>
         {/* Simple select inside our styled pill */}
         <div className="relative">
-          <select defaultValue="" className="flex h-12 w-full appearance-none rounded-full border-none bg-white/90 px-4 py-2 text-sm text-brand-green shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime">
-            <option value="" disabled>Team Name</option>
+          <select defaultValue="" className="flex h-12 w-full appearance-none rounded-xl border-none bg-white/90 px-4 py-2 text-sm text-brand-green shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime">
+            <option value="" disabled> Number of Team Members</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -65,18 +65,15 @@ export function TeamRegistration({ onNext }: TeamRegistrationProps) {
           {/* Custom Dropdown Arrow */}
           <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
             <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1.5L6 6.5L11 1.5" stroke="#0C342C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 1.5L6 6.5L11 1.5" stroke="#0C342C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end mt-4">
-        <button
-          onClick={onNext}
-          className="px-8 py-2 rounded-full bg-gradient-to-b from-brand-cream to-[#D1D1D1] text-brand-teal font-bold shadow-md hover:brightness-105 transition-all"
-        >
-          Next
+      <div className="flex justify-end">
+        <button onClick={onNext} className="px-10 py-2.5 rounded-2xl flex items-center justify-center gap-2 bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg">
+          <span>Next</span>
         </button>
       </div>
     </div>

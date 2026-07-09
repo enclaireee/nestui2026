@@ -25,7 +25,7 @@ export default function RegistrationPage() {
         src="/rightfloaterreg.svg"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute right-0 top-1/4 -z-10 h-auto w-40 sm:w-56 md:w-72 opacity-80"
+        className="pointer-events-none absolute right-0 top-1/4 -z-10 h-auto w-96 sm:w-90 md:w-100 opacity-80"
       />
 
       <RegistrationClient />

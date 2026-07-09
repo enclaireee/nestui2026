@@ -57,15 +57,15 @@ export function LeaderRegistration({ onNext, onBack, isMember = false }: LeaderR
       <div className="flex justify-end gap-4 mt-6">
         <button
           onClick={onBack}
-          className="px-8 py-2 rounded-full border-2 border-brand-lime-soft text-brand-cream font-bold hover:bg-brand-lime-soft/10 transition-all"
+          className="px-10 py-2.5 rounded-2xl border-2 border-brand-lime text-brand-lime font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-brand-lime/10"
         >
           Back
         </button>
         <button
           onClick={onNext}
-          className="px-8 py-2 rounded-full bg-gradient-to-b from-brand-cream to-[#D1D1D1] text-brand-teal font-bold shadow-md hover:brightness-105 transition-all"
+          className="px-10 py-2.5 rounded-2xl flex items-center justify-center gap-2 bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg"
         >
-          Submit
+          Next
         </button>
       </div>
     </div>

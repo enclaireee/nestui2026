@@ -31,7 +31,7 @@ export function RegistrationClient() {
       {currentStep < 4 ? (
         <div className="w-full max-w-6xl flex flex-col md:flex-row gap-12 md:gap-24 items-start justify-center">
           {/* Left Sidebar */}
-          <div className="w-full md:w-1/3 pt-12 md:pt-24 pl-4 md:pl-0 flex justify-start md:justify-end">
+          <div className="w-full md:w-1/3 pt-8 md:pt-8 pl-4 md:pl-0 flex justify-start md:justify-end">
             <StepIndicator steps={STEPS} currentStep={currentStep} />
           </div>
 
