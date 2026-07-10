@@ -5,9 +5,10 @@ import { Link as LinkIcon } from "lucide-react";
 interface SubmissionProps {
   onNext: () => void;
   onBack: () => void;
+  category?: "mahasiswa" | "sma";
 }
 
-export function Submission({ onNext, onBack }: SubmissionProps) {
+export function Submission({ onNext, onBack, category }: SubmissionProps) {
   return (
     <div className="flex flex-col gap-6 w-full max-w-md">
       <div className="flex flex-col gap-3">

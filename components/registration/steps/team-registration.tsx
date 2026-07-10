@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 
 interface TeamRegistrationProps {
   onNext: () => void;
+  category?: "mahasiswa" | "sma";
 }
 
-export function TeamRegistration({ onNext }: TeamRegistrationProps) {
+export function TeamRegistration({ onNext, category }: TeamRegistrationProps) {
   const [competitionType, setCompetitionType] = useState<string | null>(null);
 
   const competitionTypes = [
