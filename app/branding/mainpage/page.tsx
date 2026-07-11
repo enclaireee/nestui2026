@@ -6,8 +6,7 @@ import CtaSection from "./section/cta";
 import { Hero } from "./section/hero";
 import { Theme } from "./section/theme";
 
-// Inline the bg SVG so Figma's blur/grain filters render — background-image
-// drops them. `slice` = cover. Read once at build (server component).
+
 const bgSvg = readFileSync(
   join(process.cwd(), "public/mainpagebackground.svg"),
   "utf8",
@@ -21,14 +20,12 @@ export default function MainPage() {
         className="pointer-events-none absolute inset-0 -z-10 transform-gpu [contain:paint] [&>svg]:h-full [&>svg]:w-full"
         dangerouslySetInnerHTML={{ __html: bgSvg }}
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/flowerfloater.webp"
         alt=""
         aria-hidden
         className="pointer-events-none absolute left-0 top-0 -z-10 h-auto w-44 sm:w-64 md:w-80"
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/rightfloater.webp"
         alt=""
