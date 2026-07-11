@@ -17,7 +17,7 @@ const STEPS = [
   "Submission"
 ];
 
-export function RegistrationClient() {
+export function RegistrationClient({ category = "mahasiswa" }: { category?: "mahasiswa" | "sma" }) {
   const [currentStep, setCurrentStep] = useState(0);
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
@@ -50,10 +50,10 @@ export function RegistrationClient() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {currentStep === 0 && <TeamRegistration onNext={nextStep} />}
-                  {currentStep === 1 && <LeaderRegistration onNext={nextStep} onBack={prevStep} />}
-                  {currentStep === 2 && <MemberRegistration onNext={nextStep} onBack={prevStep} />}
-                  {currentStep === 3 && <Submission onNext={nextStep} onBack={prevStep} />}
+                  {currentStep === 0 && <TeamRegistration onNext={nextStep} category={category} />}
+                  {currentStep === 1 && <LeaderRegistration onNext={nextStep} onBack={prevStep} category={category} />}
+                  {currentStep === 2 && <MemberRegistration onNext={nextStep} onBack={prevStep} category={category} />}
+                  {currentStep === 3 && <Submission onNext={nextStep} onBack={prevStep} category={category} />}
                 </motion.div>
               </AnimatePresence>
             </GlassCard>

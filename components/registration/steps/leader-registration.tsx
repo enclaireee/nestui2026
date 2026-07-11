@@ -7,9 +7,10 @@ interface LeaderRegistrationProps {
   onNext: () => void;
   onBack: () => void;
   isMember?: boolean;
+  category?: "mahasiswa" | "sma";
 }
 
-export function LeaderRegistration({ onNext, onBack, isMember = false }: LeaderRegistrationProps) {
+export function LeaderRegistration({ onNext, onBack, isMember = false, category = "mahasiswa" }: LeaderRegistrationProps) {
   const title = isMember ? "Team Member 1" : "Team Leader Name";
 
   return (
@@ -18,9 +19,9 @@ export function LeaderRegistration({ onNext, onBack, isMember = false }: LeaderR
       
       <div className="flex flex-col gap-3">
         <RegistrationInput icon={User} placeholder={isMember ? "Member Name" : "Team Leader Name"} />
-        <RegistrationInput icon={IdCard} placeholder="NIM (Nomor Induk Mahasiswa)" />
-        <RegistrationInput icon={Building} placeholder="University" />
-        <RegistrationInput icon={BookOpen} placeholder="Major / Jurusan" />
+        <RegistrationInput icon={IdCard} placeholder={category === "sma" ? "NISN (Nomor Induk Siswa Nasional)" : "NIM (Nomor Induk Mahasiswa)"} />
+        <RegistrationInput icon={Building} placeholder={category === "sma" ? "Sekolah" : "University"} />
+        {category === "mahasiswa" && <RegistrationInput icon={BookOpen} placeholder="Major / Jurusan" />}
         {!isMember && <RegistrationInput icon={Mail} placeholder="Email" type="email" />}
         <RegistrationInput icon={Phone} placeholder="Telephone Number" type="tel" />
       </div>
@@ -32,7 +33,7 @@ export function LeaderRegistration({ onNext, onBack, isMember = false }: LeaderR
           <ul className="list-disc pl-4 space-y-0.5">
             <li>Proof of Following @nest_ui on Instagram</li>
             <li>Proof of Twibbon Posting</li>
-            <li>KTM / Kartu Tanda Mahasiswa</li>
+            <li>{category === "sma" ? "Kartu Pelajar" : "KTM / Kartu Tanda Mahasiswa"}</li>
           </ul>
           <p className="mt-1">
             To Google Drive and Submit The Link Below{" "}
