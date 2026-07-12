@@ -42,10 +42,10 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <GlassCard>
-        <h2 className="mb-6 text-2xl font-bold text-brand-green">Welcome Back!</h2>
+      <GlassCard className="lg:p-12">
+        <h2 className="mb-6 text-2xl font-bold text-brand-green md:mb-8 md:text-3xl">Welcome Back!</h2>
         <form onSubmit={handleLogin}>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:gap-5">
             <RegistrationInput
               icon={Mail}
               type="email"
@@ -53,6 +53,7 @@ export function LoginForm({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="md:h-14 md:text-base"
             />
             <RegistrationInput
               icon={Lock}
@@ -61,10 +62,11 @@ export function LoginForm({
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="md:h-14 md:text-base"
             />
             <Link
               href="/auth/forgot-password"
-              className="-mt-2 text-xs font-semibold text-brand-green/80 underline-offset-4 hover:underline"
+              className="-mt-2 text-xs font-semibold text-brand-green/80 underline-offset-4 hover:underline md:text-sm"
             >
               Forgot Password?
             </Link>
@@ -72,12 +74,12 @@ export function LoginForm({
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-2 w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100"
+              className="mt-2 w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100 md:py-3.5 md:text-base"
             >
               {isLoading ? "Logging in..." : "Login"}
             </button>
           </div>
-          <div className="mt-4 text-center text-sm text-brand-green">
+          <div className="mt-4 text-center text-sm text-brand-green md:mt-6 md:text-base">
             Don&apos;t have an account?{" "}
             <Link href="/auth/sign-up" className="font-bold underline underline-offset-4">
               Sign Up

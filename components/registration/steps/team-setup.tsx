@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Users, Check, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RegistrationInput } from "../registration-input";
+import { SectionLabel } from "../section-label";
 import {
   competitionsForCategory,
   teamSizeOptions,
@@ -95,14 +96,15 @@ export function TeamSetup({
                       <div className="relative flex items-start gap-4">
                         {/* competition logo */}
                         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-inner ring-1 ring-white/60 overflow-hidden p-1.5">
-                          <Image
-                            src={c.logo}
-                            alt={`${c.name} logo`}
-                            width={44}
-                            height={44}
-                            style={{ width: "auto", height: "auto" }}
-                            className="max-h-full max-w-full object-contain"
-                          />
+                          <span className="relative block h-full w-full">
+                            <Image
+                              src={c.logo}
+                              alt={`${c.name} logo`}
+                              fill
+                              sizes="56px"
+                              className="object-contain"
+                            />
+                          </span>
                         </div>
 
                         <div className="min-w-0 flex-1">
@@ -195,23 +197,6 @@ export function TeamSetup({
           Next
         </button>
       </div>
-    </div>
-  );
-}
-
-function SectionLabel({
-  icon: Icon,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-green/10">
-        <Icon className="h-4 w-4 text-brand-green" />
-      </span>
-      <span className="text-lg font-bold text-brand-green">{children}</span>
     </div>
   );
 }

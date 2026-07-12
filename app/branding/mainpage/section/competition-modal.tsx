@@ -34,7 +34,7 @@ interface TimelineItem {
 interface Prize {
   label: string;
   value: string;
-  rank?: 1 | 2 | 3;
+  rank: 1 | 2 | 3;
 }
 interface Fee {
   label: string;
@@ -75,8 +75,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "1st Place", value: "Rp4,500,000 + Certificate", rank: 1 },
       { label: "2nd Place", value: "Rp3,000,000 + Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp2,000,000 + Certificate", rank: 3 },
-      { label: "Best Pitching", value: "Rp300,000 + Certificate" },
-      { label: "Best Digital Product", value: "Rp200,000 + Certificate" },
     ],
     fees: [
       { label: "Early Bird", value: "Rp200.000" },
@@ -120,9 +118,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "1st Place", value: "Rp4,500,000 + e-Certificate", rank: 1 },
       { label: "2nd Place", value: "Rp3,000,000 + e-Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp2,000,000 + e-Certificate", rank: 3 },
-      { label: "Best Booth", value: "Rp300,000 + e-Certificate" },
-      { label: "Best Video", value: "Rp200,000 + e-Certificate" },
-      { label: "Top 5", value: "e-Certificate" },
     ],
     fees: [
       { label: "Early Bird", value: "Rp175.000" },
@@ -168,8 +163,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "1st Place", value: "Rp3,000,000 + Certificate", rank: 1 },
       { label: "2nd Place", value: "Rp2,000,000 + Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp1,000,000 + Certificate", rank: 3 },
-      { label: "Best Presentation", value: "Rp300,000 + Certificate" },
-      { label: "Best Poster", value: "Rp200,000 + Certificate" },
     ],
     fees: [
       { label: "Early Bird", value: "Rp80.000" },
@@ -240,14 +233,15 @@ export function CompetitionModal({
               boxShadow: "0 0 30px -6px rgba(227,239,38,0.35)",
             }}
           >
-            <Image
-              src={cfg.logo}
-              alt={`${cfg.name} logo`}
-              width={64}
-              height={64}
-              style={{ width: "auto", height: "auto" }}
-              className="max-h-full max-w-full object-contain drop-shadow-[0_0_14px_rgba(227,239,38,0.35)]"
-            />
+            <span className="relative block h-full w-full">
+              <Image
+                src={cfg.logo}
+                alt={`${cfg.name} logo`}
+                fill
+                sizes="80px"
+                className="object-contain drop-shadow-[0_0_14px_rgba(227,239,38,0.35)]"
+              />
+            </span>
           </div>
           <div className="min-w-0">
             <h2 className="text-3xl font-bold text-gradient-brand">{cfg.name}</h2>
@@ -317,20 +311,12 @@ export function CompetitionModal({
               {detail.prizes.map((p) => (
                 <div
                   key={p.label}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 ${
-                    p.rank
-                      ? "bg-white/8 ring-1 ring-brand-lime/25"
-                      : "bg-white/5 ring-1 ring-white/10"
-                  }`}
+                  className="flex items-center gap-3 rounded-xl bg-white/8 px-4 py-3 ring-1 ring-brand-lime/25"
                 >
                   <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black ${
-                      p.rank
-                        ? `bg-gradient-to-br ${RANK_STYLES[p.rank]}`
-                        : "bg-brand-teal text-brand-lime"
-                    }`}
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black bg-gradient-to-br ${RANK_STYLES[p.rank]}`}
                   >
-                    {p.rank ?? <Trophy className="h-4 w-4" />}
+                    {p.rank}
                   </span>
                   <span className="flex-1 text-sm font-semibold text-white/85">{p.label}</span>
                   <span className="text-right text-sm font-bold text-brand-butter">{p.value}</span>

@@ -30,7 +30,7 @@ export function AuthPageShell({ heading, children, showLogo = false }: AuthPageS
 
       <div
         className={cn(
-          "relative z-10 mt-10 flex w-full max-w-5xl flex-1 items-center justify-center gap-12 px-4 md:px-8",
+          "relative z-10 mt-10 flex w-full max-w-6xl flex-1 items-center justify-center gap-12 px-4 md:px-8 lg:gap-16",
           showLogo && "md:justify-between"
         )}
       >
@@ -38,10 +38,10 @@ export function AuthPageShell({ heading, children, showLogo = false }: AuthPageS
           <img
             src="/loginlogo.webp"
             alt="Nest UI 2026"
-            className="hidden h-auto w-full max-w-md md:block"
+            className="hidden h-auto w-full max-w-md md:block lg:max-w-lg"
           />
         )}
-        <div className="w-full max-w-sm">{children}</div>
+        <div className="w-full max-w-sm md:max-w-md lg:max-w-lg">{children}</div>
       </div>
     </main>
   );

@@ -119,14 +119,15 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
             "inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 30px -6px rgba(227,239,38,0.35)",
         }}
       >
-        <Image
-          src={logoSrc}
-          alt={`${title} logo`}
-          width={110}
-          height={110}
-          style={{ width: "auto", height: "auto" }}
-          className="max-h-full max-w-full object-contain drop-shadow-[0_0_18px_rgba(227,239,38,0.35)]"
-        />
+        <span className="relative block h-full w-full">
+          <Image
+            src={logoSrc}
+            alt={`${title} logo`}
+            fill
+            sizes="150px"
+            className="object-contain drop-shadow-[0_0_18px_rgba(227,239,38,0.35)]"
+          />
+        </span>
       </div>
 
       {/* Right side: Texts & Details button */}

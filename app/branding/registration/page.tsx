@@ -1,13 +1,28 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { RegistrationClient } from "@/components/registration/registration-client";
+import { AlreadyRegistered } from "@/components/registration/already-registered";
 
 const bgSvg = readFileSync(
   join(process.cwd(), "public/mainpagebackground.svg"),
   "utf8",
 ).replace("<svg", '<svg preserveAspectRatio="xMidYMid slice"');
 
-export default function RegistrationPage() {
+export default async function RegistrationPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  const { data: existing } = await supabase
+    .from("registrations")
+    .select("team_name, competition")
+    .limit(1)
+    .maybeSingle();
+
   return (
     <main className="relative min-h-screen flex flex-col items-center overflow-x-hidden">
       <div
@@ -28,7 +43,11 @@ export default function RegistrationPage() {
         className="pointer-events-none absolute right-0 top-1/4 -z-10 h-auto w-96 sm:w-90 md:w-100 opacity-80"
       />
 
-      <RegistrationClient />
+      {existing ? (
+        <AlreadyRegistered teamName={existing.team_name} competition={existing.competition} />
+      ) : (
+        <RegistrationClient />
+      )}
     </main>
   );
 }

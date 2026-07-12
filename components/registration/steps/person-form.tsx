@@ -1,7 +1,8 @@
 "use client";
 
-import { User, IdCard, Building, BookOpen, Mail, Phone, Link as LinkIcon } from "lucide-react";
+import { User, IdCard, Building, BookOpen, Mail, Phone, Link as LinkIcon, Upload } from "lucide-react";
 import { RegistrationInput } from "../registration-input";
+import { SectionLabel } from "../section-label";
 import type { CompetitionConfig } from "@/lib/registrations/config";
 import type { PersonDraft } from "@/lib/registrations/types";
 import type { FieldErrors } from "@/lib/registrations/validate";
@@ -18,9 +19,20 @@ interface PersonFormProps {
 // competitions (major field, ID/institution labels) comes from `cfg`.
 export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-xl font-bold text-brand-green">{title}</h3>
+    <div className="flex flex-col gap-5">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-lime to-brand-cream text-brand-teal shadow-sm">
+          <User className="h-5 w-5" />
+        </span>
+        <div>
+          <h3 className="text-xl font-bold leading-tight text-brand-green">{title}</h3>
+          <p className="text-xs font-medium text-brand-green/60">Personal &amp; contact details</p>
+        </div>
+      </div>
 
+      {/* Identity fields */}
+      <div className="flex flex-col gap-3">
       <Field error={errors.name}>
         <RegistrationInput
           icon={User}
@@ -79,38 +91,43 @@ export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormP
           />
         </Field>
       )}
-
-      <div className="rounded-xl bg-brand-green/5 px-3 py-2.5 text-xs leading-relaxed text-brand-green/80">
-        <p className="font-semibold">
-          Submit one Google Drive folder containing all of the following:
-        </p>
-        <ul className="mt-1 list-disc space-y-0.5 pl-4">
-          <li>Scan of your {cfg.studentIdLabel}</li>
-          <li>
-            Proof of following{" "}
-            <a
-              href="https://instagram.com/nest_ui"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-brand-teal underline decoration-brand-lime underline-offset-2 hover:text-brand-green"
-            >
-              @nest_ui
-            </a>{" "}
-            on Instagram
-          </li>
-          <li>Proof of posting the NEST UI 2026 twibbon</li>
-        </ul>
       </div>
-      <Field error={errors.confirmationUrl}>
-        <RegistrationInput
-          icon={LinkIcon}
-          type="url"
-          placeholder="Confirmation Google Drive Link"
-          value={person.confirmationUrl}
-          aria-invalid={!!errors.confirmationUrl}
-          onChange={(e) => onChange("confirmationUrl", e.target.value)}
-        />
-      </Field>
+
+      {/* Confirmation documents */}
+      <div className="flex flex-col gap-3 border-t border-brand-green/10 pt-4">
+        <SectionLabel icon={Upload}>Confirmation</SectionLabel>
+        <div className="rounded-xl bg-brand-green/5 px-3 py-2.5 text-xs leading-relaxed text-brand-green/80 ring-1 ring-brand-green/10">
+          <p className="font-semibold">
+            Submit one Google Drive folder containing all of the following:
+          </p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-4">
+            <li>Scan of your {cfg.studentIdLabel}</li>
+            <li>
+              Proof of following{" "}
+              <a
+                href="https://instagram.com/nest_ui"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-teal underline decoration-brand-lime underline-offset-2 hover:text-brand-green"
+              >
+                @nest_ui
+              </a>{" "}
+              on Instagram
+            </li>
+            <li>Proof of posting the NEST UI 2026 twibbon</li>
+          </ul>
+        </div>
+        <Field error={errors.confirmationUrl}>
+          <RegistrationInput
+            icon={LinkIcon}
+            type="url"
+            placeholder="Confirmation Google Drive Link"
+            value={person.confirmationUrl}
+            aria-invalid={!!errors.confirmationUrl}
+            onChange={(e) => onChange("confirmationUrl", e.target.value)}
+          />
+        </Field>
+      </div>
     </div>
   );
 }

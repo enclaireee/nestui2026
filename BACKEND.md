@@ -400,6 +400,97 @@ grant  execute on function public.delete_registration(uuid) to service_role;
 
 ---
 
+## Step 15 — Additional submissions ("Submit again") — **required for the resubmit feature**
+
+A team can now pay again and attach another submission from their dashboard. Each extra submission is its own reviewable row. The original submission stays inline on `registrations` (it is **Entry 1**); every resubmission after that is a row here (**Entry 2, 3, …**). The dashboard merges the inline Entry 1 with these rows into one list, so nothing needs to move.
+
+```sql
+create table if not exists public.submissions (
+  id                uuid primary key default gen_random_uuid(),
+  registration_id   uuid not null references public.registrations(id) on delete cascade,
+  payment_proof_url text not null,
+  submission_url    text not null,
+  status            registration_status not null default 'pending',
+  submitted_at      timestamptz not null default now(),
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists idx_submissions_reg on public.submissions (registration_id);
+
+alter table public.submissions enable row level security;
+
+-- a user can read submissions belonging to their own registration (dashboard)
+drop policy if exists submissions_select_own on public.submissions;
+create policy submissions_select_own on public.submissions
+  for select to authenticated
+  using (exists (
+    select 1 from public.registrations r
+    where r.id = submissions.registration_id and r.user_id = auth.uid()
+  ));
+
+-- clients get SELECT only (RLS-filtered); no client insert (goes through the RPC)
+revoke all on public.submissions from anon, authenticated;
+grant select on public.submissions to authenticated;
+```
+
+`add_submission` validates that the caller owns the registration, then inserts one submission. `SECURITY DEFINER`, `service_role` only — same pattern as `submit_registration`.
+
+```sql
+create or replace function public.add_submission(
+  p_user_id           uuid,
+  p_registration_id   uuid,
+  p_payment_proof_url text,
+  p_submission_url    text
+) returns uuid  -- returns the new submission id
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_owner uuid;
+  v_id    uuid;
+begin
+  select user_id into v_owner from public.registrations where id = p_registration_id;
+  if v_owner is null then
+    raise exception 'registration_not_found';
+  end if;
+  if v_owner <> p_user_id then
+    raise exception 'not_registration_owner';
+  end if;
+
+  insert into public.submissions (registration_id, payment_proof_url, submission_url)
+  values (p_registration_id, p_payment_proof_url, p_submission_url)
+  returning id into v_id;
+
+  return v_id;
+end$$;
+
+revoke all on function public.add_submission(uuid, uuid, text, text) from public, anon, authenticated;
+grant  execute on function public.add_submission(uuid, uuid, text, text) to service_role;
+```
+
+---
+
+## Step 16 — (Follow-up) Admin review of resubmissions
+
+The admin panel currently reviews only the inline Entry 1 (`registrations.status` via `set_registration_status`). To let admins verify/reject **resubmissions** too, add a per-submission status setter and surface the `submissions` rows in the admin detail page.
+
+```sql
+create or replace function public.set_submission_status(
+  p_id uuid, p_status registration_status
+) returns void
+language plpgsql security definer set search_path = public
+as $$
+begin
+  update public.submissions set status = p_status where id = p_id;
+end$$;
+
+revoke all on function public.set_submission_status(uuid, registration_status) from public, anon, authenticated;
+grant  execute on function public.set_submission_status(uuid, registration_status) to service_role;
+```
+
+Optional, for a fully uniform model: aggregate submissions into `admin_registrations_detail` (mirroring how `members` is aggregated in Step 9) and, if you want Entry 1 to live in the table too, backfill one `submissions` row per existing registration from its inline columns — but that also requires updating the admin list/detail, the CSV export, and this view to read from the aggregate. Not needed for the resubmit feature itself.
+
+---
+
 ## Environment Variables Checklist
 
 Add these in Vercel (Project → Settings → Environment Variables) and to local `.env.local`. **Never** prefix a secret with `NEXT_PUBLIC_`.

@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { COMPETITIONS, COMPETITION_IDS, isCompetitionId } from "@/lib/registrations/config";
 import { sanitizeSearch, type AdminRegistration } from "@/lib/admin/types";
 import { DeleteTeamButton } from "@/components/admin/delete-team-button";
+import { StatusBadge } from "@/components/status-badge";
 
 const PAGE_SIZE = 20;
 
@@ -201,19 +202,5 @@ function LinkCell({ href }: { href: string }) {
     >
       {href}
     </a>
-  );
-}
-
-export function StatusBadge({ status }: { status: string }) {
-  const color =
-    status === "verified"
-      ? "bg-emerald-500/20 text-emerald-300"
-      : status === "rejected"
-        ? "bg-red-500/20 text-red-300"
-        : "bg-yellow-500/20 text-yellow-200";
-  return (
-    <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold capitalize ${color}`}>
-      {status}
-    </span>
   );
 }

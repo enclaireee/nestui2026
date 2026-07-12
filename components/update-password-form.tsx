@@ -44,10 +44,10 @@ export function UpdatePasswordForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <GlassCard>
-        <h2 className="mb-6 text-2xl font-bold text-brand-green">Reset Password</h2>
+      <GlassCard className="lg:p-12">
+        <h2 className="mb-6 text-2xl font-bold text-brand-green md:mb-8 md:text-3xl">Reset Password</h2>
         <form onSubmit={handleForgotPassword}>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:gap-5">
             <RegistrationInput
               icon={Lock}
               type="password"
@@ -55,6 +55,7 @@ export function UpdatePasswordForm({
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="md:h-14 md:text-base"
             />
             <RegistrationInput
               icon={Lock}
@@ -63,12 +64,13 @@ export function UpdatePasswordForm({
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              className="md:h-14 md:text-base"
             />
             {error && <p className="text-sm text-red-500">{error}</p>}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100"
+              className="w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100 md:py-3.5 md:text-base"
             >
               {isLoading ? "Saving..." : "Change Password"}
             </button>

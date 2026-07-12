@@ -5,7 +5,7 @@ import { COMPETITIONS } from "@/lib/registrations/config";
 import type { AdminRegistration, MemberRow } from "@/lib/admin/types";
 import { setRegistrationStatus } from "@/app/admin/actions";
 import { DeleteTeamButton } from "@/components/admin/delete-team-button";
-import { StatusBadge } from "../../page";
+import { StatusBadge } from "@/components/status-badge";
 
 export default async function RegistrationDetail({
   params,

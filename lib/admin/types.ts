@@ -13,6 +13,17 @@ export interface MemberRow {
   confirmation_url: string;
 }
 
+// One row of the `submissions` table — an extra paid submission (Entry 2+) a
+// team attaches after registering. Entry 1 lives inline on the registration.
+export interface SubmissionRow {
+  id: string;
+  registration_id: string;
+  payment_proof_url: string;
+  submission_url: string;
+  status: "pending" | "verified" | "rejected";
+  submitted_at: string;
+}
+
 // One row of the admin_registrations_detail view (registration + members[]).
 export interface AdminRegistration {
   id: string;
