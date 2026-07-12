@@ -45,7 +45,10 @@ export async function updateSession(request: NextRequest) {
   const user = data?.user;
 
   const { pathname } = request.nextUrl;
-  const isAuthPage = pathname === "/auth/login" || pathname === "/auth/sign-up";
+  const isAuthPage =
+    pathname === "/auth/login" ||
+    pathname === "/auth/sign-up" ||
+    pathname === "/auth/forgot-password";
 
   // Only the registration flow requires a signed-in user — Home, About,
   // and everything else stay public.
@@ -55,10 +58,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Already signed in — no reason to see the login/sign-up forms again.
+  // Already signed in — no reason to see the login/sign-up/forgot-password forms again.
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = "/branding/registration";
+    url.pathname = "/protected";
     return NextResponse.redirect(url);
   }
 

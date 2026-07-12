@@ -21,7 +21,7 @@ export const RegistrationInput = React.forwardRef<
       <input
         ref={ref}
         className={cn(
-          "flex h-12 w-full rounded-xl border-none bg-white/90 px-4 py-2 text-sm text-brand-green placeholder:text-gray-400 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime disabled:cursor-not-allowed disabled:opacity-50 [&:user-invalid]:ring-2 [&:user-invalid]:ring-red-400 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-400",
+          "flex h-12 w-full rounded-xl border-none bg-white/90 px-4 py-2 text-sm text-brand-green placeholder:text-gray-400 shadow-sm ring-1 ring-brand-green/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime disabled:cursor-not-allowed disabled:opacity-50 [&:user-invalid]:ring-2 [&:user-invalid]:ring-red-400 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-400",
           Icon && "pl-10",
           className
         )}

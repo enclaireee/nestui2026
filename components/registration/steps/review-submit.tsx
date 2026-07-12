@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { Link as LinkIcon } from "lucide-react";
+import { Link as LinkIcon, Wallet, Upload, ClipboardList } from "lucide-react";
 import { COMPETITIONS } from "@/lib/registrations/config";
+import { PAYMENT_INFO } from "@/lib/payment";
+import { SectionLabel } from "../section-label";
 import type { RegistrationDraft } from "@/lib/registrations/types";
 
 interface ReviewSubmitProps {
@@ -28,13 +30,18 @@ export function ReviewSubmit({
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-md">
-      {/* Payment + submission links */}
+      {/* Payment */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-2xl font-bold text-brand-green">Payment</h2>
-        <div className="text-xs font-bold text-brand-green leading-relaxed uppercase tracking-wider">
-          <p>BANK NAME: Bank Mandiri</p>
-          <p>ACCOUNT NUMBER: 1670009815647</p>
-          <p>ACCOUNT HOLDER NAME: CARLOS ADRIAN MARULI</p>
+        <SectionLabel icon={Wallet}>Payment</SectionLabel>
+        <div className="rounded-2xl bg-brand-green/5 p-4 ring-1 ring-brand-green/10">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+            <dt className="text-brand-green/50">Bank</dt>
+            <dd className="font-semibold text-brand-green">{PAYMENT_INFO.bank}</dd>
+            <dt className="text-brand-green/50">Account</dt>
+            <dd className="font-mono font-semibold text-brand-green">{PAYMENT_INFO.accountNumber}</dd>
+            <dt className="text-brand-green/50">Holder</dt>
+            <dd className="font-semibold text-brand-green">{PAYMENT_INFO.accountHolder}</dd>
+          </dl>
         </div>
         <LinkField
           placeholder="Payment proof Google Drive link"
@@ -43,8 +50,9 @@ export function ReviewSubmit({
         />
       </div>
 
+      {/* Submission */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-2xl font-bold text-brand-green">Submission</h2>
+        <SectionLabel icon={Upload}>Submission</SectionLabel>
         <LinkField
           placeholder="Submission Google Drive link"
           value={draft.submissionUrl}
@@ -53,27 +61,31 @@ export function ReviewSubmit({
       </div>
 
       {/* Read-only summary */}
-      <div className="rounded-2xl bg-white/70 p-4 text-sm text-brand-green">
-        <h3 className="mb-2 text-lg font-bold">Review</h3>
-        {cfg && (
-          <div className="mb-2 flex items-center gap-2 border-b border-brand-green/10 pb-2">
-            <Image
-              src={cfg.logo}
-              alt={`${cfg.name} logo`}
-              width={28}
-              height={28}
-              className="rounded-md bg-white object-contain p-0.5"
-            />
-            <span className="font-bold">{cfg.name}</span>
-          </div>
-        )}
-        <SummaryRow label="Competition" value={cfg?.name ?? "—"} />
-        <SummaryRow label="Team" value={draft.teamName} />
-        <SummaryRow label="Team size" value={String(draft.teamSize ?? "—")} />
-        <SummaryRow label="Leader" value={`${draft.leader.name} · ${draft.leader.email}`} />
-        {draft.members.map((m, i) => (
-          <SummaryRow key={i} label={`Member ${i + 1}`} value={`${m.name} · ${m.email}`} />
-        ))}
+      <div className="flex flex-col gap-3">
+        <SectionLabel icon={ClipboardList}>Review</SectionLabel>
+        <div className="rounded-2xl bg-white/70 p-4 text-sm text-brand-green ring-1 ring-brand-green/10">
+          {cfg && (
+            <div className="mb-2 flex items-center gap-2 border-b border-brand-green/10 pb-2">
+              <span className="relative block h-7 w-7 shrink-0 overflow-hidden rounded-md bg-white">
+                <Image
+                  src={cfg.logo}
+                  alt={`${cfg.name} logo`}
+                  fill
+                  sizes="28px"
+                  className="object-contain p-0.5"
+                />
+              </span>
+              <span className="font-bold">{cfg.name}</span>
+            </div>
+          )}
+          <SummaryRow label="Competition" value={cfg?.name ?? "—"} />
+          <SummaryRow label="Team" value={draft.teamName} />
+          <SummaryRow label="Team size" value={String(draft.teamSize ?? "—")} />
+          <SummaryRow label="Leader" value={`${draft.leader.name} · ${draft.leader.email}`} />
+          {draft.members.map((m, i) => (
+            <SummaryRow key={i} label={`Member ${i + 1}`} value={`${m.name} · ${m.email}`} />
+          ))}
+        </div>
       </div>
 
       {error && (
@@ -123,7 +135,7 @@ function LinkField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex h-12 w-full rounded-xl border-none bg-white/90 py-2 pl-10 pr-4 text-sm text-brand-green placeholder:text-gray-400 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
+        className="flex h-12 w-full rounded-xl border-none bg-white/90 py-2 pl-10 pr-4 text-sm text-brand-green placeholder:text-gray-400 shadow-sm ring-1 ring-brand-green/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
       />
     </div>
   );

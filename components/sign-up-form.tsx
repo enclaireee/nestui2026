@@ -51,10 +51,10 @@ export function SignUpForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <GlassCard>
-        <h2 className="mb-6 text-2xl font-bold text-brand-green">Welcome!</h2>
+      <GlassCard className="lg:p-12">
+        <h2 className="mb-6 text-2xl font-bold text-brand-green md:mb-8 md:text-3xl">Welcome!</h2>
         <form onSubmit={handleSignUp}>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:gap-5">
             <RegistrationInput
               icon={Mail}
               type="email"
@@ -62,6 +62,7 @@ export function SignUpForm({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="md:h-14 md:text-base"
             />
             <RegistrationInput
               icon={Lock}
@@ -70,6 +71,7 @@ export function SignUpForm({
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="md:h-14 md:text-base"
             />
             <RegistrationInput
               icon={Lock}
@@ -78,17 +80,18 @@ export function SignUpForm({
               required
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
+              className="md:h-14 md:text-base"
             />
             {error && <p className="text-sm text-red-500">{error}</p>}
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-2 w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100"
+              className="mt-2 w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100 md:py-3.5 md:text-base"
             >
               {isLoading ? "Creating an account..." : "Sign Up"}
             </button>
           </div>
-          <div className="mt-4 text-center text-sm text-brand-green">
+          <div className="mt-4 text-center text-sm text-brand-green md:mt-6 md:text-base">
             Already have an account?{" "}
             <Link href="/auth/login" className="font-bold underline underline-offset-4">
               Login
