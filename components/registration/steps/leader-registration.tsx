@@ -1,6 +1,7 @@
 "use client";
 
 import { User, IdCard, Building, BookOpen, Mail, Phone, Link as LinkIcon } from "lucide-react";
+import { useState } from "react";
 import { RegistrationInput } from "../registration-input";
 
 interface LeaderRegistrationProps {
@@ -12,18 +13,31 @@ interface LeaderRegistrationProps {
 
 export function LeaderRegistration({ onNext, onBack, isMember = false, category = "mahasiswa" }: LeaderRegistrationProps) {
   const title = isMember ? "Team Member 1" : "Team Leader Name";
+  const [showError, setShowError] = useState(false);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-md">
+    <form
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!e.currentTarget.checkValidity()) {
+          setShowError(true);
+          return;
+        }
+        setShowError(false);
+        onNext();
+      }}
+      className="flex flex-col gap-6 w-full max-w-md"
+    >
       <h2 className="text-2xl font-bold text-brand-green mb-2">{title}</h2>
-      
+
       <div className="flex flex-col gap-3">
-        <RegistrationInput icon={User} placeholder={isMember ? "Member Name" : "Team Leader Name"} />
-        <RegistrationInput icon={IdCard} placeholder={category === "sma" ? "NISN (Nomor Induk Siswa Nasional)" : "NIM (Nomor Induk Mahasiswa)"} />
-        <RegistrationInput icon={Building} placeholder={category === "sma" ? "Sekolah" : "University"} />
-        {category === "mahasiswa" && <RegistrationInput icon={BookOpen} placeholder="Major / Jurusan" />}
-        {!isMember && <RegistrationInput icon={Mail} placeholder="Email" type="email" />}
-        <RegistrationInput icon={Phone} placeholder="Telephone Number" type="tel" />
+        <RegistrationInput icon={User} placeholder={isMember ? "Member Name" : "Team Leader Name"} required />
+        <RegistrationInput icon={IdCard} placeholder={category === "sma" ? "NISN (Nomor Induk Siswa Nasional)" : "NIM (Nomor Induk Mahasiswa)"} required />
+        <RegistrationInput icon={Building} placeholder={category === "sma" ? "Sekolah" : "University"} required />
+        {category === "mahasiswa" && <RegistrationInput icon={BookOpen} placeholder="Major / Jurusan" required />}
+        {!isMember && <RegistrationInput icon={Mail} placeholder="Email" type="email" required />}
+        <RegistrationInput icon={Phone} placeholder="Telephone Number" type="tel" required />
       </div>
 
       <div className="flex flex-col gap-2 mt-4">
@@ -49,26 +63,33 @@ export function LeaderRegistration({ onNext, onBack, isMember = false, category 
              <LinkIcon className="h-8 w-8" />
            </div>
            <textarea
-             className="flex min-h-[80px] w-full rounded-2xl border-none bg-white/90 py-3 pl-14 pr-4 text-sm text-brand-green placeholder:text-gray-400 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime resize-none"
-             placeholder={"Google Drive Link\nLine 2\nLine 3"}
+             required
+             className="flex min-h-[80px] w-full rounded-2xl border-none bg-white/90 py-3 pl-14 pr-4 text-sm text-brand-green placeholder:text-gray-400 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime resize-none [&:user-invalid]:ring-2 [&:user-invalid]:ring-red-400"
+             placeholder="Google Drive Link"
            />
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 mt-6">
-        <button
-          onClick={onBack}
-          className="px-10 py-2.5 rounded-2xl border-2 border-brand-lime text-brand-lime font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-brand-lime/10"
-        >
-          Back
-        </button>
-        <button
-          onClick={onNext}
-          className="px-10 py-2.5 rounded-2xl flex items-center justify-center gap-2 bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg"
-        >
-          Next
-        </button>
+      <div className="flex flex-col items-end gap-2 mt-6">
+        {showError && (
+          <p className="text-sm text-red-500">Please fill in all required fields.</p>
+        )}
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-10 py-2.5 rounded-2xl border-2 border-brand-lime text-brand-lime font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-brand-lime/10"
+          >
+            Back
+          </button>
+          <button
+            type="submit"
+            className="px-10 py-2.5 rounded-2xl flex items-center justify-center gap-2 bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg"
+          >
+            Next
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }

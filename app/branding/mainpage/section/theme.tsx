@@ -1,5 +1,24 @@
 "use client";
 
+import { useState } from "react";
+
+// Subtheme copy from the NEST UI 2026 guidebook briefs.
+// Subtheme copy from the NEST UI 2026 guidebook briefs.
+const CARDS = [
+    {
+        title: "Therapeutic Technologies",
+        desc: "Developing solutions that support therapy, recovery, medication management, and mental health to improve the quality of patient care.",
+    },
+    {
+        title: "Diagnostic Intelligence",
+        desc: "Developing solutions that help the diagnosis and decision-making process in healthcare — from early disease detection to faster, more accurate interpretation of examination results.",
+    },
+    {
+        title: "Nutrition & Sustainable Health Systems",
+        desc: "Developing solutions that support nutrition monitoring, healthy lifestyle adoption, and more effective and sustainable healthcare management.",
+    },
+];
+
 export function Theme() {
     return (
         <section className="flex flex-col w-full mt-10 px-6 py-12 items-center overflow-hidden">
@@ -35,10 +54,12 @@ export function Theme() {
             </div>
 
             {/* ── Cards Grid ───────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl mt-12 md:mt-16 relative z-10">
-                <ThemeCard title="Therapeutic Technologies" />
-                <ThemeCard title="Diagnostic Intelligence" />
-                <ThemeCard title="Nutrition & Sustainable Health Systems" />
+            {/* items-start so an expanded card grows on its own without
+                stretching its row-mates. */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl mt-12 md:mt-16 relative z-10 items-start">
+                {CARDS.map((c) => (
+                    <ThemeCard key={c.title} {...c} />
+                ))}
             </div>
         </section>
     );
@@ -48,27 +69,55 @@ export function Theme() {
 
 interface ThemeCardProps {
     title: string;
+    desc: string;
 }
 
-function ThemeCard({ title }: ThemeCardProps) {
+function ThemeCard({ title, desc }: ThemeCardProps) {
+    const [open, setOpen] = useState(false);
+
     return (
-        <div className="group relative flex flex-col items-center justify-between min-h-[250px] p-8 border border-white/20 rounded-3xl bg-white/15 backdrop-blur-md shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:bg-white/25 hover:border-white/30">
-            {/* Title Container */}
-            <div className="relative w-full text-center">
-                {/* Title Shadow Layer */}
-                <h3 className="absolute inset-x-0 top-0 pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide text-brand-green/[0.76] blur-[8px] opacity-100 select-none">
-                    {title}
-                </h3>
-                {/* Title Gradient Layer */}
-                <h3 className="relative pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent transition-colors duration-300 group-hover:from-white group-hover:to-white">
-                    {title}
-                </h3>
+        <div
+            className={`group relative flex flex-col justify-between min-h-[250px] p-8 border rounded-3xl bg-white/15 backdrop-blur-md shadow-2xl transition-colors duration-300 ${
+                open
+                    ? "border-brand-lime/50 bg-white/25"
+                    : "border-white/20 hover:bg-white/25 hover:border-white/30"
+            }`}
+        >
+            <div>
+                {/* Title Container */}
+                <div className="relative w-full text-center">
+                    {/* Title Shadow Layer */}
+                    <h3 className="absolute inset-x-0 top-0 pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide text-brand-green/[0.76] blur-[8px] opacity-100 select-none">
+                        {title}
+                    </h3>
+                    {/* Title Gradient Layer */}
+                    <h3 className="relative pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent transition-colors duration-300 group-hover:from-white group-hover:to-white">
+                        {title}
+                    </h3>
+                </div>
+
+                {/* Description mounts on open; a one-shot opacity+translate
+                    (GPU-composited) fades it in — no per-frame layout animation. */}
+                {open && (
+                    <div className="mt-6 border-t border-white/25 pt-5 text-left animate-in fade-in slide-in-from-top-2 duration-300">
+                        <p className="text-sm sm:text-base leading-relaxed text-white/90">
+                            {desc}
+                        </p>
+                    </div>
+                )}
             </div>
-            {/* See Details Button */}
-            <button className="mt-8 px-6 py-2.5 rounded-2xl flex items-center justify-center gap-2 bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg">
-                <span>See Details</span>
+
+            {/* Toggle Button */}
+            <button
+                onClick={() => setOpen((v) => !v)}
+                aria-expanded={open}
+                className="mt-8 px-6 py-2.5 rounded-2xl flex items-center justify-center gap-2 bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
+            >
+                <span>{open ? "Show Less" : "See Details"}</span>
                 <svg
-                    className="h-4 w-4 stroke-[3] text-brand-teal transition-transform duration-300 group-hover:translate-x-1"
+                    className={`h-4 w-4 stroke-[3] text-brand-teal transition-transform duration-200 ${
+                        open ? "rotate-90" : ""
+                    }`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

@@ -20,6 +20,7 @@ export function StepIndicator({ currentStep, className }: StepIndicatorProps) {
         alt={`Step ${stepNumber} Indicator`}
         width={600}
         height={600}
+        priority
         className="w-72 sm:w-96 md:w-[500px] lg:w-[600px] h-auto object-contain drop-shadow-lg"
       />
     </div>

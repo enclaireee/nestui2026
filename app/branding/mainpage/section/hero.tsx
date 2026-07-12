@@ -8,9 +8,6 @@ const DEADLINE = new Date("2026-08-14T23:59:00+07:00");
 
 type Remaining = { days: number; hours: number; minutes: number };
 
-// Returns null until mounted so the value is only ever computed on the
-// client — this avoids a hydration mismatch and the "Date.now() in a Client
-// Component" prerender error.
 function useCountdown(target: Date): Remaining | null {
   const [time, setTime] = useState<Remaining | null>(null);
 
@@ -24,7 +21,6 @@ function useCountdown(target: Date): Remaining | null {
       });
     };
     tick();
-    // ponytail: only minutes are shown, so ticking once a minute is enough.
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, [target]);
@@ -34,7 +30,6 @@ function useCountdown(target: Date): Remaining | null {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-// Soft lime glow shared by the headline and countdown digits.
 const GLOW = "drop-shadow-[0_2px_12px_rgb(var(--brand-lime)/0.35)]";
 
 export function Hero() {
@@ -65,9 +60,7 @@ export function Hero() {
           />
 
           <p className="mt-3 text-base font-semibold leading-relaxed bg-gradient-to-b from-brand-green/[0.76] via-brand-teal-mid to-brand-emerald-bright bg-clip-text text-transparent sm:text-lg md:text-xl">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum, eos
-            hic officia, deserunt exercitationem, sunt provident itaque debitis
-            minima praesentium
+            NEST UI is the largest series of scientific competitions and festivals facilitated by IME FTUI, serving as a platform to develop the potential of undergraduate and highschool students across Indonesia.
           </p>
 
           <p className={`mt-5 text-2xl font-semibold text-gradient-brand sm:text-3xl md:text-4xl ${GLOW}`}>
@@ -93,6 +86,7 @@ export function Hero() {
               alt=""
               aria-hidden="true"
               fill
+              priority
               className="object-contain"
             />
 
