@@ -1,7 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { COMPETITIONS, type CompetitionId } from "@/lib/registrations/config";
+import { CompetitionModal } from "./competition-modal";
 
 // Exact Figma SVG for the "Our COMPETITION" Title
 const CompetitionTitle: React.FC<{ className?: string }> = ({ className }) => (
@@ -72,56 +75,62 @@ const CompetitionTitle: React.FC<{ className?: string }> = ({ className }) => (
 interface CompetitionCardProps {
   title: string;
   description: string;
-  logoText: string;
+  logoSrc: string;
   titleGradient: string;
   descGradient: string;
+  onDetails: () => void;
 }
 
 // Custom reusable card component built using exact Figma values
 const CompetitionCard: React.FC<CompetitionCardProps> = ({
   title,
   description,
-  logoText,
+  logoSrc,
   titleGradient,
   descGradient,
+  onDetails,
 }) => {
   return (
     <div
-      className="relative flex flex-col sm:flex-row items-center p-6 gap-6 transition-transform duration-300 hover:scale-[1.02] z-10"
+      className="group relative flex flex-col sm:flex-row items-center p-6 gap-6 overflow-hidden transition-all duration-300 hover:-translate-y-1"
       style={{
         width: "100%",
         maxWidth: "537px",
         minHeight: "299px",
-        background: "rgba(255, 255, 255, 0.1)",
-        boxShadow: "0px 5px 5px rgba(0, 0, 0, 0.51)",
+        background:
+          "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 100%)",
+        boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.45)",
         borderRadius: "24px",
+        border: "1px solid rgba(255,255,255,0.18)",
       }}
     >
-      {/* Left side: Gray logo placeholder box */}
+      {/* ambient corner glow, brightens on hover */}
+      <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-gradient-to-br from-brand-lime/30 to-brand-teal/0 blur-3xl transition-opacity duration-300 opacity-60 group-hover:opacity-100" />
+
+      {/* Left side: competition logo, glowing on a dark glass badge */}
       <div
-        className="flex-shrink-0 flex items-center justify-center rounded-lg"
+        className="relative flex-shrink-0 flex items-center justify-center rounded-2xl p-4 ring-1 ring-brand-lime/30 transition-all duration-300 group-hover:ring-brand-lime/60"
         style={{
-          width: "171px",
-          height: "176px",
-          backgroundColor: "#D9D9D9",
+          width: "150px",
+          height: "150px",
+          background:
+            "radial-gradient(circle at 30% 20%, rgba(var(--brand-teal-mid),0.55), rgba(var(--brand-green),0.85))",
+          boxShadow:
+            "inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 30px -6px rgba(227,239,38,0.35)",
         }}
       >
-        <span
-          className="text-center select-none px-2"
-          style={{
-            fontFamily: "var(--font-oddval), sans-serif",
-            fontWeight: 600,
-            fontSize: "35px",
-            lineHeight: "115%",
-            color: "rgb(var(--brand-green))",
-          }}
-        >
-          {logoText}
-        </span>
+        <Image
+          src={logoSrc}
+          alt={`${title} logo`}
+          width={110}
+          height={110}
+          style={{ width: "auto", height: "auto" }}
+          className="max-h-full max-w-full object-contain drop-shadow-[0_0_18px_rgba(227,239,38,0.35)]"
+        />
       </div>
 
       {/* Right side: Texts & Details button */}
-      <div className="flex flex-col justify-between h-full flex-1 w-full gap-6 sm:gap-2 min-h-[176px]">
+      <div className="relative flex flex-col justify-between h-full flex-1 w-full gap-6 sm:gap-2 min-h-[176px]">
         <div className="flex flex-col gap-2">
           {/* Card Title with exact Figma gradient */}
           <h4
@@ -156,6 +165,7 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
 
         {/* Button styled with exact gradients and rounded corner radius */}
         <button
+          onClick={onDetails}
           className="flex items-center justify-center gap-2 transition-all hover:brightness-110 shadow-sm mt-auto sm:mt-4"
           style={{
             width: "214px",
@@ -183,6 +193,8 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
 };
 
 export default function CompetitionSection() {
+  const [openId, setOpenId] = useState<CompetitionId | null>(null);
+
   return (
     <section className="relative w-full py-16 px-4 md:px-8 max-w-[1440px] mx-auto overflow-hidden min-h-[1000px] flex flex-col items-center">
 
@@ -214,16 +226,18 @@ export default function CompetitionSection() {
           <div className="flex flex-col xl:flex-row gap-8 justify-center items-center w-full">
             <CompetitionCard
               title="Medhack"
-              logoText="logo lomba"
+              logoSrc={COMPETITIONS.medhack.logo}
+              onDetails={() => setOpenId("medhack")}
               titleGradient="linear-gradient(227.28deg, rgb(var(--brand-lime)) 8.58%, rgb(var(--brand-teal)) 52.85%, rgb(var(--brand-green)) 87.95%)"
-              description="Kompetisi hackathon berkelompok (3–5 peserta) yang menantang peserta mengembangkan solusi bisnis berbasis teknologi kesehatan melalui perancangan model bisnis dan digital product yang inovatif serta berdampak."
+              description="A team hackathon competition (3–5 participants) that challenges participants to develop healthcare-technology-based business solutions by designing an innovative, impactful business model and digital product."
               descGradient="linear-gradient(269.27deg, rgb(var(--brand-cream)) 69.75%, rgb(var(--brand-lime)) 155.54%)"
             />
             <CompetitionCard
               title="Healthineer"
-              logoText="logo lomba"
+              logoSrc={COMPETITIONS.healthineer.logo}
+              onDetails={() => setOpenId("healthineer")}
               titleGradient="linear-gradient(227.28deg, rgb(var(--brand-lime)) 8.58%, rgb(var(--brand-teal)) 52.85%, rgb(var(--brand-green)) 87.95%)"
-              description="Kompetisi berkelompok (3–5 peserta) untuk mengembangkan solusi teknologi kesehatan dalam bentuk karya tulis dan prototipe yang inovatif, aplikatif, serta berpotensi untuk diimplementasikan."
+              description="A team competition (3–5 participants) to develop healthcare technology solutions in the form of an innovative, applicable scientific paper and prototype with real implementation potential."
               descGradient="linear-gradient(269.27deg, rgb(var(--brand-cream)) 69.75%, rgb(var(--brand-lime)) 155.54%)"
             />
           </div>
@@ -250,14 +264,17 @@ export default function CompetitionSection() {
           <div className="flex justify-center items-center w-full">
             <CompetitionCard
               title="Healthynovation"
-              logoText="logo lomba"
+              logoSrc={COMPETITIONS.healthynovation.logo}
+              onDetails={() => setOpenId("healthynovation")}
               titleGradient="linear-gradient(72.46deg, rgb(var(--brand-cream)) -51.59%, rgb(var(--brand-lime)) -46.93%, rgb(var(--brand-teal)) 45.25%)"
-              description="Kompetisi karya tulis ilmiah bagi siswa SMA/sederajat (1–3 peserta) yang mendorong lahirnya gagasan inovatif dalam menjawab tantangan kesehatan melalui karya tulis dan poster ilmiah."
+              description="A scientific paper competition for highschool students (1–3 participants) that encourages innovative ideas to address healthcare challenges through a scientific paper and poster."
               descGradient="linear-gradient(260.23deg, rgb(var(--brand-cream)) 60.52%, rgb(var(--brand-lime)) 128%)"
             />
           </div>
         </div>
       </div>
+
+      <CompetitionModal competitionId={openId} onClose={() => setOpenId(null)} />
     </section>
   );
 }

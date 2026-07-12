@@ -30,17 +30,17 @@ export function Description() {
         variants={fadeUp}
         className="mt-6 max-w-4xl text-center text-base font-semibold leading-loose text-white sm:mt-8 sm:text-lg"
       >
-        National Electrical Summit (NEST) UI 2026 hadir sebagai wadah kolaborasi
-        dan inovasi yang mempertemukan teknologi, kesehatan, dan generasi muda
-        untuk membentuk masa depan healthcare yang lebih cerdas, inklusif, dan
-        berkelanjutan. Dengan mengusung tema{" "}
+        National Electrical Summit (NEST) UI 2026 is a platform for
+        collaboration and innovation that brings together technology, health,
+        and the younger generation to shape a smarter, more inclusive, and
+        sustainable future of healthcare. Under the theme{" "}
         <span className="italic">
           &ldquo;Shaping the Future of Healthcare Through Intelligent and
           Inclusive Innovation,&rdquo;
         </span>{" "}
-        NEST UI 2026 mendorong lahirnya solusi berdampak melalui integrasi
-        berbagai disiplin ilmu dan pemanfaatan teknologi untuk menjawab tantangan
-        kesehatan masyarakat masa kini maupun masa depan.
+        NEST UI 2026 drives the emergence of impactful solutions through the
+        integration of various disciplines and the use of technology to
+        address both present and future public health challenges.
       </motion.p>
       </div>
     </motion.section>

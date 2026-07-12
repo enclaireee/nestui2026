@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import { fadeUp, inViewOnce, staggerContainer } from "@/lib/motion";
 
 const MISSIONS = [
-  "Menyediakan platform kompetitif bagi siswa dan mahasiswa untuk mengembangkan solusi inovatif di bidang healthcare technology berbasis keilmuan Teknik Elektro, Teknik Komputer, dan Teknik Biomedik.",
-  "Memperkenalkan dan merepresentasikan keberagaman fokus keilmuan di Departemen Teknik Elektro melalui rangkaian kegiatan yang edukatif, inspiratif, dan berdampak.",
-  "Mendorong kolaborasi multidisiplin dan pertukaran gagasan untuk menghasilkan inovasi yang relevan, adaptif, dan berorientasi pada kebutuhan masyarakat.",
-  "Meningkatkan kesadaran akan pentingnya teknologi yang inklusif, mudah diakses, dan memberikan manfaat nyata bagi kualitas hidup manusia.",
-  "Menciptakan iklim kerja internal yang efektif, disiplin, dan harmonis.",
+  "Providing a competitive platform for highschool and university students to develop innovative solutions in healthcare technology, grounded in Electrical Engineering, Computer Engineering, and Biomedical Engineering.",
+  "Introducing and representing the diversity of academic focuses within the Department of Electrical Engineering through a series of educational, inspiring, and impactful activities.",
+  "Encouraging multidisciplinary collaboration and the exchange of ideas to produce innovation that is relevant, adaptive, and oriented toward the needs of society.",
+  "Raising awareness of the importance of inclusive, accessible technology that delivers real benefits to human quality of life.",
+  "Creating an internal working environment that is effective, disciplined, and harmonious.",
 ];
 
 export function Mission() {

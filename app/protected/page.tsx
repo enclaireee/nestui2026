@@ -8,10 +8,10 @@ import { createClient } from "@/lib/supabase/server";
  */
 async function DashboardContent() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getUser();
 
-  // Redirect to login if unauthenticated or claims are missing
-  if (error || !data?.claims) {
+  // Redirect to login if unauthenticated
+  if (error || !data?.user) {
     redirect("/auth/login");
   }
 
@@ -21,7 +21,7 @@ async function DashboardContent() {
       <p className="text-muted-foreground">
         Signed in as{" "}
         <span className="font-medium text-foreground">
-          {data.claims.email}
+          {data.user.email}
         </span>
         . This page is only visible to authenticated users.
       </p>

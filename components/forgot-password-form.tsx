@@ -1,17 +1,10 @@
 "use client";
 
+import { Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { GlassCard } from "@/components/registration/glass-card";
+import { RegistrationInput } from "@/components/registration/registration-input";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -46,60 +39,47 @@ export function ForgotPasswordForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      {success ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
+      <GlassCard>
+        {success ? (
+          <>
+            <h2 className="mb-2 text-2xl font-bold text-brand-green">Check Your Email</h2>
+            <p className="text-sm text-brand-green/80">
               If you registered using your email and password, you will receive
               a password reset email.
             </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>
-              Type in your email and we&apos;ll send you a link to reset your
-              password
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleForgotPassword}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send reset email"}
-                </Button>
-              </div>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
-                <Link
-                  href="/auth/login"
-                  className="underline underline-offset-4"
-                >
-                  Login
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+          </>
+        ) : (
+          <form onSubmit={handleForgotPassword}>
+            <div className="flex flex-col gap-4">
+              <RegistrationInput
+                icon={Mail}
+                type="email"
+                placeholder="Email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <p className="-mt-2 text-xs font-semibold text-brand-green/80">
+                Enter your email to send the verification link
+              </p>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100"
+              >
+                {isLoading ? "Sending..." : "Send Verification Link"}
+              </button>
+            </div>
+            <div className="mt-4 text-center text-sm text-brand-green">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="font-bold underline underline-offset-4">
+                Login
+              </Link>
+            </div>
+          </form>
+        )}
+      </GlassCard>
     </div>
   );
 }

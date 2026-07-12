@@ -38,9 +38,10 @@ export function Vision() {
             variants={fadeUp}
             className="mt-5 text-justify text-base font-semibold leading-loose text-white sm:text-lg"
           >
-            Menjadi wadah kompetisi nasional yang mendorong lahirnya inovasi
-            teknologi kesehatan yang inklusif, kolaboratif, dan berdampak melalui
-            sinergi multidisiplin dalam menjawab tantangan masa depan.
+            To become a national competition platform that drives the emergence
+            of inclusive, collaborative, and impactful healthcare technology
+            innovation through multidisciplinary synergy in addressing the
+            challenges of the future.
           </motion.p>
         </div>
       </div>

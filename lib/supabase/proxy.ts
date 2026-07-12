@@ -39,23 +39,26 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Do not run code between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
+  const { data } = await supabase.auth.getUser();
+  const user = data?.user;
 
-  // IMPORTANT: If you remove getClaims() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  const { pathname } = request.nextUrl;
+  const isAuthPage = pathname === "/auth/login" || pathname === "/auth/sign-up";
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // Only the registration flow requires a signed-in user — Home, About,
+  // and everything else stay public.
+  if (!user && pathname.startsWith("/branding/registration")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Already signed in — no reason to see the login/sign-up forms again.
+  if (user && isAuthPage) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/branding/registration";
     return NextResponse.redirect(url);
   }
 
