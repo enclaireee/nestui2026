@@ -23,6 +23,12 @@ export function UpdatePasswordForm({
     setIsLoading(true);
     setError(null);
 
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       setIsLoading(false);

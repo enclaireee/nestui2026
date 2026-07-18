@@ -187,7 +187,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <ThankYou code={state.submittedCode} />
+            <ThankYou code={state.submittedCode} competition={draft.competition} />
           </motion.div>
         </AnimatePresence>
       ) : (

@@ -13,7 +13,8 @@ import {
   Phone,
   Users,
 } from "lucide-react";
-import { COMPETITIONS, type CompetitionId } from "@/lib/registrations/config";
+import { COMPETITIONS, currentFee, type CompetitionId } from "@/lib/registrations/config";
+import { formatIDR } from "@/lib/payment";
 
 // ---------------------------------------------------------------------------
 // Detail copy for each competition, extracted from the NEST UI 2026 guidebook
@@ -36,16 +37,11 @@ interface Prize {
   value: string;
   rank: 1 | 2 | 3;
 }
-interface Fee {
-  label: string;
-  value: string;
-}
 interface CompetitionDetail {
   about: string;
   stages: Stage[];
   timeline: TimelineItem[];
   prizes: Prize[];
-  fees: Fee[];
   contacts: { name: string; phone: string }[];
 }
 
@@ -75,10 +71,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "1st Place", value: "Rp4,500,000 + Certificate", rank: 1 },
       { label: "2nd Place", value: "Rp3,000,000 + Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp2,000,000 + Certificate", rank: 3 },
-    ],
-    fees: [
-      { label: "Early Bird", value: "Rp200.000" },
-      { label: "Normal", value: "Rp220.000" },
     ],
     contacts: [
       { name: "Rahel", phone: "0887 5475 115" },
@@ -118,11 +110,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "1st Place", value: "Rp4,500,000 + e-Certificate", rank: 1 },
       { label: "2nd Place", value: "Rp3,000,000 + e-Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp2,000,000 + e-Certificate", rank: 3 },
-    ],
-    fees: [
-      { label: "Early Bird", value: "Rp175.000" },
-      { label: "Normal", value: "Rp200.000" },
-      { label: "Extend", value: "Rp210.000" },
     ],
     contacts: [
       { name: "Josia", phone: "0812 6231 4375" },
@@ -164,11 +151,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "2nd Place", value: "Rp2,000,000 + Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp1,000,000 + Certificate", rank: 3 },
     ],
-    fees: [
-      { label: "Early Bird", value: "Rp80.000" },
-      { label: "Normal", value: "Rp100.000" },
-      { label: "Late", value: "Rp120.000" },
-    ],
     contacts: [
       { name: "Lita", phone: "0895 3604 48081" },
       { name: "Nicholas", phone: "0859 4739 5277" },
@@ -205,6 +187,9 @@ export function CompetitionModal({
 
   const cfg = COMPETITIONS[competitionId];
   const detail = DETAILS[competitionId];
+  // Safe to read the clock during render: the modal returns null until a click,
+  // so this never renders on the server and can't cause a hydration mismatch.
+  const activeFee = currentFee(competitionId);
   const registerHref =
     cfg.category === "sma" ? "/branding/registration/sma" : "/branding/registration";
 
@@ -328,17 +313,32 @@ export function CompetitionModal({
           {/* Fees */}
           <Section icon={Wallet} title="Biaya Registrasi">
             <div className="flex flex-wrap gap-3">
-              {detail.fees.map((f) => (
-                <div
-                  key={f.label}
-                  className="flex-1 min-w-[120px] rounded-2xl bg-white/5 p-4 text-center ring-1 ring-white/10"
-                >
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-white/50">
-                    {f.label}
-                  </p>
-                  <p className="mt-1 text-lg font-black text-brand-lime">{f.value}</p>
-                </div>
-              ))}
+              {cfg.fees.map((f) => {
+                const active = f.label === activeFee?.label;
+                return (
+                  <div
+                    key={f.label}
+                    className={
+                      "flex-1 min-w-[120px] rounded-2xl p-4 text-center ring-1 " +
+                      (active
+                        ? "bg-brand-lime/10 ring-brand-lime/50"
+                        : "bg-white/5 ring-white/10 opacity-60")
+                    }
+                  >
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-white/50">
+                      {f.label}
+                    </p>
+                    <p className="mt-1 text-lg font-black text-brand-lime">
+                      {formatIDR(f.amount)}
+                    </p>
+                    {active && (
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-brand-lime/80">
+                        Berlaku sekarang
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </Section>
 

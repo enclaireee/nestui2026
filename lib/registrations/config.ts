@@ -17,6 +17,17 @@ export interface CompetitionConfig {
   institutionLabel: string; // University / Sekolah
   blurb: string;
   logo: string; // path in /public
+  qr: string; // WhatsApp group QR, path in /public
+  /** Registration fee tiers, earliest first. See `currentFee`. */
+  fees: FeeTier[];
+}
+
+export interface FeeTier {
+  label: string;
+  /** Rupiah. */
+  amount: number;
+  /** Inclusive last day of this tier, `YYYY-MM-DD` in WIB. */
+  until: string;
 }
 
 export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
@@ -33,6 +44,11 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     blurb:
       "A team hackathon that challenges participants to develop healthcare-technology-based business solutions.",
     logo: "/medhacklogo.webp",
+    qr: "/qrmedhack.png",
+    fees: [
+      { label: "Early Bird", amount: 200_000, until: "2026-07-27" },
+      { label: "Normal", amount: 220_000, until: "2026-08-22" },
+    ],
   },
   healthineer: {
     id: "healthineer",
@@ -47,6 +63,12 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     blurb:
       "A team competition to develop healthcare technology solutions in the form of a scientific paper and prototype.",
     logo: "/healthineerlogo.webp",
+    qr: "/qrhealthyneer.png",
+    fees: [
+      { label: "Early Bird", amount: 175_000, until: "2026-07-19" },
+      { label: "Normal", amount: 200_000, until: "2026-07-31" },
+      { label: "Extend", amount: 210_000, until: "2026-08-07" },
+    ],
   },
   healthynovation: {
     id: "healthynovation",
@@ -61,6 +83,12 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     blurb:
       "A scientific paper competition for highschool students that encourages innovative ideas in healthcare.",
     logo: "/healthynovationlogo.webp",
+    qr: "/qrhealthynovation.png",
+    fees: [
+      { label: "Early Bird", amount: 80_000, until: "2026-07-19" },
+      { label: "Normal", amount: 100_000, until: "2026-07-31" },
+      { label: "Late", amount: 120_000, until: "2026-08-07" },
+    ],
   },
 };
 
@@ -83,4 +111,18 @@ export function teamSizeOptions(id: CompetitionId): number[] {
 export function isValidTeamSize(id: CompetitionId, size: number): boolean {
   const c = COMPETITIONS[id];
   return Number.isInteger(size) && size >= c.minSize && size <= c.maxSize;
+}
+
+/**
+ * The fee tier in effect right now — the first one whose `until` day hasn't
+ * passed. Tiers end at 23:59:59 WIB on their `until` date, matching how the
+ * timeline on the main page reads ("13 – 19 July" includes the 19th).
+ *
+ * Returns null once every tier has lapsed, and callers hide the amount rather
+ * than guessing: showing a stale price would have people transfer the wrong sum.
+ */
+export function currentFee(id: CompetitionId, now: Date = new Date()): FeeTier | null {
+  return (
+    COMPETITIONS[id].fees.find((t) => now <= new Date(`${t.until}T23:59:59+07:00`)) ?? null
+  );
 }

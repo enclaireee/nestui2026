@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { Link as LinkIcon, Wallet, Upload, ClipboardList } from "lucide-react";
-import { COMPETITIONS } from "@/lib/registrations/config";
-import { PAYMENT_INFO } from "@/lib/payment";
+import { COMPETITIONS, currentFee } from "@/lib/registrations/config";
+import { PAYMENT_INFO, formatIDR } from "@/lib/payment";
 import { SectionLabel } from "../section-label";
 import type { RegistrationDraft } from "@/lib/registrations/types";
 
@@ -27,6 +27,7 @@ export function ReviewSubmit({
   onBack,
 }: ReviewSubmitProps) {
   const cfg = draft.competition ? COMPETITIONS[draft.competition] : null;
+  const fee = draft.competition ? currentFee(draft.competition) : null;
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-md">
@@ -34,6 +35,25 @@ export function ReviewSubmit({
       <div className="flex flex-col gap-3">
         <SectionLabel icon={Wallet}>Payment</SectionLabel>
         <div className="rounded-2xl bg-brand-green/5 p-4 ring-1 ring-brand-green/10">
+          {fee && (
+            <div className="mb-3 border-b border-brand-green/10 pb-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-brand-green/50">
+                Amount to transfer
+              </p>
+              <p className="mt-0.5 text-2xl font-bold text-brand-green">
+                {formatIDR(fee.amount)}
+              </p>
+              <p className="mt-0.5 text-xs text-brand-green/60">
+                {cfg?.name} · {fee.label} rate, until{" "}
+                {new Date(`${fee.until}T00:00:00+07:00`).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  timeZone: "Asia/Jakarta",
+                })}
+              </p>
+            </div>
+          )}
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
             <dt className="text-brand-green/50">Bank</dt>
             <dd className="font-semibold text-brand-green">{PAYMENT_INFO.bank}</dd>

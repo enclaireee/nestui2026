@@ -1,8 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { COMPETITIONS, type CompetitionId } from "@/lib/registrations/config";
 
-export function ThankYou({ code }: { code?: string }) {
+export function ThankYou({ code, competition }: { code?: string; competition?: CompetitionId | null }) {
+  const cfg = competition ? COMPETITIONS[competition] : null;
+
   return (
     <div className="flex flex-col items-center justify-center gap-10 w-full py-8">
       <h1 className="text-2xl font-bold text-gradient-brand relative z-10 drop-shadow-md text-center">
@@ -19,11 +23,28 @@ export function ThankYou({ code }: { code?: string }) {
       )}
 
       <p className="text-lg font-bold text-gradient-brand relative z-10 drop-shadow-md text-center max-w-md">
-        Join the WhatsApp Group using the QR Code below. See you there!
+        Join the {cfg?.name ?? ""} WhatsApp Group using the QR Code below. See you there!
       </p>
 
-      <div className="w-56 h-56 bg-white/80 rounded-xl flex items-center justify-center text-center p-6 shadow-inner">
-        <p className="font-bold text-brand-green text-sm">WhatsApp group QR</p>
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative h-56 w-56 overflow-hidden rounded-xl bg-white p-3 shadow-inner">
+          {cfg ? (
+            <Image
+              src={cfg.qr}
+              alt={`${cfg.name} WhatsApp group QR code`}
+              fill
+              sizes="224px"
+              className="object-contain p-3"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-center">
+              <p className="text-sm font-bold text-brand-green">WhatsApp group QR</p>
+            </div>
+          )}
+        </div>
+        {cfg && (
+          <p className="text-xs font-semibold text-brand-green/70">{cfg.name} participants</p>
+        )}
       </div>
 
       <Link

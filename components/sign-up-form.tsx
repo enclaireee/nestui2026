@@ -26,6 +26,15 @@ export function SignUpForm({
     setIsLoading(true);
     setError(null);
 
+    if (password.length < 8) {
+      // Real enforcement is Supabase Auth → Policies → minimum password length
+      // (set it to 8 there too); this is the inline message so people aren't
+      // bounced by a server error.
+      setError("Password must be at least 8 characters");
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== repeatPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
@@ -37,6 +46,8 @@ export function SignUpForm({
         email,
         password,
         options: {
+          // verifyOtp in /auth/confirm sets the session, so the link lands them
+          // signed in on /auth/confirmed, which then forwards to the dashboard.
           emailRedirectTo: `${window.location.origin}/auth/confirm?next=/auth/confirmed`,
         },
       });
