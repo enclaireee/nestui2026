@@ -22,15 +22,19 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+  /*
+   * Only the paths that this proxy actually makes a decision about. Matching
+   * everything meant a blocking supabase.auth.getUser() network round-trip on
+   * every public page view (Home, About, assets) for no reason — that was the
+   * lag. Public pages need no session: the header reads auth client-side and
+   * every protected page re-checks getUser() itself.
+   */
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/admin/:path*",
+    "/protected/:path*",
+    "/branding/registration/:path*",
+    "/auth/login",
+    "/auth/sign-up",
+    "/auth/forgot-password",
   ],
 };

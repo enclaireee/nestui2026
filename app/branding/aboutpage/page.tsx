@@ -1,10 +1,18 @@
+import type { Metadata } from "next";
 import { Description } from "./sections/description";
 import { Vision } from "./sections/vision";
 import { Mission } from "./sections/mission";
-import { Sponsors } from "./sections/sponsor";
+// import { Sponsors } from "./sections/sponsor";
 import { PastSponsors } from "./sections/pastSponsors";
 import { Dokumentasi } from "./sections/documentation";
 import CtaSection from "../mainpage/section/cta";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "About NEST UI 2026 — our vision, mission, and the National Electrical Summit's healthcare-innovation competitions at Universitas Indonesia.",
+  alternates: { canonical: "/branding/aboutpage" },
+};
 
 export default function AboutPage() {
   return (
@@ -16,7 +24,7 @@ export default function AboutPage() {
         <Description />
         <Vision />
         <Mission />
-        <Sponsors />
+        {/* <Sponsors /> */}
         <PastSponsors />
         <Dokumentasi />
         <CtaSection />

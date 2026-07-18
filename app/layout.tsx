@@ -2,17 +2,39 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Suspense } from "react";
 import { AppShell } from "@/components/app-shell";
+import { siteUrl } from "@/lib/utils";
 import "./globals.css";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+const title = "NEST UI 2026 — National Electrical Summit";
+const description =
+  "National Electrical Summit (NEST) UI 2026 — Shaping the Future of Healthcare Through Intelligent and Inclusive Innovation. Join MedHack, Healthineer, and Healthynovation.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "NEST UI 2026",
-  description:
-    "National Electrical Summit (NEST) UI 2026 — Shaping the Future of Healthcare Through Intelligent and Inclusive Innovation.",
+  metadataBase: new URL(siteUrl),
+  title: { default: title, template: "%s · NEST UI 2026" },
+  description,
+  applicationName: "NEST UI 2026",
+  keywords: [
+    "NEST UI 2026",
+    "National Electrical Summit",
+    "Universitas Indonesia",
+    "MedHack",
+    "Healthineer",
+    "Healthynovation",
+    "healthcare innovation",
+    "biomedical competition",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "NEST UI 2026",
+    title,
+    description,
+    url: "/",
+    locale: "en_US",
+  },
+  twitter: { card: "summary_large_image", title, description },
+  robots: { index: true, follow: true },
 };
 
 // Default font for the whole app. Drop the file(s) in app/fonts/.
