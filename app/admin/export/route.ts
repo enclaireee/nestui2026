@@ -3,6 +3,7 @@ import { isAdminAuthed } from "@/lib/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { COMPETITIONS, isCompetitionId } from "@/lib/registrations/config";
 import { csvSafe } from "@/lib/sanitize";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import type { AdminRegistration } from "@/lib/admin/types";
 
 // One row per team; leader + members flattened into columns. Blocked without an
@@ -10,6 +11,12 @@ import type { AdminRegistration } from "@/lib/admin/types";
 export async function GET(request: NextRequest) {
   if (!(await isAdminAuthed())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Full-table join per hit — cap it so even a valid admin session can't hammer
+  // it into a connection-pool DoS (20 exports / 10 min / IP).
+  if (!(await checkRateLimit(`export:${clientIp(request.headers)}`, 20, 600))) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
   const competitionParam = request.nextUrl.searchParams.get("competition");

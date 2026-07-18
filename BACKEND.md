@@ -491,6 +491,64 @@ Optional, for a fully uniform model: aggregate submissions into `admin_registrat
 
 ---
 
+## Step 17 — Connection pooling (Supavisor / PgBouncer) — **config, no SQL**
+
+Serverless (Vercel) spins up many short-lived instances, each opening its own Postgres connection; against the direct endpoint (port **5432**) this exhausts `max_connections` under load. Point runtime traffic at Supabase's **pooler** instead:
+
+- **Supabase Dashboard → Project Settings → Database → Connection string / Pooling.** Use the pooler host on port **6543** (transaction mode) for the app.
+- The Supabase JS client this app uses (`@supabase/supabase-js` over the REST/`NEXT_PUBLIC_SUPABASE_URL` endpoint) already goes through Supabase's connection management — you only need to switch to the pooled connection string if/when you add a **direct Postgres** connection (an ORM, a migration tool, an external worker). Use `:6543` for those; keep `:5432` only for one-off migrations that need a session (e.g. `prisma migrate`).
+
+Nothing to paste in the SQL editor for this step.
+
+---
+
+## Step 18 — (Optional) Audit log for admin mutations
+
+The admin is a **single shared login** with no per-user identity in the DB (see the env note below), and admin writes run as `service_role` where `auth.uid()` is `NULL` — so a per-admin audit trail isn't possible without redesigning admin auth. What you *can* capture cheaply is **what changed and when** on the review-status columns, append-only, via triggers. Skip this unless you need it for compliance.
+
+```sql
+create table if not exists public.audit_logs (
+  id          bigint generated always as identity primary key,
+  table_name  text not null,
+  record_id   uuid not null,
+  action      text not null,          -- 'status_change'
+  old_status  registration_status,
+  new_status  registration_status,
+  changed_at  timestamptz not null default now()
+);
+alter table public.audit_logs enable row level security;  -- deny all clients; server bypasses
+revoke all on public.audit_logs from anon, authenticated;
+
+create or replace function public.log_status_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.status is distinct from old.status then
+    insert into public.audit_logs (table_name, record_id, action, old_status, new_status)
+    values (tg_table_name, new.id, 'status_change', old.status, new.status);
+  end if;
+  return new;
+end$$;
+
+drop trigger if exists trg_audit_registrations on public.registrations;
+create trigger trg_audit_registrations
+  after update on public.registrations
+  for each row execute function public.log_status_change();
+
+-- only if you ran Step 15 (submissions table)
+drop trigger if exists trg_audit_submissions on public.submissions;
+create trigger trg_audit_submissions
+  after update on public.submissions
+  for each row execute function public.log_status_change();
+```
+
+To read the log: query `public.audit_logs` from the SQL editor or the admin server (secret key).
+
+---
+
 ## Environment Variables Checklist
 
 Add these in Vercel (Project → Settings → Environment Variables) and to local `.env.local`. **Never** prefix a secret with `NEXT_PUBLIC_`.
