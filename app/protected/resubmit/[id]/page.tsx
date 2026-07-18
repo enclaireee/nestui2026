@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { COMPETITIONS } from "@/lib/registrations/config";
+import { COMPETITIONS, currentFee } from "@/lib/registrations/config";
 import { ResubmitForm } from "@/components/registration/resubmit-form";
 
 export default async function ResubmitPage({
@@ -67,7 +67,10 @@ export default async function ResubmitPage({
           </div>
         </div>
 
-        <ResubmitForm registrationId={reg.id} />
+        <ResubmitForm
+          registrationId={reg.id}
+          fee={cfg ? currentFee(cfg.id) : null}
+        />
       </div>
     </section>
   );

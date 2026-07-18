@@ -29,10 +29,20 @@ export async function adminLogin(
   _prev: AdminLoginState,
   formData: FormData,
 ): Promise<AdminLoginState> {
-  // Rate limit brute force against the single known credential (10 / 10 min / IP).
+  // Brute-force defense over a single static credential, so both limits fail
+  // CLOSED — a DB error must not silently switch throttling off.
+  //   per-IP:  10 / 10 min — stops the obvious hammering.
+  //   global: 100 / hour   — the per-IP key is useless against a rotating-IP or
+  //                          spoofed-XFF attacker, this one is not tied to IP.
   const hdrs = await headers();
-  const allowed = await checkRateLimit(`admin_login:${clientIp(hdrs)}`, 10, 600);
-  if (!allowed) return { error: "Too many attempts. Please wait and try again." };
+  const perIp = await checkRateLimit(`admin_login:${clientIp(hdrs)}`, 10, 600, {
+    failClosed: true,
+  });
+  const global = await checkRateLimit("admin_login:global", 100, 3600, {
+    failClosed: true,
+  });
+  if (!perIp || !global)
+    return { error: "Too many attempts. Please wait and try again." };
 
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");

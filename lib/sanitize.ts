@@ -8,6 +8,14 @@ export function stripHtml(v: string): string {
   return v.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
 
+// Open-redirect guard for a `?next=` that arrives in an emailed link. Only a
+// same-origin absolute path is honoured: the first char must be `/` and the
+// second must be neither `/` nor `\`, because browsers normalise `/\evil.com`
+// into the protocol-relative `//evil.com` and navigate off-site.
+export function safeNextPath(requested: string | null, fallback = "/protected"): string {
+  return requested && /^\/[^/\\]/.test(requested) ? requested : fallback;
+}
+
 function sanitizePerson(p: PersonDraft): PersonDraft {
   return {
     name: stripHtml(p.name),

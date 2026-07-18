@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
-import { COMPETITIONS, isCompetitionId } from "@/lib/registrations/config";
+import { COMPETITIONS, currentFee, isCompetitionId } from "@/lib/registrations/config";
 import { validateDraft } from "@/lib/registrations/validate";
 import { sanitizeDraft } from "@/lib/sanitize";
 import type { MemberPayload, RegistrationDraft } from "@/lib/registrations/types";
@@ -34,6 +34,13 @@ export async function submitRegistration(draft: RegistrationDraft): Promise<Subm
   // 3. Sanitize free-text, then re-validate the whole draft server-side.
   if (!isCompetitionId(draft?.competition))
     return { ok: false, error: "Invalid competition." };
+
+  // Registration closes when the last fee tier lapses. The UI only hides the
+  // price once that happens, so without this the Server Action still accepts
+  // submissions after the deadline.
+  if (!currentFee(draft.competition))
+    return { ok: false, error: "Registration for this competition has closed." };
+
   const clean = sanitizeDraft(draft);
   const cfg = COMPETITIONS[draft.competition];
   const result = validateDraft(clean, cfg);

@@ -28,7 +28,11 @@ export function SiteHeader() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
+    // getSession() reads the JWT from local storage — no network round-trip. This
+    // button is cosmetic; real enforcement lives in proxy.ts and each protected
+    // page's own getUser(). getUser() here cost a Supabase auth request on every
+    // page load and made the button flip from "Login Now" after hydration.
+    supabase.auth.getSession().then(({ data }) => setIsLoggedIn(!!data.session));
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session?.user);
     });

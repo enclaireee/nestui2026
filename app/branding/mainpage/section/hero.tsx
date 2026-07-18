@@ -35,8 +35,12 @@ const GLOW = "drop-shadow-[0_2px_12px_rgb(var(--brand-lime)/0.35)]";
 export function Hero() {
   const time = useCountdown(DEADLINE);
 
+  // bg-white/5 instead of backdrop-blur-md: the backdrop here is a smooth
+  // gradient SVG over a flat bg-brand-green, so blurring it is a visual no-op
+  // — but backdrop-filter re-reads and re-blurs the whole region on every zoom
+  // step, which is what made zooming lag.
   return (
-    <section className="mx-auto mt-8 flex w-fit max-w-6xl flex-col items-center rounded-3xl border border-white/40 px-6 pb-8 pt-6 backdrop-blur-md sm:px-10">
+    <section className="mx-auto mt-8 flex w-fit max-w-6xl flex-col items-center rounded-3xl border border-white/40 bg-white/5 px-6 pb-8 pt-6 sm:px-10">
       <div className="flex w-full flex-col items-center gap-8 md:flex-row md:gap-12">
         <Image
           src="/nestlogo.webp"

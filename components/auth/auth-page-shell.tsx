@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface AuthPageShellProps {
@@ -35,9 +36,12 @@ export function AuthPageShell({ heading, children, showLogo = false }: AuthPageS
         )}
       >
         {showLogo && (
-          <img
+          <Image
             src="/loginlogo.webp"
             alt="Nest UI 2026"
+            width={1280}
+            height={658}
+            sizes="(min-width: 1024px) 512px, (min-width: 768px) 448px, 0px"
             className="hidden h-auto w-full max-w-md md:block lg:max-w-lg"
           />
         )}

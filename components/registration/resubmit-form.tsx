@@ -4,9 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Link as LinkIcon, Wallet, Copy, Check } from "lucide-react";
 import { addSubmission } from "@/app/protected/actions";
-import { PAYMENT_INFO } from "@/lib/payment";
+import { PAYMENT_INFO, formatIDR } from "@/lib/payment";
+import type { FeeTier } from "@/lib/registrations/config";
 
-export function ResubmitForm({ registrationId }: { registrationId: string }) {
+export function ResubmitForm({
+  registrationId,
+  fee,
+}: {
+  registrationId: string;
+  fee?: FeeTier | null;
+}) {
   const [payment, setPayment] = useState("");
   const [submission, setSubmission] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +50,17 @@ export function ResubmitForm({ registrationId }: { registrationId: string }) {
           <Wallet className="h-4 w-4" />
           Pay the registration fee to
         </div>
+        {fee && (
+          <div className="mb-3 border-b border-white/10 pb-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-white/45">
+              Amount to transfer
+            </p>
+            <p className="mt-0.5 text-2xl font-bold text-brand-lime">{formatIDR(fee.amount)}</p>
+            <p className="mt-0.5 text-xs text-white/45">
+              {fee.label} rate · each entry needs its own paid fee.
+            </p>
+          </div>
+        )}
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
           <dt className="text-white/45">Bank</dt>
           <dd className="font-medium text-white">{PAYMENT_INFO.bank}</dd>

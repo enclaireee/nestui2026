@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { stripHtml } from "@/lib/sanitize";
 import { URL_RE } from "@/lib/registrations/validate";
+import { currentFee, isCompetitionId } from "@/lib/registrations/config";
 
 export type AddSubmissionResult = { ok: true } | { ok: false; error: string };
 
@@ -32,6 +33,18 @@ export async function addSubmission(
   const submission = stripHtml(submissionUrl);
   if (!URL_RE.test(payment)) return { ok: false, error: "Payment proof must be a valid link." };
   if (!URL_RE.test(submission)) return { ok: false, error: "Submission must be a valid link." };
+
+  // Same deadline gate as the initial registration. The lookup goes through the
+  // RLS-scoped client, so a foreign registration id reads back null here — the
+  // RPC re-checks ownership anyway, this just fails it earlier and cheaper.
+  const { data: reg } = await supabase
+    .from("registrations")
+    .select("competition")
+    .eq("id", registrationId)
+    .maybeSingle();
+  if (!reg) return { ok: false, error: "You can only submit for your own team." };
+  if (!isCompetitionId(reg.competition) || !currentFee(reg.competition))
+    return { ok: false, error: "Submissions for this competition have closed." };
 
   const admin = createAdminClient();
   const { error } = await admin.rpc("add_submission", {
