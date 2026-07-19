@@ -18,8 +18,6 @@ import {
 
 interface TeamSetupProps {
   category?: Category;
-  /** Competitions this user already has a team in. */
-  registered?: CompetitionId[];
   competition: CompetitionId | null;
   teamName: string;
   teamSize: number | null;
@@ -40,7 +38,6 @@ const titleGradient: React.CSSProperties = {
 
 export function TeamSetup({
   category,
-  registered = [],
   competition,
   teamName,
   teamSize,
@@ -82,13 +79,11 @@ export function TeamSetup({
               <div className="flex flex-col gap-3">
                 {group.items.map((c) => {
                   const active = competition === c.id;
-                  // Two ways a competition can't be picked, and the user is told
-                  // which — previously both only surfaced after all 36 fields
-                  // were filled, as a rejection from the server.
+                  // A competition drops out of the picker once its last fee tier
+                  // lapses — surfaced here instead of as a server rejection after
+                  // all 36 fields are filled.
                   const fee = currentFee(c.id);
-                  const taken = registered.includes(c.id);
-                  const closed = !fee;
-                  const disabled = taken || closed;
+                  const disabled = !fee;
                   return (
                     <button
                       key={c.id}
@@ -149,8 +144,7 @@ export function TeamSetup({
                                 {formatIDR(fee.amount)} · {fee.label}
                               </Pill>
                             )}
-                            {taken && <Pill tone="muted">Already registered</Pill>}
-                            {closed && !taken && (
+                            {disabled && (
                               <Pill tone="muted">Registration closed</Pill>
                             )}
                           </div>

@@ -1,10 +1,7 @@
-// No "use client": this section is static markup and a mailto link — it had no
-// state or handlers to justify shipping it to the browser as a client component.
+// No "use client": this section is static markup and a link — it had no state
+// or handlers to justify shipping it to the browser as a client component.
 import React from "react";
-
-// The partnership contact. Same address as the footer.
-const PARTNER_EMAIL = "nestui.ft@gmail.com";
-const PARTNER_SUBJECT = "Partnership Inquiry — NEST UI 2026";
+import Link from "next/link";
 
 export default function CtaSection() {
   return (
@@ -23,11 +20,10 @@ export default function CtaSection() {
         industry leaders and expert practitioners.
       </p>
 
-      {/* Was a <button> with no onClick and no href — a dead CTA rendered on
-          both the main page and the About page, exactly where an interested
-          sponsor would click. */}
-      <a
-        href={`mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(PARTNER_SUBJECT)}`}
+      {/* Leads to the contact page, which carries the partnership email plus
+          every competition's contact person. */}
+      <Link
+        href="/branding/contact"
         className="group z-10 mt-10 flex items-center justify-center rounded-full border-[1.5px] border-brand-lime/65 px-12 py-5 transition-all duration-150 hover:-translate-y-0.5 hover:brightness-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime focus-visible:ring-offset-2 focus-visible:ring-offset-transparent active:translate-y-0"
         style={{
           // Was rgba(124,165,74,…) — a green that exists nowhere in the palette.
@@ -40,11 +36,9 @@ export default function CtaSection() {
         <span className="text-[clamp(20px,2.4vw,28px)] font-semibold leading-[115%] text-brand-butter-soft [text-shadow:0_2px_4px_rgb(var(--brand-green)/0.55)]">
           Become Our Partner
         </span>
-      </a>
+      </Link>
 
-      <p className="z-10 mt-4 text-xs text-white/50">
-        Opens your email app · {PARTNER_EMAIL}
-      </p>
+      <p className="z-10 mt-4 text-xs text-white/50">Partnership &amp; competition contacts →</p>
     </section>
   );
 }

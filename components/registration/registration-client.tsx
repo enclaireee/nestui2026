@@ -154,14 +154,7 @@ function reducer(state: WizardState, action: Action): WizardState {
   }
 }
 
-export function RegistrationClient({
-  category,
-  registered = [],
-}: {
-  category?: Category;
-  /** Competitions this user already has a team in — shown as taken, not selectable. */
-  registered?: CompetitionId[];
-}) {
+export function RegistrationClient({ category }: { category?: Category }) {
   const [state, dispatch] = useReducer(reducer, undefined, () => ({
     draft: emptyDraft(),
     stepIndex: 0,
@@ -278,7 +271,6 @@ export function RegistrationClient({
                   {step === "team" && (
                     <TeamSetup
                       category={category}
-                      registered={registered}
                       competition={draft.competition}
                       teamName={draft.teamName}
                       teamSize={draft.teamSize}
