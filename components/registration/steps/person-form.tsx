@@ -31,66 +31,70 @@ export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormP
         </div>
       </div>
 
-      {/* Identity fields */}
-      <div className="flex flex-col gap-3">
-      <Field error={errors.name}>
+      {/* Identity fields. autoComplete lets the browser fill a member's own
+          details in one tap — the difference between 7 fields and 2 on a phone.
+          The leader and each member are separate people, so these stay the
+          plain field names rather than a section-scoped token. */}
+      <div className="flex flex-col gap-4">
         <RegistrationInput
           icon={User}
-          placeholder="Full Name"
+          label="Full name"
+          placeholder="e.g. Budi Santoso"
+          autoComplete="name"
           value={person.name}
-          aria-invalid={!!errors.name}
+          error={errors.name}
           onChange={(e) => onChange("name", e.target.value)}
         />
-      </Field>
-      <Field error={errors.email}>
         <RegistrationInput
           icon={Mail}
           type="email"
-          placeholder="Email"
+          label="Email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          inputMode="email"
           value={person.email}
-          aria-invalid={!!errors.email}
+          error={errors.email}
           onChange={(e) => onChange("email", e.target.value)}
         />
-      </Field>
-      <Field error={errors.phone}>
         <RegistrationInput
           icon={Phone}
           type="tel"
-          placeholder="Telephone Number"
+          label="Phone number"
+          placeholder="08xxxxxxxxxx"
+          autoComplete="tel"
+          inputMode="tel"
+          hint="WhatsApp number — this is how we reach you about your submission."
           value={person.phone}
-          aria-invalid={!!errors.phone}
+          error={errors.phone}
           onChange={(e) => onChange("phone", e.target.value)}
         />
-      </Field>
-      <Field error={errors.studentId}>
         <RegistrationInput
           icon={IdCard}
+          label={cfg.studentIdLabel}
           placeholder={cfg.studentIdLabel}
           value={person.studentId}
-          aria-invalid={!!errors.studentId}
+          error={errors.studentId}
           onChange={(e) => onChange("studentId", e.target.value)}
         />
-      </Field>
-      <Field error={errors.institution}>
         <RegistrationInput
           icon={Building}
-          placeholder={cfg.institutionLabel}
+          label={cfg.institutionLabel}
+          placeholder={`Your ${cfg.institutionLabel.toLowerCase()}`}
+          autoComplete="organization"
           value={person.institution}
-          aria-invalid={!!errors.institution}
+          error={errors.institution}
           onChange={(e) => onChange("institution", e.target.value)}
         />
-      </Field>
-      {cfg.hasMajor && (
-        <Field error={errors.major}>
+        {cfg.hasMajor && (
           <RegistrationInput
             icon={BookOpen}
-            placeholder="Major"
+            label="Major / Jurusan"
+            placeholder="e.g. Electrical Engineering"
             value={person.major}
-            aria-invalid={!!errors.major}
+            error={errors.major}
             onChange={(e) => onChange("major", e.target.value)}
           />
-        </Field>
-      )}
+        )}
       </div>
 
       {/* Confirmation documents */}
@@ -117,26 +121,17 @@ export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormP
             <li>Proof of posting the NEST UI 2026 twibbon</li>
           </ul>
         </div>
-        <Field error={errors.confirmationUrl}>
-          <RegistrationInput
-            icon={LinkIcon}
-            type="url"
-            placeholder="Confirmation Google Drive Link"
-            value={person.confirmationUrl}
-            aria-invalid={!!errors.confirmationUrl}
-            onChange={(e) => onChange("confirmationUrl", e.target.value)}
-          />
-        </Field>
+        <RegistrationInput
+          icon={LinkIcon}
+          type="url"
+          label="Confirmation folder link"
+          placeholder="https://drive.google.com/..."
+          hint="Make sure the folder is shared as “Anyone with the link can view”."
+          value={person.confirmationUrl}
+          error={errors.confirmationUrl}
+          onChange={(e) => onChange("confirmationUrl", e.target.value)}
+        />
       </div>
-    </div>
-  );
-}
-
-function Field({ error, children }: { error?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      {children}
-      {error && <p className="pl-1 text-xs font-semibold text-red-500">{error}</p>}
     </div>
   );
 }

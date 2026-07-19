@@ -132,7 +132,7 @@ const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details,
     // Fixed glitch by removing scale animation from the main bounding wrapper container
     <div className="relative flex flex-col items-center transform-gpu">
       {/* Interactive scale only applied to small nodes rather than overlapping layout layers */}
-      <div className="relative z-10 transition-transform duration-300 active:scale-95 group cursor-default">
+      <div className="relative z-10 transition-transform duration-150 active:scale-95 group cursor-default">
 
         <CloverIcon showGlow={showGlow} className="w-[120px] h-[120px] md:w-[179px] md:h-[179px] transition-transform duration-300 group-hover:scale-105" />
 

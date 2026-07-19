@@ -469,9 +469,13 @@ grant  execute on function public.add_submission(uuid, uuid, text, text) to serv
 
 ---
 
-## Step 16 — (Follow-up) Admin review of resubmissions
+## Step 16 — Admin review of resubmissions — **required for the admin Submissions view**
 
-The admin panel currently reviews only the inline Entry 1 (`registrations.status` via `set_registration_status`). To let admins verify/reject **resubmissions** too, add a per-submission status setter and surface the `submissions` rows in the admin detail page.
+The admin panel now has two modes — **Teams** (one row per team; click through for that team's submissions) and **Submissions** (every submission across all teams, newest first; click through to the team). The team detail page shows Entry 1 **and** every resubmission, each with its own verify/reject control. All of that needs the two objects below.
+
+> **Run this whole block once in the Supabase SQL editor.** It is idempotent (`create or replace`). It requires the `submissions` table from **Step 15** to already exist. Nothing else in the app changes shape — the existing `admin_registrations_detail` view and `set_registration_status` are untouched.
+
+**(a) Per-submission status setter** — lets an admin verify/reject a resubmission (Entry 2+). Entry 1 still goes through `set_registration_status`.
 
 ```sql
 create or replace function public.set_submission_status(
@@ -487,7 +491,53 @@ revoke all on function public.set_submission_status(uuid, registration_status) f
 grant  execute on function public.set_submission_status(uuid, registration_status) to service_role;
 ```
 
-Optional, for a fully uniform model: aggregate submissions into `admin_registrations_detail` (mirroring how `members` is aggregated in Step 9) and, if you want Entry 1 to live in the table too, backfill one `submissions` row per existing registration from its inline columns — but that also requires updating the admin list/detail, the CSV export, and this view to read from the aggregate. Not needed for the resubmit feature itself.
+**(b) Flattened "all submissions" view** — one row per submission across every team: Entry 1 (the inline submission on `registrations`) unioned with every `submissions` row (Entry 2, 3, …). Each row carries the owning team's identifying columns so the Submissions list can sort/search on its own, and an `entry_no` (1 = the inline Entry 1). The admin server reads it with the secret key (bypasses RLS); `security_invoker = true` + the revoke keep the publishable-key roles out.
+
+```sql
+create or replace view public.admin_submissions_detail
+with (security_invoker = true) as
+-- Entry 1: the inline submission that came with the registration.
+select
+  r.id                as submission_id,   -- Entry 1 has no submissions-row id; use the registration id
+  r.id                as registration_id,
+  r.code,
+  r.team_name,
+  r.competition,
+  r.leader_email,
+  true                as is_primary,
+  1                   as entry_no,
+  r.payment_proof_url,
+  r.submission_url,
+  r.status,
+  r.submitted_at
+from public.registrations r
+union all
+-- Entry 2+: each row in the submissions table, numbered per team by time.
+select
+  s.id                as submission_id,
+  s.registration_id,
+  r.code,
+  r.team_name,
+  r.competition,
+  r.leader_email,
+  false               as is_primary,
+  (1 + row_number() over (
+        partition by s.registration_id
+        order by s.submitted_at, s.id))::int as entry_no,
+  s.payment_proof_url,
+  s.submission_url,
+  s.status,
+  s.submitted_at
+from public.submissions s
+join public.registrations r on r.id = s.registration_id;
+
+-- Same lockdown as admin_registrations_detail: server-only (secret key) reads.
+revoke all on public.admin_submissions_detail from anon, authenticated;
+```
+
+The app degrades gracefully if you skip this: the Teams view keeps working (it reads `admin_registrations_detail`), the team detail page falls back to showing just the inline Entry 1, and the CSV export falls back to one submission column set. The **Submissions** mode is the only thing that hard-requires (b) — it shows an inline "run the Step 16 SQL" notice until you do.
+
+The CSV export is unchanged in shape philosophy — still one row per team — but now flattens **every** submission into `Entry1_*`, `Entry2_*`, … columns (like it already does for `Member1_*`, `Member2_*`), instead of only Entry 1.
 
 ---
 

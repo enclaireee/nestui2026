@@ -10,6 +10,11 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // `eslint .` was walking the build output, so `npm run lint` reported
+  // thousands of errors in generated code and buried the handful in ours.
+  {
+    ignores: [".next/**", "node_modules/**", "next-env.d.ts", "public/**"],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 

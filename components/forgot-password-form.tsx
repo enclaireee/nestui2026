@@ -1,86 +1,64 @@
 "use client";
 
 import { Mail } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { GlassCard } from "@/components/registration/glass-card";
+import { AuthForm, authFieldClass } from "@/components/auth/auth-form";
 import { RegistrationInput } from "@/components/registration/registration-input";
 import Link from "next/link";
 import { useState } from "react";
 
-export function ForgotPasswordForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function sendResetLink() {
     const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
-      });
-      if (error) throw error;
-      setSuccess(true);
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/update-password`,
+    });
+    if (error) throw error;
+    // Returning a node swaps it in for the form — see AuthForm.
+    return (
+      <>
+        <h2 className="mb-2 text-2xl font-bold text-brand-green md:text-3xl">
+          Check Your Email
+        </h2>
+        <p className="text-sm text-brand-green/80 md:text-base">
+          If you registered using your email and password, you will receive a
+          password reset email.
+        </p>
+      </>
+    );
+  }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <GlassCard className="lg:p-12">
-        {success ? (
-          <>
-            <h2 className="mb-2 text-2xl font-bold text-brand-green md:text-3xl">Check Your Email</h2>
-            <p className="text-sm text-brand-green/80 md:text-base">
-              If you registered using your email and password, you will receive
-              a password reset email.
-            </p>
-          </>
-        ) : (
-          <form onSubmit={handleForgotPassword}>
-            <div className="flex flex-col gap-4 md:gap-5">
-              <RegistrationInput
-                icon={Mail}
-                type="email"
-                placeholder="Email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="md:h-14 md:text-base"
-              />
-              <p className="-mt-2 text-xs font-semibold text-brand-green/80 md:text-sm">
-                Enter your email to send the verification link
-              </p>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100 md:py-3.5 md:text-base"
-              >
-                {isLoading ? "Sending..." : "Send Verification Link"}
-              </button>
-            </div>
-            <div className="mt-4 text-center text-sm text-brand-green md:mt-6 md:text-base">
-              Already have an account?{" "}
-              <Link href="/auth/login" className="font-bold underline underline-offset-4">
-                Login
-              </Link>
-            </div>
-          </form>
-        )}
-      </GlassCard>
-    </div>
+    <AuthForm
+      submitLabel="Send Verification Link"
+      pendingLabel="Sending..."
+      onSubmit={sendResetLink}
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link href="/auth/login" className="font-bold underline underline-offset-4">
+            Login
+          </Link>
+        </>
+      }
+    >
+      <RegistrationInput
+        icon={Mail}
+        type="email"
+        label="Email"
+        placeholder="you@example.com"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className={authFieldClass}
+      />
+      <p className="-mt-2 text-xs font-semibold text-brand-green/80 md:text-sm">
+        Enter your email to send the verification link
+      </p>
+    </AuthForm>
   );
 }

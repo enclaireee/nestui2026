@@ -8,18 +8,27 @@ const DEADLINE = new Date("2026-08-14T23:59:00+07:00");
 
 type Remaining = { days: number; hours: number; minutes: number };
 
+function remaining(target: Date): Remaining {
+  const diff = Math.max(0, target.getTime() - Date.now());
+  return {
+    days: Math.floor(diff / 86_400_000),
+    hours: Math.floor((diff % 86_400_000) / 3_600_000),
+    minutes: Math.floor((diff % 3_600_000) / 60_000),
+  };
+}
+
 function useCountdown(target: Date): Remaining | null {
+  // Deliberately NOT seeded from Date.now() in the initializer. This is a client
+  // component on a statically prerendered page: reading the clock during render
+  // makes the whole hero request-time under `cacheComponents`, which would push
+  // the LCP element out of the prerendered HTML. A sub-second placeholder is a
+  // much cheaper price than a hero that streams in. The placeholder is styled as
+  // an obvious placeholder (see CountdownBlock) rather than showing "00", which
+  // would read as "no time left".
   const [time, setTime] = useState<Remaining | null>(null);
 
   useEffect(() => {
-    const tick = () => {
-      const diff = Math.max(0, target.getTime() - Date.now());
-      setTime({
-        days: Math.floor(diff / 86_400_000),
-        hours: Math.floor((diff % 86_400_000) / 3_600_000),
-        minutes: Math.floor((diff % 3_600_000) / 60_000),
-      });
-    };
+    const tick = () => setTime(remaining(target));
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
@@ -96,9 +105,9 @@ export function Hero() {
 
             {/* Digit groups pinned to Group 701's blob lobe centers
                 (x 88-662 of 760 → 22% / 49% / 77%; blob sits at y≈44%). */}
-            <CountdownBlock value={time ? pad(time.days) : "--"} label="Days" className="absolute left-[22%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
-            <CountdownBlock value={time ? pad(time.hours) : "--"} label="Hours" className="absolute left-[49%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
-            <CountdownBlock value={time ? pad(time.minutes) : "--"} label="Minutes" className="absolute left-[77%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
+            <CountdownBlock value={time && pad(time.days)} label="Days" className="absolute left-[22%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
+            <CountdownBlock value={time && pad(time.hours)} label="Hours" className="absolute left-[49%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
+            <CountdownBlock value={time && pad(time.minutes)} label="Minutes" className="absolute left-[77%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
           </div>
         </div>
       </div>
@@ -120,11 +129,26 @@ export function Hero() {
   );
 }
 
-function CountdownBlock({ value, label, className }: { value: string; label: string; className?: string }) {
+function CountdownBlock({
+  value,
+  label,
+  className,
+}: {
+  /** null until the clock is read on the client — see useCountdown. */
+  value: string | null;
+  label: string;
+  className?: string;
+}) {
   return (
     <div className={`flex flex-col items-center ${className ?? ""}`}>
-      <span className={`text-3xl font-extrabold leading-none text-gradient-brand sm:text-5xl md:text-6xl ${GLOW}`}>
-        {value}
+      <span
+        suppressHydrationWarning
+        className={`text-3xl font-extrabold leading-none sm:text-5xl md:text-6xl ${GLOW} ${
+          value ? "text-gradient-brand" : "animate-pulse text-brand-lime/25"
+        }`}
+      >
+        {/* Same glyph count as a real value, so the digits never reflow in. */}
+        {value ?? "00"}
       </span>
       <span className="mt-1.5 text-xs font-semibold text-gradient-brand sm:text-base md:text-lg">
         {label}

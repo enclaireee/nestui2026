@@ -11,7 +11,7 @@ export default function Error({ reset }: { error: Error; reset: () => void }) {
       </p>
       <button
         onClick={reset}
-        className="rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-6 py-2.5 text-sm font-bold text-brand-teal"
+        className="btn-brand px-6 py-2.5 text-sm"
       >
         Try again
       </button>

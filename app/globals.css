@@ -23,57 +23,11 @@
     --brand-butter: 255 244 120;      /* #FFF478  warm accent heading */
     --brand-butter-soft: 244 244 160; /* #F4F4A0  warm accent (light) */
 
-    --background: 0 0% 100%;
+    /* The only two shadcn tokens still referenced (by the base layer below)
+       and --radius, which backs Tailwind's rounded-lg/md/sm. */
     --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 }
 
@@ -110,6 +64,22 @@
   img::-moz-selection {
     background-color: transparent;
   }
+
+  /* Vestibular safety. This site has scroll-reveals, a wizard step transition,
+     hover-scale on nearly every button and an infinite sponsor marquee — for
+     anyone who asked the OS for less motion, none of that is optional to them.
+     Near-zero rather than `none` so transitionend/animationend still fire and
+     no JS that waits on them can hang. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -127,5 +97,46 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
+  }
+
+  /* ===================================================================
+     BUTTONS — one radius, one hover response, one disabled treatment.
+     Size/width still come from utilities at the call site (`px-10 py-2.5`,
+     `w-full`, …) since those legitimately vary; everything else must not.
+     150ms because these are micro-interactions — 300ms on a hover reads as
+     lag, especially combined with a scale.
+     =================================================================== */
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+      bg-gradient-to-r from-brand-lime to-brand-cream font-bold tracking-wide
+      text-brand-teal shadow-md transition-all duration-150
+      hover:scale-[1.02] hover:shadow-lg active:scale-95
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime
+      focus-visible:ring-offset-2 focus-visible:ring-offset-transparent
+      disabled:opacity-60 disabled:hover:scale-100 disabled:pointer-events-none;
+  }
+
+  /* Secondary action: the outline-lime twin of .btn-brand. Was pasted in four
+     places with three different radii. */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2
+      border-brand-lime font-bold tracking-wide text-brand-lime
+      transition-all duration-150 hover:scale-[1.02] hover:bg-brand-lime/10
+      active:scale-95 focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-brand-lime focus-visible:ring-offset-2
+      focus-visible:ring-offset-transparent
+      disabled:opacity-60 disabled:hover:scale-100 disabled:pointer-events-none;
+  }
+
+  /* Same shape on the dark dashboard surfaces, where lime-on-dark outline is
+     too loud for a Cancel action. */
+  .btn-ghost-muted {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2
+      border-white/20 font-bold tracking-wide text-white/80
+      transition-all duration-150 hover:scale-[1.02] hover:bg-white/5
+      active:scale-95 focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-brand-lime focus-visible:ring-offset-2
+      focus-visible:ring-offset-transparent
+      disabled:opacity-60 disabled:hover:scale-100 disabled:pointer-events-none;
   }
 }

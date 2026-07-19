@@ -119,7 +119,7 @@ export function ReviewSubmit({
           type="button"
           onClick={onBack}
           disabled={submitting}
-          className="px-10 py-2.5 rounded-2xl border-2 border-brand-lime text-brand-lime font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-brand-lime/10 disabled:opacity-50"
+          className="btn-ghost px-10 py-2.5 text-sm"
         >
           Back
         </button>
@@ -127,7 +127,7 @@ export function ReviewSubmit({
           type="button"
           onClick={onSubmit}
           disabled={submitting}
-          className="px-10 py-2.5 rounded-2xl bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:pointer-events-none"
+          className="btn-brand px-10 py-2.5 text-sm"
         >
           {submitting ? "Submitting..." : "Submit"}
         </button>

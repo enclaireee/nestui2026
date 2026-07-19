@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Suspense } from "react";
-import { AppShell } from "@/components/app-shell";
 import { siteUrl } from "@/lib/utils";
 import "./globals.css";
 
@@ -68,13 +66,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${oddval.variable} font-sans antialiased bg-brand-green`}
       >
-        {/* AppShell reads usePathname() to pick the site chrome per route —
-            that's request-bound ("uncached") data, so cacheComponents needs
-            a Suspense boundary around it (same pattern as the admin layout's
-            cookie-based auth check). */}
-        <Suspense>
-          <AppShell>{children}</AppShell>
-        </Suspense>
+        {children}
       </body>
     </html>
   );

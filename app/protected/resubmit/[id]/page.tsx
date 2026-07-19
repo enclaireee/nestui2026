@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -6,11 +7,31 @@ import { createClient } from "@/lib/supabase/server";
 import { COMPETITIONS, currentFee } from "@/lib/registrations/config";
 import { ResubmitForm } from "@/components/registration/resubmit-form";
 
-export default async function ResubmitPage({
+export default function ResubmitPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // Everything on this page depends on the session, so the whole body sits
+  // behind the boundary and the route can still prerender its shell.
+  return (
+    <Suspense fallback={<ResubmitSkeleton />}>
+      <ResubmitBody params={params} />
+    </Suspense>
+  );
+}
+
+function ResubmitSkeleton() {
+  return (
+    <div aria-hidden className="flex animate-pulse flex-col gap-6">
+      <div className="h-4 w-40 rounded bg-white/10" />
+      <div className="h-8 w-56 rounded-lg bg-white/10" />
+      <div className="h-96 rounded-2xl border border-white/10 bg-white/[0.03]" />
+    </div>
+  );
+}
+
+async function ResubmitBody({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   const supabase = await createClient();

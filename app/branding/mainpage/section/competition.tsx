@@ -12,6 +12,8 @@ const CompetitionTitle: React.FC<{ className?: string }> = ({ className }) => (
     className={className}
     viewBox="0 0 1026 144"
     fill="none"
+    role="img"
+    aria-label="Our Competition"
     xmlns="http://www.w3.org/2000/svg"
   >
     <g filter="url(#filter0_d_2160_67)">
@@ -92,7 +94,7 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
 }) => {
   return (
     <div
-      className="group relative flex flex-col sm:flex-row items-center p-6 gap-6 overflow-hidden transition-all duration-300 hover:-translate-y-1"
+      className="group relative flex flex-col sm:flex-row items-center p-6 gap-6 overflow-hidden transition-all duration-200 hover:-translate-y-1"
       style={{
         width: "100%",
         maxWidth: "537px",

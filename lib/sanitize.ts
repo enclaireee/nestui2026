@@ -8,10 +8,14 @@ export function stripHtml(v: string): string {
   return v.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
 
-// Open-redirect guard for a `?next=` that arrives in an emailed link. Only a
-// same-origin absolute path is honoured: the first char must be `/` and the
-// second must be neither `/` nor `\`, because browsers normalise `/\evil.com`
-// into the protocol-relative `//evil.com` and navigate off-site.
+/**
+ * A post-login redirect target that can only ever be a path on this site.
+ * `next` arrives on the query string, so it is attacker-controlled: a bare
+ * "starts with /" check still lets through `//evil.com` and `/\evil.com`, both
+ * of which browsers resolve as protocol-relative external URLs — an open
+ * redirect that makes a phishing page look like it came from us. Requiring the
+ * second character to be neither / nor \ closes both.
+ */
 export function safeNextPath(requested: string | null, fallback = "/protected"): string {
   return requested && /^\/[^/\\]/.test(requested) ? requested : fallback;
 }

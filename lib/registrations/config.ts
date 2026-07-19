@@ -13,7 +13,7 @@ export interface CompetitionConfig {
   minSize: number;
   maxSize: number;
   hasMajor: boolean;
-  studentIdLabel: string; // NIM (undergrad) / NISN (SMA)
+  studentIdLabel: string; // NIM (undergrad) / Kartu Identitas Siswa (SMA)
   institutionLabel: string; // University / Sekolah
   blurb: string;
   logo: string; // path in /public
@@ -78,7 +78,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     minSize: 1,
     maxSize: 3,
     hasMajor: false,
-    studentIdLabel: "NISN (National Student ID Number)",
+    studentIdLabel: "Kartu Identitas Siswa",
     institutionLabel: "School",
     blurb:
       "A scientific paper competition for highschool students that encourages innovative ideas in healthcare.",

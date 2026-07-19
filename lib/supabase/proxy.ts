@@ -1,17 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasEnvVars } from "../utils";
+import { safeNextPath } from "@/lib/sanitize";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
-
-  // If the env vars are not set, skip proxy check. You can remove this
-  // once you setup the project.
-  if (!hasEnvVars) {
-    return supabaseResponse;
-  }
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
@@ -55,13 +49,17 @@ export async function updateSession(request: NextRequest) {
   if (!user && pathname.startsWith("/branding/registration")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
+    // Remember the destination so login can return the user there instead of
+    // dropping them on the dashboard to navigate back by hand.
+    url.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
 
   // Already signed in — no reason to see the login/sign-up/forgot-password forms again.
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = "/protected";
+    url.pathname = safeNextPath(request.nextUrl.searchParams.get("next"));
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
