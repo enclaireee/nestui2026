@@ -52,7 +52,7 @@ export function PastSponsors() {
             {logos.map((src) => (
               <div
                 key={src}
-                className="group flex h-24 sm:h-32 items-center justify-center rounded-2xl bg-white/90 ring-1 ring-white/20 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:ring-yellow-400/50 hover:shadow-lg hover:shadow-yellow-400/10"
+                className="group flex h-24 sm:h-32 items-center justify-center rounded-2xl bg-white/90 ring-1 ring-white/20 transition-all duration-200 hover:-translate-y-1 hover:bg-white hover:ring-yellow-400/50 hover:shadow-lg hover:shadow-yellow-400/10"
               >
                 <Image
                   src={`/pastsponsors/${src}`}

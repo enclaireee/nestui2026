@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { COMPETITIONS } from "@/lib/registrations/config";
 import type { AdminRegistration, MemberRow, SubmissionRow } from "@/lib/admin/types";
@@ -53,7 +53,12 @@ function buildEntries(reg: Registration, extra: SubmissionRow[]): Entry[] {
   return [primary, ...rest];
 }
 
-async function DashboardContent() {
+async function DashboardContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ submitted?: string }>;
+}) {
+  const submitted = (await searchParams).submitted === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -72,22 +77,20 @@ async function DashboardContent() {
   if (registrations.length) {
     const ids = registrations.map((r) => r.id);
 
-    const { data: members } = await supabase
-      .from("team_members")
-      .select("*")
-      .in("registration_id", ids)
-      .order("member_index");
+    // Independent queries — no reason to pay two round-trips in series.
+    // `submissions` may not exist until the Step 15 migration is run, so its
+    // absence is tolerated rather than thrown.
+    const [{ data: members }, { data: subs }] = await Promise.all([
+      supabase.from("team_members").select("*").in("registration_id", ids).order("member_index"),
+      supabase.from("submissions").select("*").in("registration_id", ids),
+    ]);
+
     for (const m of (members as MemberRow[] | null) ?? []) {
       const list = membersByReg.get(m.registration_id) ?? [];
       list.push(m);
       membersByReg.set(m.registration_id, list);
     }
 
-    // `submissions` may not exist until the Step 15 migration is run — tolerate its absence.
-    const { data: subs } = await supabase
-      .from("submissions")
-      .select("*")
-      .in("registration_id", ids);
     for (const s of (subs as SubmissionRow[] | null) ?? []) {
       const list = subsByReg.get(s.registration_id) ?? [];
       list.push(s);
@@ -111,6 +114,16 @@ async function DashboardContent() {
             : "Register a team to get started."}
         </p>
       </header>
+
+      {submitted && (
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-brand-lime/30 bg-brand-lime/10 px-4 py-3 text-sm font-semibold text-brand-lime"
+        >
+          <Check className="h-4 w-4 shrink-0 stroke-[3]" />
+          Submission received. It&apos;s listed below and now waiting for review.
+        </p>
+      )}
 
       {registrations.length === 0 ? (
         <EmptyState />
@@ -142,7 +155,7 @@ function EmptyState() {
       </div>
       <Link
         href="/branding/registration"
-        className="rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-6 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-sm transition-all duration-300 hover:scale-[1.02] active:scale-95"
+        className="btn-brand px-6 py-2.5 text-sm"
       >
         Register a team
       </Link>
@@ -244,7 +257,7 @@ function Submissions({
         <h2 className="text-lg font-bold text-white">Submissions</h2>
         <Link
           href={`/protected/resubmit/${registrationId}`}
-          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2 text-sm font-bold text-brand-teal shadow-sm transition-all duration-300 hover:scale-[1.02] active:scale-95"
+          className="btn-brand px-4 py-2 text-sm"
         >
           <Plus className="h-4 w-4 stroke-[3]" /> Submit again
         </Link>
@@ -263,18 +276,43 @@ function Submissions({
   );
 }
 
+// A bare status word tells a participant nothing about what happens next, and
+// "rejected" with no explanation and no route forward is the worst of the three.
+const STATUS_HELP: Record<string, string> = {
+  pending:
+    "Our team is checking your payment and submission links. No action needed — we'll contact the leader by WhatsApp if anything is unclear.",
+  verified: "Payment and submission confirmed. You're in — see you in the WhatsApp group.",
+  rejected:
+    "Something didn't check out — usually an unreadable transfer receipt or a Drive link that isn't shared publicly. Email nestui.ft@gmail.com and we'll sort it out, or submit again below.",
+};
+
 function EntryCard({ entry, index }: { entry: Entry; index: number }) {
+  const help = STATUS_HELP[entry.status];
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-white">
           Submission {index}
           <span className="ml-2 text-xs font-normal text-white/40">
-            {new Date(entry.submittedAt).toLocaleDateString()}
+            {new Date(entry.submittedAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
           </span>
         </p>
         <StatusBadge status={entry.status} />
       </div>
+
+      {help && (
+        <p
+          className={`mt-2 text-xs leading-relaxed ${
+            entry.status === "rejected" ? "text-red-200/80" : "text-white/50"
+          }`}
+        >
+          {help}
+        </p>
+      )}
 
       <div className="mt-3 flex flex-col gap-1.5 text-sm">
         <LinkRow label="Payment proof" href={entry.paymentUrl} />
@@ -304,10 +342,34 @@ function LinkRow({ label, href }: { label: string; href: string }) {
   );
 }
 
-export default function ProtectedPage() {
+export default function ProtectedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ submitted?: string }>;
+}) {
+  // The promise is handed down rather than awaited here: awaiting it in the
+  // page body would put request-time data outside the boundary and block the
+  // whole route from prerendering.
   return (
-    <Suspense fallback={<div className="py-12 text-sm text-white/55">Loading…</div>}>
-      <DashboardContent />
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardContent searchParams={searchParams} />
     </Suspense>
+  );
+}
+
+// Matches the real layout's shape and spacing so the swap doesn't jump.
+function DashboardSkeleton() {
+  return (
+    <div aria-hidden className="flex animate-pulse flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <div className="h-9 w-64 rounded-lg bg-white/10" />
+        <div className="h-4 w-40 rounded bg-white/[0.07]" />
+      </div>
+      <div className="h-64 rounded-2xl border border-white/10 bg-white/[0.03]" />
+      <div className="flex flex-col gap-3">
+        <div className="h-6 w-32 rounded bg-white/10" />
+        <div className="h-28 rounded-2xl border border-white/10 bg-white/[0.03]" />
+      </div>
+    </div>
   );
 }

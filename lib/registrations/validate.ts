@@ -5,8 +5,8 @@ import type { CompetitionConfig } from "./config";
 import { isValidTeamSize } from "./config";
 import type { PersonDraft, RegistrationDraft } from "./types";
 
-export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-export const PHONE_RE = /^[+()\-\s\d]{5,30}$/;
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const PHONE_RE = /^[+()\-\s\d]{5,30}$/;
 export const URL_RE = /^https?:\/\/\S+$/i;
 
 export type FieldErrors = Record<string, string>;
@@ -27,7 +27,7 @@ export function validatePerson(p: PersonDraft, cfg: CompetitionConfig): FieldErr
   return e;
 }
 
-export function allEmails(draft: RegistrationDraft): string[] {
+function allEmails(draft: RegistrationDraft): string[] {
   return [draft.leader.email, ...draft.members.map((m) => m.email)]
     .map((x) => x.trim().toLowerCase())
     .filter(Boolean);

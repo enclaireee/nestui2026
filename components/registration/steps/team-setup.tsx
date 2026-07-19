@@ -5,8 +5,10 @@ import { Users, Check, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RegistrationInput } from "../registration-input";
 import { SectionLabel } from "../section-label";
+import { formatIDR } from "@/lib/payment";
 import {
   competitionsForCategory,
+  currentFee,
   teamSizeOptions,
   COMPETITIONS,
   type Category,
@@ -16,6 +18,8 @@ import {
 
 interface TeamSetupProps {
   category?: Category;
+  /** Competitions this user already has a team in. */
+  registered?: CompetitionId[];
   competition: CompetitionId | null;
   teamName: string;
   teamSize: number | null;
@@ -26,7 +30,8 @@ interface TeamSetupProps {
 }
 
 const titleGradient: React.CSSProperties = {
-  backgroundImage: "linear-gradient(90deg, #0C342C 0%, #076653 60%, #0E8057 100%)",
+  backgroundImage:
+    "linear-gradient(90deg, rgb(var(--brand-green)) 0%, rgb(var(--brand-teal)) 60%, rgb(var(--brand-emerald)) 100%)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   WebkitTextFillColor: "transparent",
@@ -35,6 +40,7 @@ const titleGradient: React.CSSProperties = {
 
 export function TeamSetup({
   category,
+  registered = [],
   competition,
   teamName,
   teamSize,
@@ -76,18 +82,29 @@ export function TeamSetup({
               <div className="flex flex-col gap-3">
                 {group.items.map((c) => {
                   const active = competition === c.id;
+                  // Two ways a competition can't be picked, and the user is told
+                  // which — previously both only surfaced after all 36 fields
+                  // were filled, as a rejection from the server.
+                  const fee = currentFee(c.id);
+                  const taken = registered.includes(c.id);
+                  const closed = !fee;
+                  const disabled = taken || closed;
                   return (
                     <button
                       key={c.id}
                       type="button"
-                      onClick={() => onSelectCompetition(c.id)}
+                      onClick={() => !disabled && onSelectCompetition(c.id)}
+                      disabled={disabled}
                       aria-pressed={active}
                       className={cn(
-                        "group relative overflow-hidden rounded-3xl p-4 text-left transition-all duration-300",
-                        "bg-gradient-to-br from-white/95 to-brand-cream/60 hover:-translate-y-0.5",
+                        "group relative overflow-hidden rounded-3xl p-4 text-left transition-all duration-150",
+                        "bg-gradient-to-br from-white/95 to-brand-cream/60",
+                        disabled && "cursor-not-allowed opacity-55 grayscale",
+                        !disabled && "hover:-translate-y-0.5",
                         active
-                          ? "ring-2 ring-brand-lime shadow-[0_0_30px_-6px_rgba(227,239,38,0.75)]"
-                          : "ring-1 ring-white/50 shadow-md hover:shadow-lg",
+                          ? "ring-2 ring-brand-lime shadow-[0_0_30px_-6px_rgb(var(--brand-lime)/0.75)]"
+                          : "ring-1 ring-white/50 shadow-md",
+                        !disabled && !active && "hover:shadow-lg",
                       )}
                     >
                       {/* soft decorative glow */}
@@ -125,6 +142,17 @@ export function TeamSetup({
                           </div>
                           <div className="mt-1.5 flex flex-wrap gap-1.5">
                             <Pill>{c.minSize}–{c.maxSize} members</Pill>
+                            {/* The fee decides which competition people enter,
+                                so it belongs here rather than on the last step. */}
+                            {fee && (
+                              <Pill>
+                                {formatIDR(fee.amount)} · {fee.label}
+                              </Pill>
+                            )}
+                            {taken && <Pill tone="muted">Already registered</Pill>}
+                            {closed && !taken && (
+                              <Pill tone="muted">Registration closed</Pill>
+                            )}
                           </div>
                           <p className="mt-2 text-xs font-medium leading-relaxed text-brand-green/70">
                             {c.blurb}
@@ -145,7 +173,9 @@ export function TeamSetup({
         <SectionLabel icon={Users}>Team Name</SectionLabel>
         <RegistrationInput
           icon={Users}
+          label="Team name"
           placeholder="Enter your team name"
+          maxLength={80}
           value={teamName}
           onChange={(e) => onTeamName(e.target.value)}
         />
@@ -174,9 +204,9 @@ export function TeamSetup({
                 onClick={() => onSelectSize(n)}
                 aria-pressed={active}
                 className={cn(
-                  "relative h-16 w-16 rounded-2xl text-2xl font-black transition-all duration-300",
+                  "relative h-16 w-16 rounded-2xl text-2xl font-black transition-all duration-150",
                   active
-                    ? "scale-105 bg-gradient-to-br from-brand-lime to-brand-cream text-brand-teal shadow-[0_8px_20px_-6px_rgba(227,239,38,0.8)] ring-2 ring-brand-lime"
+                    ? "scale-105 bg-gradient-to-br from-brand-lime to-brand-cream text-brand-teal shadow-[0_8px_20px_-6px_rgb(var(--brand-lime)/0.8)] ring-2 ring-brand-lime"
                     : "bg-white/70 text-brand-green/80 ring-1 ring-white/60 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-md",
                 )}
               >
@@ -192,7 +222,7 @@ export function TeamSetup({
           type="button"
           onClick={onNext}
           disabled={!canNext}
-          className="px-10 py-2.5 rounded-2xl bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:pointer-events-none"
+          className="btn-brand px-10 py-2.5 text-sm"
         >
           Next
         </button>
@@ -201,9 +231,22 @@ export function TeamSetup({
   );
 }
 
-function Pill({ children }: { children: React.ReactNode }) {
+function Pill({
+  children,
+  tone = "default",
+}: {
+  children: React.ReactNode;
+  tone?: "default" | "muted";
+}) {
   return (
-    <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
+    <span
+      className={cn(
+        "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+        tone === "muted"
+          ? "bg-brand-green/70 text-brand-cream"
+          : "bg-brand-green/10 text-brand-green",
+      )}
+    >
       {children}
     </span>
   );

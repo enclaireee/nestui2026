@@ -12,6 +12,7 @@ interface AuthPageShellProps {
 export function AuthPageShell({ heading, children, showLogo = false }: AuthPageShellProps) {
   return (
     <main className="relative isolate flex min-h-screen w-full flex-col items-center overflow-x-hidden pt-28 pb-16">
+      {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
       <img
         src="/loginbg.svg"
         alt=""

@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface StepIndicatorProps {
-  steps: string[];
   currentStep: number;
   className?: string;
 }

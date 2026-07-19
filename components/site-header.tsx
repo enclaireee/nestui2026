@@ -54,7 +54,7 @@ export function SiteHeader() {
       transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
       className="sticky top-0 z-50 w-full px-4 pt-3 sm:pt-4"
     >
-      <nav className="relative mx-auto flex h-12 max-w-4xl items-center justify-between rounded-full border border-white/15 bg-[#0C342C]/80 pl-4 pr-2 shadow-lg shadow-black/10 ring-1 ring-white/5 sm:pl-5">
+      <nav className="relative mx-auto flex h-12 max-w-4xl items-center justify-between rounded-full border border-white/15 bg-brand-green/80 pl-4 pr-2 shadow-lg shadow-black/10 ring-1 ring-white/5 sm:pl-5">
         <Link href="/branding/mainpage" className="flex items-center gap-2">
           <Image
             src="/nestlogo.webp"
@@ -68,7 +68,7 @@ export function SiteHeader() {
             className="bg-clip-text text-sm font-semibold tracking-wide text-transparent"
             style={{
               backgroundImage:
-                "linear-gradient(60deg, #0C342C 0%, #009477 22%, #009477 78%, #0C342C 100%)",
+                "linear-gradient(60deg, rgb(var(--brand-green)) 0%, rgb(var(--brand-emerald-bright)) 22%, rgb(var(--brand-emerald-bright)) 78%, rgb(var(--brand-green)) 100%)",
             }}
           >
             NEST UI
@@ -80,7 +80,7 @@ export function SiteHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-white/90 transition-colors hover:text-emerald-300"
+              className="text-sm font-medium text-white/90 transition-colors duration-150 hover:text-brand-lime"
             >
               {link.label}
             </Link>
@@ -92,8 +92,8 @@ export function SiteHeader() {
             href={isLoggedIn ? "/protected" : "/auth/login"}
             className={
               isLoggedIn
-                ? "flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-lime to-brand-cream px-5 py-1.5 text-sm font-semibold text-brand-teal shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md"
-                : "rounded-full bg-white/95 px-5 py-1.5 text-sm font-semibold text-[#0C342C] shadow-sm transition-colors hover:bg-white"
+                ? "flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-lime to-brand-cream px-5 py-1.5 text-sm font-semibold text-brand-teal shadow-sm transition-all duration-150 hover:scale-105 hover:shadow-md"
+                : "rounded-full bg-white/95 px-5 py-1.5 text-sm font-semibold text-brand-teal shadow-sm transition-colors hover:bg-white"
             }
           >
             {isLoggedIn && <LayoutDashboard className="h-4 w-4" />}
@@ -124,13 +124,13 @@ export function SiteHeader() {
             </summary>
             {/* Click-away backdrop: closes the menu on any tap outside it */}
             <div className="fixed inset-0 z-40" onClick={closeMenu} />
-            <div className="absolute right-2 top-[calc(100%+0.6rem)] z-50 flex w-48 flex-col rounded-2xl border border-white/15 bg-[#0C342C]/95 p-2 shadow-lg ring-1 ring-white/5">
+            <div className="absolute right-2 top-[calc(100%+0.6rem)] z-50 flex w-48 flex-col rounded-2xl border border-white/15 bg-brand-green/95 p-2 shadow-lg ring-1 ring-white/5">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={closeMenu}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-emerald-300"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-brand-lime"
                 >
                   {link.label}
                 </Link>
@@ -144,17 +144,17 @@ export function SiteHeader() {
         isOpen={showLogoutConfirm}
         onClose={() => setShowLogoutConfirm(false)}
         title="Log Out?"
-        content="Are you sure you want to log out?"
+        content="You'll need to log in again to reach your team dashboard and submissions. Your registration stays safe."
       >
         <button
           onClick={() => setShowLogoutConfirm(false)}
-          className="rounded-xl border-2 border-brand-lime px-8 py-2.5 text-sm font-bold tracking-wide text-brand-lime transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-brand-lime/10"
+          className="btn-ghost px-8 py-2.5 text-sm"
         >
           Cancel
         </button>
         <button
           onClick={confirmLogout}
-          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-8 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg"
+          className="btn-brand px-8 py-2.5 text-sm"
         >
           <LogOut className="h-4 w-4" />
           Log Out

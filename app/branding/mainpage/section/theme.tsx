@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 // Subtheme copy from the NEST UI 2026 guidebook briefs.
-// Subtheme copy from the NEST UI 2026 guidebook briefs.
 const CARDS = [
     {
         title: "Therapeutic Technologies",
@@ -77,7 +76,7 @@ function ThemeCard({ title, desc }: ThemeCardProps) {
 
     return (
         <div
-            className={`group relative flex flex-col justify-between min-h-[250px] p-8 border rounded-3xl bg-white/15 backdrop-blur-md shadow-2xl transition-colors duration-300 ${
+            className={`group relative flex flex-col justify-between min-h-[250px] p-8 border rounded-3xl bg-white/15 backdrop-blur-md shadow-2xl transition-colors duration-200 ${
                 open
                     ? "border-brand-lime/50 bg-white/25"
                     : "border-white/20 hover:bg-white/25 hover:border-white/30"
@@ -111,7 +110,7 @@ function ThemeCard({ title, desc }: ThemeCardProps) {
             <button
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
-                className="mt-8 px-6 py-2.5 rounded-2xl flex items-center justify-center gap-2 bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
+                className="btn-brand mt-8 px-6 py-2.5 text-sm"
             >
                 <span>{open ? "Show Less" : "See Details"}</span>
                 <svg

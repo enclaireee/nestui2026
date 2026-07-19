@@ -1,115 +1,85 @@
 "use client";
 
 import { Mail, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { GlassCard } from "@/components/registration/glass-card";
+import { AuthForm, authFieldClass } from "@/components/auth/auth-form";
 import { RegistrationInput } from "@/components/registration/registration-input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { safeNextPath } from "@/lib/sanitize";
 import { useState } from "react";
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function signUp() {
+    // Real enforcement is Supabase Auth → Policies → minimum password length
+    // (set it to 8 there too); this is the inline message so people aren't
+    // bounced by a server error.
+    if (password.length < 8) throw new Error("Password must be at least 8 characters");
+    if (password !== repeatPassword) throw new Error("Passwords do not match");
+
     const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    if (password.length < 8) {
-      // Real enforcement is Supabase Auth → Policies → minimum password length
-      // (set it to 8 there too); this is the inline message so people aren't
-      // bounced by a server error.
-      setError("Password must be at least 8 characters");
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== repeatPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          // verifyOtp in /auth/confirm sets the session, so the link lands them
-          // signed in on /auth/confirmed, which then forwards to the dashboard.
-          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/auth/confirmed`,
-        },
-      });
-      if (error) throw error;
-      router.push("/auth/sign-up-success");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+    // Email confirmation is off in Supabase, so signUp already returns a
+    // valid session — same destination as a normal login.
+    // ?next= is set by the proxy when it bounced an unauthenticated visitor
+    // off a protected page — send them back there, not to the dashboard.
+    router.push(safeNextPath(new URLSearchParams(window.location.search).get("next")));
+  }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <GlassCard className="lg:p-12">
-        <h2 className="mb-6 text-2xl font-bold text-brand-green md:mb-8 md:text-3xl">Welcome!</h2>
-        <form onSubmit={handleSignUp}>
-          <div className="flex flex-col gap-4 md:gap-5">
-            <RegistrationInput
-              icon={Mail}
-              type="email"
-              placeholder="Email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="md:h-14 md:text-base"
-            />
-            <RegistrationInput
-              icon={Lock}
-              type="password"
-              placeholder="Password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="md:h-14 md:text-base"
-            />
-            <RegistrationInput
-              icon={Lock}
-              type="password"
-              placeholder="Confirm Password"
-              required
-              value={repeatPassword}
-              onChange={(e) => setRepeatPassword(e.target.value)}
-              className="md:h-14 md:text-base"
-            />
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="mt-2 w-full rounded-xl bg-gradient-to-r from-brand-lime to-brand-cream px-4 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100 md:py-3.5 md:text-base"
-            >
-              {isLoading ? "Creating an account..." : "Sign Up"}
-            </button>
-          </div>
-          <div className="mt-4 text-center text-sm text-brand-green md:mt-6 md:text-base">
-            Already have an account?{" "}
-            <Link href="/auth/login" className="font-bold underline underline-offset-4">
-              Login
-            </Link>
-          </div>
-        </form>
-      </GlassCard>
-    </div>
+    <AuthForm
+      heading="Welcome!"
+      submitLabel="Sign Up"
+      pendingLabel="Creating an account..."
+      onSubmit={signUp}
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link href="/auth/login" className="font-bold underline underline-offset-4">
+            Login
+          </Link>
+        </>
+      }
+    >
+      <RegistrationInput
+        icon={Mail}
+        type="email"
+        label="Email"
+        placeholder="you@example.com"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className={authFieldClass}
+      />
+      <RegistrationInput
+        icon={Lock}
+        type="password"
+        label="Password"
+        placeholder="At least 8 characters"
+        autoComplete="new-password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className={authFieldClass}
+      />
+      <RegistrationInput
+        icon={Lock}
+        type="password"
+        label="Confirm password"
+        placeholder="Repeat your password"
+        autoComplete="new-password"
+        required
+        value={repeatPassword}
+        onChange={(e) => setRepeatPassword(e.target.value)}
+        className={authFieldClass}
+      />
+    </AuthForm>
   );
 }

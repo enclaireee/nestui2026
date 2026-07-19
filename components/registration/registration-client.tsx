@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { StepIndicator } from "./step-indicator";
 import { GlassCard } from "./glass-card";
@@ -44,6 +44,27 @@ const TIMELINE_INDEX: Record<StepKey, number> = {
   review: 3,
 };
 
+// This wizard is up to 36 fields across 4 steps, filled under deadline pressure
+// on phones. Keeping the draft only in memory meant a refresh, a tab switch that
+// evicted the page, or an expired session threw all of it away. sessionStorage
+// (not localStorage) so it dies with the tab and never leaks to the next person
+// on a shared lab computer.
+// Restored in an effect rather than in the reducer initializer: this component
+// still server-renders, and seeding inputs from storage during the first client
+// render would be a hydration mismatch.
+const DRAFT_KEY = "nest-reg-draft";
+
+function loadDraft(): RegistrationDraft | null {
+  try {
+    const saved = window.sessionStorage.getItem(DRAFT_KEY);
+    // Shallow-merge over a fresh draft so a copy written by an older version of
+    // this form can't leave a required key undefined.
+    return saved ? { ...emptyDraft(), ...JSON.parse(saved) } : null;
+  } catch {
+    return null;
+  }
+}
+
 function activeSteps(teamSize: number | null): StepKey[] {
   const steps: StepKey[] = ["team", "leader"];
   if ((teamSize ?? 1) > 1) steps.push("members");
@@ -76,7 +97,8 @@ type Action =
   | { type: "MEMBER_ERRORS"; errors: FieldErrors[]; formError: string | null }
   | { type: "SUBMIT_START" }
   | { type: "SUBMIT_ERROR"; error: string }
-  | { type: "SUBMIT_SUCCESS"; code: string };
+  | { type: "SUBMIT_SUCCESS"; code: string }
+  | { type: "RESTORE"; draft: RegistrationDraft };
 
 function reducer(state: WizardState, action: Action): WizardState {
   switch (action.type) {
@@ -125,12 +147,21 @@ function reducer(state: WizardState, action: Action): WizardState {
       return { ...state, submitting: false, submitError: action.error };
     case "SUBMIT_SUCCESS":
       return { ...state, submitting: false, submittedCode: action.code };
+    case "RESTORE":
+      return { ...state, draft: action.draft };
     default:
       return state;
   }
 }
 
-export function RegistrationClient({ category }: { category?: Category }) {
+export function RegistrationClient({
+  category,
+  registered = [],
+}: {
+  category?: Category;
+  /** Competitions this user already has a team in — shown as taken, not selectable. */
+  registered?: CompetitionId[];
+}) {
   const [state, dispatch] = useReducer(reducer, undefined, () => ({
     draft: emptyDraft(),
     stepIndex: 0,
@@ -147,15 +178,47 @@ export function RegistrationClient({ category }: { category?: Category }) {
   const step = steps[state.stepIndex];
   const cfg = draft.competition ? COMPETITIONS[draft.competition] : null;
 
+  // Restore a draft left behind by a refresh / crash / expired session.
+  useEffect(() => {
+    const saved = loadDraft();
+    if (saved) dispatch({ type: "RESTORE", draft: saved });
+  }, []);
+
+  // Save on every keystroke. JSON.stringify of ~36 short strings is far cheaper
+  // than the debounce machinery it would take to avoid it.
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(state.draft));
+    } catch {
+      // Private mode / quota — persistence is a safety net, not a requirement.
+    }
+  }, [state.draft]);
+
+  // Errors render inline next to their field, and on the members step the first
+  // bad field can sit several screens above the Next button — without this the
+  // button reads as broken. aria-invalid is already set by PersonForm.
+  function focusFirstError() {
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>('[aria-invalid="true"]');
+      el?.focus({ preventScroll: true });
+      el?.scrollIntoView({ block: "center", behavior: "smooth" });
+    });
+  }
+
   function goNext() {
     if (step === "leader" && cfg) {
       const errs = validatePerson(draft.leader, cfg);
-      if (Object.keys(errs).length) return dispatch({ type: "LEADER_ERRORS", errors: errs });
+      if (Object.keys(errs).length) {
+        dispatch({ type: "LEADER_ERRORS", errors: errs });
+        return focusFirstError();
+      }
     }
     if (step === "members" && cfg) {
       const errs = draft.members.map((m) => validatePerson(m, cfg));
-      if (errs.some((e) => Object.keys(e).length))
-        return dispatch({ type: "MEMBER_ERRORS", errors: errs, formError: null });
+      if (errs.some((e) => Object.keys(e).length)) {
+        dispatch({ type: "MEMBER_ERRORS", errors: errs, formError: null });
+        return focusFirstError();
+      }
       if (hasDuplicateEmails(draft))
         return dispatch({
           type: "MEMBER_ERRORS",
@@ -169,13 +232,19 @@ export function RegistrationClient({ category }: { category?: Category }) {
   async function handleSubmit() {
     dispatch({ type: "SUBMIT_START" });
     const result = await submitRegistration(draft);
-    if (result.ok) dispatch({ type: "SUBMIT_SUCCESS", code: result.code });
-    else dispatch({ type: "SUBMIT_ERROR", error: result.error });
+    if (result.ok) {
+      // The team exists in the DB now — a stale draft would only refill the form
+      // with data that can no longer be submitted.
+      try {
+        window.sessionStorage.removeItem(DRAFT_KEY);
+      } catch {}
+      dispatch({ type: "SUBMIT_SUCCESS", code: result.code });
+    } else dispatch({ type: "SUBMIT_ERROR", error: result.error });
   }
 
   return (
     <div className="relative flex flex-col min-h-screen w-full items-center justify-center pt-24 pb-24 px-4 md:px-8">
-      <h1 className="text-6xl md:text-7xl font-bold text-gradient-brand drop-shadow-md pb-3">
+      <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-gradient-brand drop-shadow-md pb-3 text-center">
         {state.submittedCode ? "Thank You" : STEP_LABELS[step]}
       </h1>
 
@@ -193,10 +262,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
       ) : (
         <div className="w-full max-w-6xl flex flex-col md:flex-row gap-12 md:gap-24 items-start justify-center">
           <div className="w-full md:w-1/3 pt-8 pl-4 md:pl-0 flex justify-start md:justify-end">
-            <StepIndicator
-              steps={steps.map((s) => STEP_LABELS[s])}
-              currentStep={TIMELINE_INDEX[step]}
-            />
+            <StepIndicator currentStep={TIMELINE_INDEX[step]} />
           </div>
 
           <div className="w-full md:w-2/3 max-w-2xl">
@@ -212,6 +278,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
                   {step === "team" && (
                     <TeamSetup
                       category={category}
+                      registered={registered}
                       competition={draft.competition}
                       teamName={draft.teamName}
                       teamSize={draft.teamSize}
@@ -280,18 +347,10 @@ export function RegistrationClient({ category }: { category?: Category }) {
 function NavButtons({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
   return (
     <div className="flex justify-end gap-4">
-      <button
-        type="button"
-        onClick={onBack}
-        className="px-10 py-2.5 rounded-2xl border-2 border-brand-lime text-brand-lime font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-brand-lime/10"
-      >
+      <button type="button" onClick={onBack} className="btn-ghost px-10 py-2.5 text-sm">
         Back
       </button>
-      <button
-        type="button"
-        onClick={onNext}
-        className="px-10 py-2.5 rounded-2xl bg-gradient-to-r from-brand-lime to-brand-cream text-brand-teal font-bold text-sm tracking-wide shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg"
-      >
+      <button type="button" onClick={onNext} className="btn-brand px-10 py-2.5 text-sm">
         Next
       </button>
     </div>

@@ -49,7 +49,7 @@ export function ThankYou({ code, competition }: { code?: string; competition?: C
 
       <Link
         href="/protected"
-        className="px-10 py-3 rounded-full bg-gradient-to-b from-brand-lime-soft to-brand-lime text-brand-green font-bold text-lg shadow-lg hover:brightness-105 transition-all relative z-10"
+        className="btn-brand relative z-10 px-10 py-3 text-lg"
       >
         Go to Dashboard
       </Link>

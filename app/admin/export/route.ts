@@ -4,10 +4,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { COMPETITIONS, isCompetitionId } from "@/lib/registrations/config";
 import { csvSafe } from "@/lib/sanitize";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
-import type { AdminRegistration } from "@/lib/admin/types";
+import type { AdminRegistration, AdminSubmissionDetail } from "@/lib/admin/types";
 
-// One row per team; leader + members flattened into columns. Blocked without an
-// admin session. Values pass through csvSafe() (quoted + formula-injection guard).
+// One row per team (leader + members flattened into columns), followed by every
+// submission that team made flattened into per-entry columns (Entry 1 inline +
+// each resubmission). Blocked without an admin session. Values pass through
+// csvSafe() (quoted + formula-injection guard).
 export async function GET(request: NextRequest) {
   if (!(await isAdminAuthed())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,29 +25,62 @@ export async function GET(request: NextRequest) {
   const competition = isCompetitionId(competitionParam) ? competitionParam : null;
 
   const supabase = createAdminClient();
-  let query = supabase
+
+  let teamQuery = supabase
     .from("admin_registrations_detail")
     .select("*")
     .order("submitted_at", { ascending: false });
-  if (competition) query = query.eq("competition", competition);
-
-  const { data, error } = await query;
+  if (competition) teamQuery = teamQuery.eq("competition", competition);
+  const { data: teamData, error } = await teamQuery;
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  const rows = (data as AdminRegistration[] | null) ?? [];
+  const teams = (teamData as AdminRegistration[] | null) ?? [];
 
-  // Column count = leader + the largest team's member count across the export.
-  const maxMembers = rows.reduce((max, r) => Math.max(max, r.members.length), 0);
+  // All submissions across those teams, keyed by registration. If the
+  // submissions view isn't present yet, fall back to the inline Entry 1 so the
+  // export still produces the same data it always did.
+  const byReg = new Map<string, AdminSubmissionDetail[]>();
+  let subQuery = supabase
+    .from("admin_submissions_detail")
+    .select("*")
+    .order("entry_no", { ascending: true });
+  if (competition) subQuery = subQuery.eq("competition", competition);
+  const { data: subData } = await subQuery;
+  for (const s of (subData as AdminSubmissionDetail[] | null) ?? []) {
+    const list = byReg.get(s.registration_id) ?? [];
+    list.push(s);
+    byReg.set(s.registration_id, list);
+  }
+  const entriesFor = (r: AdminRegistration): AdminSubmissionDetail[] =>
+    byReg.get(r.id) ?? [
+      {
+        submission_id: r.id,
+        registration_id: r.id,
+        code: r.code,
+        team_name: r.team_name,
+        competition: r.competition,
+        leader_email: r.leader_email,
+        is_primary: true,
+        entry_no: 1,
+        payment_proof_url: r.payment_proof_url,
+        submission_url: r.submission_url,
+        status: r.status,
+        submitted_at: r.submitted_at,
+      },
+    ];
+
+  // Column widths = the widest team's member count and the most submissions any
+  // one team made, across the whole export.
+  const maxMembers = teams.reduce((max, r) => Math.max(max, r.members.length), 0);
+  const maxEntries = teams.reduce((max, r) => Math.max(max, entriesFor(r).length), 1);
 
   const header = [
     "Code",
     "Team",
     "Competition",
-    "Status",
-    "SubmittedAt",
-    "PaymentProofUrl",
-    "SubmissionUrl",
+    "TeamSize",
+    "RegisteredAt",
     "Leader_Name",
     "Leader_Email",
     "Leader_Phone",
@@ -65,17 +100,23 @@ export async function GET(request: NextRequest) {
       `Member${i}_ConfirmationUrl`,
     );
   }
+  for (let i = 1; i <= maxEntries; i++) {
+    header.push(
+      `Entry${i}_Status`,
+      `Entry${i}_SubmittedAt`,
+      `Entry${i}_PaymentProofUrl`,
+      `Entry${i}_SubmissionUrl`,
+    );
+  }
 
   const lines = [header.map(csvSafe).join(",")];
-  for (const r of rows) {
+  for (const r of teams) {
     const cells: unknown[] = [
       r.code,
       r.team_name,
       COMPETITIONS[r.competition]?.name ?? r.competition,
-      r.status,
+      r.team_size,
       r.submitted_at,
-      r.payment_proof_url,
-      r.submission_url,
       r.leader_name,
       r.leader_email,
       r.leader_phone,
@@ -94,6 +135,16 @@ export async function GET(request: NextRequest) {
         m?.institution ?? "",
         m?.major ?? "",
         m?.confirmation_url ?? "",
+      );
+    }
+    const entries = entriesFor(r);
+    for (let i = 0; i < maxEntries; i++) {
+      const e = entries[i];
+      cells.push(
+        e?.status ?? "",
+        e?.submitted_at ?? "",
+        e?.payment_proof_url ?? "",
+        e?.submission_url ?? "",
       );
     }
     lines.push(cells.map(csvSafe).join(","));

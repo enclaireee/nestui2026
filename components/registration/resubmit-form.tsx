@@ -27,7 +27,9 @@ export function ResubmitForm({
     setError(null);
     const res = await addSubmission(registrationId, payment, submission);
     if (res.ok) {
-      router.push("/protected");
+      // Without this the page just silently swaps to the dashboard and the user
+      // has no confirmation the entry landed.
+      router.push("/protected?submitted=1");
       router.refresh();
     } else {
       setError(res.error);
@@ -108,14 +110,14 @@ export function ResubmitForm({
           type="button"
           onClick={() => router.push("/protected")}
           disabled={submitting}
-          className="rounded-2xl border-2 border-white/20 px-8 py-2.5 text-sm font-bold tracking-wide text-white/80 transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-white/5 disabled:opacity-50"
+          className="btn-ghost-muted px-8 py-2.5 text-sm"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={submitting || !payment.trim() || !submission.trim()}
-          className="rounded-2xl bg-gradient-to-r from-brand-lime to-brand-cream px-8 py-2.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:pointer-events-none"
+          className="btn-brand px-8 py-2.5 text-sm"
         >
           {submitting ? "Submitting…" : "Submit entry"}
         </button>

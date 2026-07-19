@@ -203,7 +203,7 @@ export function CompetitionModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] border border-white/15 bg-[#0C342C]/95 shadow-2xl ring-1 ring-white/5 animate-in fade-in zoom-in-95 duration-200"
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] border border-white/15 bg-brand-green/95 shadow-2xl ring-1 ring-white/5 animate-in fade-in zoom-in-95 duration-200"
       >
         {/* ambient glow */}
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-lime/20 blur-3xl" />
@@ -359,7 +359,7 @@ export function CompetitionModal({
         <div className="border-t border-white/10 p-4">
           <Link
             href={registerHref}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-lime to-brand-cream py-3.5 text-sm font-bold tracking-wide text-brand-teal shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95"
+            className="btn-brand w-full py-3.5 text-sm"
           >
             Daftar {cfg.name}
             <ArrowRight className="h-5 w-5 stroke-[3]" />

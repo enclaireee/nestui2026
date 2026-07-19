@@ -34,6 +34,30 @@ export async function setRegistrationStatus(id: string, status: string): Promise
   revalidatePath(`/admin/registrations/${id}`);
 }
 
+// Verify/reject an additional submission (Entry 2+). `registrationId` is passed
+// only so the team detail page can be revalidated — the RPC keys off the
+// submission id.
+export async function setSubmissionStatus(
+  id: string,
+  status: string,
+  registrationId: string,
+): Promise<void> {
+  if (!(await isAdminAuthed())) redirect("/admin/login");
+  if (!STATUSES.includes(status as Status)) return;
+
+  const admin = createAdminClient();
+  const { error } = await admin.rpc("set_submission_status", {
+    p_id: id,
+    p_status: status,
+  });
+  if (error) {
+    console.error("set_submission_status failed:", error.message);
+    return;
+  }
+  revalidatePath("/admin");
+  revalidatePath(`/admin/registrations/${registrationId}`);
+}
+
 // Deletes a team and (via ON DELETE CASCADE on team_members.registration_id)
 // all its members. Secret key bypasses RLS; admin session required.
 export async function deleteRegistration(id: string): Promise<void> {

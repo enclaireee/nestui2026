@@ -24,6 +24,27 @@ export interface SubmissionRow {
   submitted_at: string;
 }
 
+// One row of the admin_submissions_detail view: every submission across all
+// teams, flattened to one shape. Entry 1 is the inline submission on the
+// registration (is_primary, entry_no 1); Entry 2+ are `submissions` rows.
+// Carries the owning team's identifying columns so the submissions list can be
+// sorted/searched on its own.
+export interface AdminSubmissionDetail {
+  // Registration id for Entry 1; the submissions-row id for Entry 2+. Unique.
+  submission_id: string;
+  registration_id: string;
+  code: string;
+  team_name: string;
+  competition: CompetitionId;
+  leader_email: string;
+  is_primary: boolean;
+  entry_no: number;
+  payment_proof_url: string;
+  submission_url: string;
+  status: "pending" | "verified" | "rejected";
+  submitted_at: string;
+}
+
 // One row of the admin_registrations_detail view (registration + members[]).
 export interface AdminRegistration {
   id: string;
