@@ -548,8 +548,7 @@ Serverless (Vercel) spins up many short-lived instances, each opening its own Po
 - **Supabase Dashboard → Project Settings → Database → Connection string / Pooling.** Use the pooler host on port **6543** (transaction mode) for the app.
 - The Supabase JS client this app uses (`@supabase/supabase-js` over the REST/`NEXT_PUBLIC_SUPABASE_URL` endpoint) already goes through Supabase's connection management — you only need to switch to the pooled connection string if/when you add a **direct Postgres** connection (an ORM, a migration tool, an external worker). Use `:6543` for those; keep `:5432` only for one-off migrations that need a session (e.g. `prisma migrate`).
 
-Nothing to paste in the SQL editor for this step.
-
+                              
 ---
 
 ## Step 18 — (Optional) Audit log for admin mutations

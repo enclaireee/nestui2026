@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { COMPETITIONS, currentFee, type CompetitionId } from "@/lib/registrations/config";
+import { COMPETITION_CONTACTS, waLink } from "@/lib/contacts";
 import { formatIDR } from "@/lib/payment";
 
 // ---------------------------------------------------------------------------
@@ -42,7 +43,6 @@ interface CompetitionDetail {
   stages: Stage[];
   timeline: TimelineItem[];
   prizes: Prize[];
-  contacts: { name: string; phone: string }[];
 }
 
 const DETAILS: Record<CompetitionId, CompetitionDetail> = {
@@ -71,10 +71,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "1st Place", value: "Rp4,500,000 + Certificate", rank: 1 },
       { label: "2nd Place", value: "Rp3,000,000 + Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp2,000,000 + Certificate", rank: 3 },
-    ],
-    contacts: [
-      { name: "Rahel", phone: "0887 5475 115" },
-      { name: "Nadzira", phone: "0812 1288 1794" },
     ],
   },
   healthineer: {
@@ -111,10 +107,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "2nd Place", value: "Rp3,000,000 + e-Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp2,000,000 + e-Certificate", rank: 3 },
     ],
-    contacts: [
-      { name: "Josia", phone: "0812 6231 4375" },
-      { name: "Enders", phone: "0877 8564 0780" },
-    ],
   },
   healthynovation: {
     about:
@@ -150,10 +142,6 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
       { label: "1st Place", value: "Rp3,000,000 + Certificate", rank: 1 },
       { label: "2nd Place", value: "Rp2,000,000 + Certificate", rank: 2 },
       { label: "3rd Place", value: "Rp1,000,000 + Certificate", rank: 3 },
-    ],
-    contacts: [
-      { name: "Lita", phone: "0895 3604 48081" },
-      { name: "Nicholas", phone: "0859 4739 5277" },
     ],
   },
 };
@@ -344,12 +332,18 @@ export function CompetitionModal({
 
           {/* Contacts */}
           <Section icon={Phone} title="Contact Person">
-            <div className="flex flex-wrap gap-4">
-              {detail.contacts.map((c) => (
-                <div key={c.name} className="text-sm">
+            <div className="flex flex-wrap gap-2">
+              {COMPETITION_CONTACTS[competitionId].map((c) => (
+                <a
+                  key={c.name}
+                  href={waLink(c.phone)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full bg-white/10 px-3 py-1.5 text-sm ring-1 ring-white/10 transition-colors hover:bg-white/20"
+                >
                   <span className="font-bold text-white">{c.name}</span>{" "}
                   <span className="text-white/60">· {c.phone}</span>
-                </div>
+                </a>
               ))}
             </div>
           </Section>

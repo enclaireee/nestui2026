@@ -3,10 +3,10 @@ import { GlassCard } from "./glass-card";
 import { COMPETITIONS, type CompetitionId } from "@/lib/registrations/config";
 
 /**
- * Shown only when there is nothing left for this account to enter — every
- * competition available to them already has a team. The DB rule is one team per
- * (user, competition), so a single registration is NOT a dead end and must not
- * land here; the picker marks that competition taken instead.
+ * Shown on the registration route once this account already has a team — it's
+ * one team per account. Extra paid entries don't go through registration again;
+ * they go through "Submit again" on the dashboard, so that's where this points.
+ * Rendered inside RegistrationPage's <main>, which carries the SVG background.
  */
 export function AlreadyRegistered({
   teams,
@@ -16,11 +16,13 @@ export function AlreadyRegistered({
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 pb-24 pt-24 md:px-8">
       <h1 className="pb-3 text-center text-3xl font-bold text-gradient-brand drop-shadow-md sm:text-5xl md:text-6xl">
-        You&apos;re all set
+        You&apos;ve Already Registered
       </h1>
       <GlassCard className="mt-8 flex max-w-md flex-col items-center gap-4 p-8 text-center">
         <p className="text-lg font-semibold text-brand-green">
-          You&apos;ve registered a team for every competition open to you.
+          {teams.length > 1
+            ? "Your teams are already registered."
+            : "Your team is already registered."}
         </p>
 
         <ul className="flex w-full flex-col gap-2">
@@ -38,11 +40,12 @@ export function AlreadyRegistered({
         </ul>
 
         <p className="text-sm text-brand-green/70">
-          Track verification status, or add another paid submission, from your
-          dashboard.
+          It&apos;s one team per account. To add another submission — a separate
+          paid entry — head to your dashboard and use{" "}
+          <span className="font-semibold text-brand-green">Submit again</span>.
         </p>
         <Link href="/protected" className="btn-brand mt-2 px-10 py-2.5 text-sm">
-          Go to dashboard
+          Go to dashboard for another submission
         </Link>
       </GlassCard>
     </div>

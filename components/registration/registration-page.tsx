@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 import { RegistrationClient } from "@/components/registration/registration-client";
 import { AlreadyRegistered } from "@/components/registration/already-registered";
 import {
-  competitionsForCategory,
   isCompetitionId,
   type Category,
   type CompetitionId,
@@ -71,10 +70,9 @@ async function RegistrationBody({ category }: { category?: Category }) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  // The DB constraint is one team per (user, competition) — see
-  // uq_reg_user_competition — so a user who registered Healthineer may still
-  // enter Medhack. Collect what they already have and let the picker mark those
-  // instead of blocking the whole page.
+  // One team per account. If this user already registered, don't offer the
+  // wizard again — send them to the dashboard, where additional paid entries go
+  // through "Submit again" (the resubmit flow), not a fresh registration.
   const { data: existing } = await supabase
     .from("registrations")
     .select("team_name, competition");
@@ -82,17 +80,10 @@ async function RegistrationBody({ category }: { category?: Category }) {
     (r): r is { team_name: string; competition: CompetitionId } =>
       isCompetitionId(r.competition),
   );
-  const registered = rows.map((r) => r.competition);
 
-  // Only a genuine dead end — every competition open to this user is taken —
-  // gets the "already registered" screen.
-  const available = competitionsForCategory(category);
-  const allTaken =
-    available.length > 0 && available.every((c) => registered.includes(c.id));
-
-  return allTaken ? (
+  return rows.length > 0 ? (
     <AlreadyRegistered teams={rows} />
   ) : (
-    <RegistrationClient category={category} registered={registered} />
+    <RegistrationClient category={category} />
   );
 }

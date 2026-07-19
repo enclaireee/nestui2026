@@ -14,6 +14,7 @@ const navLinks = [
   { label: "Home", href: "/branding/mainpage" },
   { label: "About us", href: "/branding/aboutpage" },
   { label: "Registration", href: "/branding/registration" },
+  { label: "Contact", href: "/branding/contact" },
 ];
 
 // Close the enclosing <details> menu (uncontrolled, no state needed).
