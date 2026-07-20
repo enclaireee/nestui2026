@@ -20,7 +20,6 @@ interface PersonFormProps {
 export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormProps) {
   return (
     <div className="flex flex-col gap-5">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-lime to-brand-cream text-brand-teal shadow-sm">
           <User className="h-5 w-5" />
@@ -97,7 +96,6 @@ export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormP
         )}
       </div>
 
-      {/* Confirmation documents */}
       <div className="flex flex-col gap-3 border-t border-brand-green/10 pt-4">
         <SectionLabel icon={Upload}>Confirmation</SectionLabel>
         <div className="rounded-xl bg-brand-green/5 px-3 py-2.5 text-xs leading-relaxed text-brand-green/80 ring-1 ring-brand-green/10">

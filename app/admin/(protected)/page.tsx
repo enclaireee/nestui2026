@@ -40,7 +40,6 @@ export default async function AdminDashboard({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Mode toggle */}
       <div className="flex w-fit gap-1 rounded-xl bg-white/5 p-1">
         <ModeTab href={qs({ view: "teams", page: 1 })} active={view === "teams"} label="Teams" />
         <ModeTab
@@ -50,7 +49,6 @@ export default async function AdminDashboard({
         />
       </div>
 
-      {/* Competition tabs */}
       <div className="flex flex-wrap gap-2">
         <Tab href={qs({ competition: "", page: 1 })} active={!competition} label="All" />
         {COMPETITION_IDS.map((id) => (
@@ -63,7 +61,6 @@ export default async function AdminDashboard({
         ))}
       </div>
 
-      {/* Search + export */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <form method="get" className="flex gap-2">
           {view !== "teams" && <input type="hidden" name="view" value={view} />}

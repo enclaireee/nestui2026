@@ -168,17 +168,10 @@ function TeamCard({ reg, members }: { reg: Registration; members: MemberRow[] })
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
-      {/* Team header */}
       <div className="flex items-center gap-4 border-b border-white/10 p-6">
         {cfg && (
-          <div
-            className="relative h-14 w-14 shrink-0 rounded-xl p-2 ring-1 ring-white/10"
-            style={{
-              background:
-                "radial-gradient(circle at 30% 20%, rgba(var(--brand-teal-mid),0.5), rgba(var(--brand-green),0.9))",
-            }}
-          >
-            <Image src={cfg.logo} alt={`${cfg.name} logo`} fill sizes="56px" className="object-contain p-2" />
+          <div className="relative h-14 w-14 shrink-0">
+            <Image src={cfg.logo} alt={`${cfg.name} logo`} fill sizes="56px" className="object-contain" />
           </div>
         )}
         <div className="min-w-0">
@@ -189,7 +182,6 @@ function TeamCard({ reg, members }: { reg: Registration; members: MemberRow[] })
         </div>
       </div>
 
-      {/* Members */}
       <div className="border-b border-white/10 p-6">
         <h3 className="mb-3 text-sm font-bold text-brand-lime">Team members</h3>
         <ul className="flex flex-col gap-2">
@@ -200,7 +192,6 @@ function TeamCard({ reg, members }: { reg: Registration; members: MemberRow[] })
         </ul>
       </div>
 
-      {/* Contact */}
       <div className="p-6">
         <h3 className="mb-3 text-sm font-bold text-brand-lime">Contact person</h3>
         <p className="font-semibold text-white">{reg.leader_name}</p>

@@ -17,12 +17,10 @@ import { COMPETITIONS, currentFee, type CompetitionId } from "@/lib/registration
 import { COMPETITION_CONTACTS, waLink } from "@/lib/contacts";
 import { formatIDR } from "@/lib/payment";
 
-// ---------------------------------------------------------------------------
 // Detail copy for each competition, extracted from the NEST UI 2026 guidebook
 // design briefs. Only the entrant-facing marketing copy lives here — the
 // functional config (team sizes, field variations) stays in lib/registrations.
 // Grand theme + subthemes live in the "Our Theme" section, not per-competition.
-// ---------------------------------------------------------------------------
 
 interface Stage {
   name: string;
@@ -193,19 +191,10 @@ export function CompetitionModal({
         onClick={(e) => e.stopPropagation()}
         className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] border border-white/15 bg-brand-green/95 shadow-2xl ring-1 ring-white/5 animate-in fade-in zoom-in-95 duration-200"
       >
-        {/* ambient glow */}
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-lime/20 blur-3xl" />
 
-        {/* Header */}
         <div className="relative flex items-center gap-4 border-b border-white/10 p-6 pr-14">
-          <div
-            className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl p-3 ring-1 ring-brand-lime/30"
-            style={{
-              background:
-                "radial-gradient(circle at 30% 20%, rgba(var(--brand-teal-mid),0.55), rgba(var(--brand-green),0.9))",
-              boxShadow: "0 0 30px -6px rgba(227,239,38,0.35)",
-            }}
-          >
+          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center">
             <span className="relative block h-full w-full">
               <Image
                 src={cfg.logo}
@@ -233,12 +222,9 @@ export function CompetitionModal({
           </button>
         </div>
 
-        {/* Scrollable body */}
         <div className="flex flex-col gap-8 overflow-y-auto px-6 py-7 [scrollbar-width:thin] [scrollbar-color:rgb(var(--brand-lime))_transparent]">
-          {/* About */}
           <p className="text-sm leading-relaxed text-white/75">{detail.about}</p>
 
-          {/* Stages */}
           <Section icon={Layers} title="Tahapan Kompetisi">
             <div className="flex flex-col gap-3">
               {detail.stages.map((st, i) => (
@@ -255,7 +241,6 @@ export function CompetitionModal({
             </div>
           </Section>
 
-          {/* Timeline */}
           <Section icon={CalendarDays} title="Timeline">
             <ol className="relative ml-1 border-l border-white/15 pl-5">
               {detail.timeline.map((t, i) => (
@@ -278,7 +263,6 @@ export function CompetitionModal({
             </ol>
           </Section>
 
-          {/* Prizes */}
           <Section icon={Trophy} title="Prize Pool">
             <div className="flex flex-col gap-2">
               {detail.prizes.map((p) => (
@@ -298,7 +282,6 @@ export function CompetitionModal({
             </div>
           </Section>
 
-          {/* Fees */}
           <Section icon={Wallet} title="Biaya Registrasi">
             <div className="flex flex-wrap gap-3">
               {cfg.fees.map((f) => {
@@ -330,7 +313,6 @@ export function CompetitionModal({
             </div>
           </Section>
 
-          {/* Contacts */}
           <Section icon={Phone} title="Contact Person">
             <div className="flex flex-wrap gap-2">
               {COMPETITION_CONTACTS[competitionId].map((c) => (
@@ -349,7 +331,6 @@ export function CompetitionModal({
           </Section>
         </div>
 
-        {/* Footer CTA */}
         <div className="border-t border-white/10 p-4">
           <Link
             href={registerHref}

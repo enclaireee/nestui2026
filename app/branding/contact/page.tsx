@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Mail, Phone, Instagram, Linkedin, Handshake } from "lucide-react";
 import { COMPETITIONS, COMPETITION_IDS } from "@/lib/registrations/config";
 import { COMPETITION_CONTACTS, GENERAL_CONTACT, waLink } from "@/lib/contacts";
+import { Reveal } from "@/components/reveal";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -47,19 +48,24 @@ export default function ContactPage() {
 
       <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 pb-24 pt-28 md:px-8">
         <header className="text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-lime">Contact</p>
-          <h1 className="mt-2 text-4xl font-bold text-gradient-brand drop-shadow-md sm:text-5xl md:text-6xl">
-            Get in Touch
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
-            Questions about a competition, or interested in partnering with NEST UI 2026? Reach the
-            right person below.
-          </p>
+          <Reveal>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-lime">Contact</p>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <h1 className="mt-2 text-4xl font-bold text-gradient-brand drop-shadow-md sm:text-5xl md:text-6xl">
+              Get in Touch
+            </h1>
+          </Reveal>
+          <Reveal delay={0.16}>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
+              Questions about a competition, or interested in partnering with NEST UI 2026? Reach
+              the right person below.
+            </p>
+          </Reveal>
         </header>
 
-        {/* Partnership + socials */}
         <div className="grid gap-4 md:grid-cols-2">
-          <Card>
+          <Card delay={0.08}>
             <CardHead icon={Handshake} title="Partnership & Sponsorship" />
             <p className="text-sm leading-relaxed text-white/70">
               Collaborate with NEST UI 2026 — from multinational corporations to startups. Tell us
@@ -74,7 +80,7 @@ export default function ContactPage() {
             </a>
           </Card>
 
-          <Card>
+          <Card delay={0.16}>
             <CardHead icon={Mail} title="General & Socials" />
             <a
               href={`mailto:${GENERAL_CONTACT.email}`}
@@ -104,22 +110,21 @@ export default function ContactPage() {
           </Card>
         </div>
 
-        {/* Per-competition contact persons */}
         <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
+          <Reveal className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-lime/15">
               <Phone className="h-4 w-4 text-brand-lime" />
             </span>
             <h2 className="text-lg font-bold text-white">Competition Contact Persons</h2>
-          </div>
+          </Reveal>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {COMPETITION_IDS.map((id) => {
+            {COMPETITION_IDS.map((id, i) => {
               const cfg = COMPETITIONS[id];
               return (
-                <Card key={id}>
+                <Card key={id} delay={i * 0.1}>
                   <div className="flex items-center gap-3">
-                    <div className="relative h-11 w-11 shrink-0 rounded-xl bg-white/90 p-1.5 ring-1 ring-white/10">
+                    <div className="relative h-11 w-11 shrink-0">
                       <Image
                         src={cfg.logo}
                         alt={`${cfg.name} logo`}
@@ -159,11 +164,14 @@ export default function ContactPage() {
   );
 }
 
-function Card({ children }: { children: React.ReactNode }) {
+function Card({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
+    <Reveal
+      delay={delay}
+      className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm"
+    >
       {children}
-    </div>
+    </Reveal>
   );
 }
 

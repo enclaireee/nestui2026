@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { duration, ease, inViewOnce, offset, rest } from "@/lib/motion";
+
+const entry = {
+    initial: { opacity: 0, ...offset.up },
+    whileInView: rest,
+    viewport: inViewOnce,
+};
 
 // Subtheme copy from the NEST UI 2026 guidebook briefs.
 const CARDS = [
@@ -22,60 +30,72 @@ export function Theme() {
     return (
         <section className="flex flex-col w-full mt-10 px-6 py-12 items-center overflow-hidden">
 
-            {/* ── Section Title ────────────────────────────────────────────── */}
             <div className="relative flex flex-col items-center text-center">
-                {/* Title Shadow Layer */}
-                <h2 className="absolute text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold text-brand-green/[0.76] blur-[10px] opacity-100 select-none">
+                {/* Shadow and gradient layer animate separately but on the same
+                    timing, so the blurred layer never lags behind the text.
+                    A shared wrapper isn't an option: the shadow is absolutely
+                    positioned against this flex container. */}
+                <motion.h2
+                    {...entry}
+                    transition={{ duration, ease }}
+                    className="absolute text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold text-brand-green/[0.76] blur-[10px] opacity-100 select-none"
+                >
                     The theme is...
-                </h2>
-                {/* Title Gradient Layer */}
-                <h2 className="relative text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold bg-gradient-to-t from-brand-lime to-brand-cream bg-clip-text text-transparent">
+                </motion.h2>
+                <motion.h2
+                    {...entry}
+                    transition={{ duration, ease }}
+                    className="relative text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold bg-gradient-to-t from-brand-lime to-brand-cream bg-clip-text text-transparent"
+                >
                     The theme is...
-                </h2>
+                </motion.h2>
 
-                {/* Tagline Tag */}
-                <div className="relative mt-6 px-4 max-w-5xl">
-                    {/* Shadow Layer */}
+                <motion.div
+                    {...entry}
+                    transition={{ duration, ease, delay: 0.12 }}
+                    className="relative mt-6 px-4 max-w-5xl"
+                >
                     <p
                         className="absolute inset-0 px-4 text-lg sm:text-xl md:text-4xl font-bold text-brand-green/[0.76] blur-[10px] opacity-100 select-none pb-2"
                         style={{ lineHeight: 1.5 }}
                     >
                         “Shaping the future of Healthcare Through Intelligent and Inclusive Innovation”
                     </p>
-                    {/* Gradient Layer */}
                     <p
                         className="relative text-lg sm:text-xl md:text-4xl font-bold bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent pb-2"
                         style={{ lineHeight: 1.5 }}
                     >
                         “Shaping the future of Healthcare Through Intelligent and Inclusive Innovation”
                     </p>
-                </div>
+                </motion.div>
             </div>
 
-            {/* ── Cards Grid ───────────────────────────────────────────────── */}
             {/* items-start so an expanded card grows on its own without
                 stretching its row-mates. */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl mt-12 md:mt-16 relative z-10 items-start">
-                {CARDS.map((c) => (
-                    <ThemeCard key={c.title} {...c} />
+                {CARDS.map((c, i) => (
+                    <ThemeCard key={c.title} {...c} delay={i * 0.12} />
                 ))}
             </div>
         </section>
     );
 }
 
-/* ── Card Sub-component ─────────────────────────────────────────────── */
 
 interface ThemeCardProps {
     title: string;
     desc: string;
+    /** Stagger offset in seconds across the card row. */
+    delay?: number;
 }
 
-function ThemeCard({ title, desc }: ThemeCardProps) {
+function ThemeCard({ title, desc, delay = 0 }: ThemeCardProps) {
     const [open, setOpen] = useState(false);
 
     return (
-        <div
+        <motion.div
+            {...entry}
+            transition={{ duration, ease, delay }}
             className={`group relative flex flex-col justify-between min-h-[250px] p-8 border rounded-3xl bg-white/15 backdrop-blur-md shadow-2xl transition-colors duration-200 ${
                 open
                     ? "border-brand-lime/50 bg-white/25"
@@ -83,13 +103,10 @@ function ThemeCard({ title, desc }: ThemeCardProps) {
             }`}
         >
             <div>
-                {/* Title Container */}
                 <div className="relative w-full text-center">
-                    {/* Title Shadow Layer */}
                     <h3 className="absolute inset-x-0 top-0 pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide text-brand-green/[0.76] blur-[8px] opacity-100 select-none">
                         {title}
                     </h3>
-                    {/* Title Gradient Layer */}
                     <h3 className="relative pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent transition-colors duration-300 group-hover:from-white group-hover:to-white">
                         {title}
                     </h3>
@@ -106,7 +123,6 @@ function ThemeCard({ title, desc }: ThemeCardProps) {
                 )}
             </div>
 
-            {/* Toggle Button */}
             <button
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
@@ -128,6 +144,6 @@ function ThemeCard({ title, desc }: ThemeCardProps) {
                     />
                 </svg>
             </button>
-        </div>
+        </motion.div>
     );
 }
