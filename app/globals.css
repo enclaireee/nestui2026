@@ -83,6 +83,30 @@
 }
 
 @layer components {
+  /* Hero entry. Transform-only, and CSS rather than framer-motion, both for the
+     same reason: the hero holds the LCP element.
+
+     - No opacity. Chrome skips fully-transparent elements when picking an LCP
+       candidate, so fading the hero in moves the metric to whenever the fade
+       ends. Sliding an already-painted element costs the metric nothing.
+     - No framer-motion. Its `initial` doesn't run until hydration, so the hero
+       would sit still and then jump once JS lands. A CSS animation starts at
+       first paint.
+
+     Reduced motion is handled by the global rule above. */
+  @keyframes hero-rise {
+    from {
+      transform: translateY(18px);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  .hero-rise {
+    animation: hero-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
   /* Brand gradient text: lime → cream, clipped to the glyphs.
      Reused across the hero (countdown, headings). Pair with a
      `bg-gradient-to-*` utility only when a non-default direction is needed;

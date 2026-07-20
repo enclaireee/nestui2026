@@ -31,7 +31,6 @@ export function ReviewSubmit({
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-md">
-      {/* Payment */}
       <div className="flex flex-col gap-3">
         <SectionLabel icon={Wallet}>Payment</SectionLabel>
         <div className="rounded-2xl bg-brand-green/5 p-4 ring-1 ring-brand-green/10">
@@ -70,7 +69,6 @@ export function ReviewSubmit({
         />
       </div>
 
-      {/* Submission */}
       <div className="flex flex-col gap-3">
         <SectionLabel icon={Upload}>Submission</SectionLabel>
         <LinkField
@@ -80,13 +78,12 @@ export function ReviewSubmit({
         />
       </div>
 
-      {/* Read-only summary */}
       <div className="flex flex-col gap-3">
         <SectionLabel icon={ClipboardList}>Review</SectionLabel>
         <div className="rounded-2xl bg-white/70 p-4 text-sm text-brand-green ring-1 ring-brand-green/10">
           {cfg && (
             <div className="mb-2 flex items-center gap-2 border-b border-brand-green/10 pb-2">
-              <span className="relative block h-7 w-7 shrink-0 overflow-hidden rounded-md bg-white">
+              <span className="relative block h-7 w-7 shrink-0">
                 <Image
                   src={cfg.logo}
                   alt={`${cfg.name} logo`}

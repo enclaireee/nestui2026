@@ -61,7 +61,6 @@ export function TeamSetup({
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-lg">
-      {/* Competition */}
       <section className="flex flex-col gap-4">
         <SectionLabel icon={Trophy}>Choose a Competition</SectionLabel>
         <div className="flex flex-col gap-5">
@@ -102,12 +101,10 @@ export function TeamSetup({
                         !disabled && !active && "hover:shadow-lg",
                       )}
                     >
-                      {/* soft decorative glow */}
                       <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br from-brand-lime/40 to-brand-teal/10 blur-2xl transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
 
                       <div className="relative flex items-start gap-4">
-                        {/* competition logo */}
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-inner ring-1 ring-white/60 overflow-hidden p-1.5">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center">
                           <span className="relative block h-full w-full">
                             <Image
                               src={c.logo}
@@ -162,7 +159,6 @@ export function TeamSetup({
         </div>
       </section>
 
-      {/* Team name */}
       <section className="flex flex-col gap-3">
         <SectionLabel icon={Users}>Team Name</SectionLabel>
         <RegistrationInput
@@ -175,7 +171,6 @@ export function TeamSetup({
         />
       </section>
 
-      {/* Team size */}
       <section className="flex flex-col gap-3">
         <SectionLabel icon={Users}>
           Team Size

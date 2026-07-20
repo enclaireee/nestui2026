@@ -57,10 +57,13 @@ export function Hero() {
           width={800}
           height={800}
           priority
-          className="h-auto w-44 shrink-0 drop-shadow-2xl sm:w-56 md:w-72"
+          className="hero-rise h-auto w-44 shrink-0 drop-shadow-2xl sm:w-56 md:w-72"
         />
 
-        <div className="flex max-w-2xl flex-1 flex-col items-start">
+        <div
+          className="hero-rise flex max-w-2xl flex-1 flex-col items-start"
+          style={{ animationDelay: "120ms" }}
+        >
           {/* Indent text to the blob's left lobe edge (88/760 ≈ 11.6%). */}
           <div className="w-full pl-[11.6%]">
           <Image
@@ -114,7 +117,8 @@ export function Hero() {
 
       <Link
         href="#explore"
-        className="mt-7 transition-all hover:scale-105 hover:brightness-105 active:scale-100"
+        className="hero-rise mt-7 transition-all hover:scale-105 hover:brightness-105 active:scale-100"
+        style={{ animationDelay: "240ms" }}
       >
         <Image
           src="/Explore Now.svg"

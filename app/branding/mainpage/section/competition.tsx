@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { COMPETITIONS, type CompetitionId } from "@/lib/registrations/config";
+import { duration, ease, inViewOnce, offset, rest } from "@/lib/motion";
 import { CompetitionModal } from "./competition-modal";
 
-// Exact Figma SVG for the "Our COMPETITION" Title
 const CompetitionTitle: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={className}
@@ -73,7 +74,6 @@ const CompetitionTitle: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// Props for each competition card component
 interface CompetitionCardProps {
   title: string;
   description: string;
@@ -81,9 +81,10 @@ interface CompetitionCardProps {
   titleGradient: string;
   descGradient: string;
   onDetails: () => void;
+  /** Stagger offset in seconds when several cards share a row. */
+  delay?: number;
 }
 
-// Custom reusable card component built using exact Figma values
 const CompetitionCard: React.FC<CompetitionCardProps> = ({
   title,
   description,
@@ -91,10 +92,18 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
   titleGradient,
   descGradient,
   onDetails,
+  delay = 0,
 }) => {
   return (
-    <div
-      className="group relative flex flex-col sm:flex-row items-center p-6 gap-6 overflow-hidden transition-all duration-200 hover:-translate-y-1"
+    <motion.div
+      initial={{ opacity: 0, ...offset.up }}
+      whileInView={rest}
+      viewport={inViewOnce}
+      transition={{ duration, ease, delay }}
+      // Hover lift lives here, not in a `hover:-translate-y-1` class: framer
+      // writes an inline transform, which a Tailwind hover transform can't beat.
+      whileHover={{ y: -6 }}
+      className="group relative flex flex-col sm:flex-row items-center p-6 gap-6 overflow-hidden"
       style={{
         width: "100%",
         maxWidth: "537px",
@@ -106,20 +115,11 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
         border: "1px solid rgba(255,255,255,0.18)",
       }}
     >
-      {/* ambient corner glow, brightens on hover */}
       <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-gradient-to-br from-brand-lime/30 to-brand-teal/0 blur-3xl transition-opacity duration-300 opacity-60 group-hover:opacity-100" />
 
-      {/* Left side: competition logo, glowing on a dark glass badge */}
       <div
-        className="relative flex-shrink-0 flex items-center justify-center rounded-2xl p-4 ring-1 ring-brand-lime/30 transition-all duration-300 group-hover:ring-brand-lime/60"
-        style={{
-          width: "150px",
-          height: "150px",
-          background:
-            "radial-gradient(circle at 30% 20%, rgba(var(--brand-teal-mid),0.55), rgba(var(--brand-green),0.85))",
-          boxShadow:
-            "inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 30px -6px rgba(227,239,38,0.35)",
-        }}
+        className="relative flex-shrink-0 flex items-center justify-center"
+        style={{ width: "150px", height: "150px" }}
       >
         <span className="relative block h-full w-full">
           <Image
@@ -132,10 +132,8 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
         </span>
       </div>
 
-      {/* Right side: Texts & Details button */}
       <div className="relative flex flex-col justify-between h-full flex-1 w-full gap-6 sm:gap-2 min-h-[176px]">
         <div className="flex flex-col gap-2">
-          {/* Card Title with exact Figma gradient */}
           <h4
             style={{
               fontFamily: "var(--font-oddval), sans-serif",
@@ -150,7 +148,6 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
             {title}
           </h4>
 
-          {/* Description text with exact Figma gradient */}
           <p
             style={{
               fontFamily: "'SF Pro', ui-sans-serif, sans-serif",
@@ -166,7 +163,6 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
           </p>
         </div>
 
-        {/* Button styled with exact gradients and rounded corner radius */}
         <button
           onClick={onDetails}
           className="flex items-center justify-center gap-2 transition-all hover:brightness-110 shadow-sm mt-auto sm:mt-4"
@@ -191,7 +187,7 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
           <ArrowRight className="h-5 w-5 stroke-[3] text-brand-teal" />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -201,17 +197,23 @@ export default function CompetitionSection() {
   return (
     <section className="relative w-full py-16 px-4 md:px-8 max-w-[1440px] mx-auto overflow-hidden min-h-[1000px] flex flex-col items-center">
 
-      {/* Title block using exact SVG */}
-      <div className="flex justify-center w-full mb-8 md:mb-12 z-10 px-2 md:px-0">
+      <motion.div
+        initial={{ opacity: 0, ...offset.up }}
+        whileInView={rest}
+        viewport={inViewOnce}
+        transition={{ duration, ease }}
+        className="flex justify-center w-full mb-8 md:mb-12 z-10 px-2 md:px-0"
+      >
         <CompetitionTitle className="w-full max-w-[800px] lg:max-w-[1026px] h-auto drop-shadow-xl" />
-      </div>
+      </motion.div>
 
       <div className="w-full max-w-[1150px] flex flex-col items-center z-10">
-        {/* ======================================================= */}
-        {/* UNDERGRADUATE CATEGORY                                    */}
-        {/* ======================================================= */}
         <div className="mb-12 w-full flex flex-col items-center">
-          <h3
+          <motion.h3
+            initial={{ opacity: 0, ...offset.up }}
+            whileInView={rest}
+            viewport={inViewOnce}
+            transition={{ duration, ease }}
             className="mb-6 select-none text-center tracking-wide"
             style={{
               fontFamily: "var(--font-oddval), sans-serif",
@@ -223,9 +225,8 @@ export default function CompetitionSection() {
             }}
           >
             Undergraduate
-          </h3>
+          </motion.h3>
 
-          {/* Grid container matching exact 537px card bounds */}
           <div className="flex flex-col xl:flex-row gap-8 justify-center items-center w-full">
             <CompetitionCard
               title="Medhack"
@@ -237,6 +238,7 @@ export default function CompetitionSection() {
             />
             <CompetitionCard
               title="Healthineer"
+              delay={0.12}
               logoSrc={COMPETITIONS.healthineer.logo}
               onDetails={() => setOpenId("healthineer")}
               titleGradient="linear-gradient(227.28deg, rgb(var(--brand-lime)) 8.58%, rgb(var(--brand-teal)) 52.85%, rgb(var(--brand-green)) 87.95%)"
@@ -246,11 +248,12 @@ export default function CompetitionSection() {
           </div>
         </div>
 
-        {/* ======================================================= */}
-        {/* HIGHSCHOOL CATEGORY                                       */}
-        {/* ======================================================= */}
         <div className="w-full flex flex-col items-center">
-          <h3
+          <motion.h3
+            initial={{ opacity: 0, ...offset.up }}
+            whileInView={rest}
+            viewport={inViewOnce}
+            transition={{ duration, ease }}
             className="mb-6 select-none text-center tracking-wide"
             style={{
               fontFamily: "var(--font-oddval), sans-serif",
@@ -262,7 +265,7 @@ export default function CompetitionSection() {
             }}
           >
             Highschool
-          </h3>
+          </motion.h3>
 
           <div className="flex justify-center items-center w-full">
             <CompetitionCard

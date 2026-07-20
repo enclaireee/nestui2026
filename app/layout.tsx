@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { MotionProvider } from "@/components/motion-provider";
 import { siteUrl } from "@/lib/utils";
 import "./globals.css";
 
@@ -66,7 +67,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${oddval.variable} font-sans antialiased bg-brand-green`}
       >
-        {children}
+        <MotionProvider>{children}</MotionProvider>
       </body>
     </html>
   );

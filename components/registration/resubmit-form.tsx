@@ -46,7 +46,6 @@ export function ResubmitForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      {/* Payment destination */}
       <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
         <div className="mb-3 flex items-center gap-2 text-sm font-bold text-brand-lime">
           <Wallet className="h-4 w-4" />

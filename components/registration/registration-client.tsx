@@ -2,6 +2,7 @@
 
 import { useEffect, useReducer } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { duration, ease } from "@/lib/motion";
 import { StepIndicator } from "./step-indicator";
 import { GlassCard } from "./glass-card";
 import { TeamSetup } from "./steps/team-setup";
@@ -247,7 +248,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
             key="thank-you"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration, ease }}
           >
             <ThankYou code={state.submittedCode} competition={draft.competition} />
           </motion.div>
@@ -263,10 +264,12 @@ export function RegistrationClient({ category }: { category?: Category }) {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 24 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, x: -24 }}
+                  // Exit is quicker than entry: with mode="wait" the outgoing
+                  // step's duration is dead time before the new one starts.
+                  transition={{ duration: 0.45, ease }}
                 >
                   {step === "team" && (
                     <TeamSetup

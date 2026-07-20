@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Description } from "./sections/description";
 import { Vision } from "./sections/vision";
 import { Mission } from "./sections/mission";
-// import { Sponsors } from "./sections/sponsor";
+import { Sponsors } from "./sections/sponsor";
 import { PastSponsors } from "./sections/pastSponsors";
 import { Dokumentasi } from "./sections/documentation";
 import CtaSection from "../mainpage/section/cta";
@@ -24,7 +24,7 @@ export default function AboutPage() {
         <Description />
         <Vision />
         <Mission />
-        {/* <Sponsors /> */}
+        <Sponsors />
         <PastSponsors />
         <Dokumentasi />
         <CtaSection />

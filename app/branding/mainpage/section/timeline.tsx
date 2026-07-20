@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
+import { duration, ease, inViewOnce, offset, rest } from "@/lib/motion";
 
-// Exact SVG for the Timeline Title
 const TimelineTitle: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={className}
@@ -67,7 +68,6 @@ const TimelineTitle: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// Exact Figma source for the 179x179 Clover Icon
 const CloverIcon: React.FC<{ className?: string; showGlow?: boolean }> = ({
   className,
   showGlow = false,
@@ -123,20 +123,29 @@ interface MilestoneNodeProps {
   details?: string[];
   rotateLabelDeg: number;
   showGlow?: boolean;
+  /** Stagger offset in seconds, so nodes light up in order along the ribbon. */
+  delay?: number;
 }
 
-const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details, rotateLabelDeg, showGlow }) => {
+const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details, rotateLabelDeg, showGlow, delay = 0 }) => {
   const arcPath = `M 15 120 A 105 105 0 0 1 225 120`;
 
   return (
     // Fixed glitch by removing scale animation from the main bounding wrapper container
-    <div className="relative flex flex-col items-center transform-gpu">
+    // — so the entry here is opacity-only. The parent positions this node with an
+    // inline translate; adding a transform animation re-introduced that glitch.
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={inViewOnce}
+      transition={{ duration, ease, delay }}
+      className="relative flex flex-col items-center transform-gpu"
+    >
       {/* Interactive scale only applied to small nodes rather than overlapping layout layers */}
       <div className="relative z-10 transition-transform duration-150 active:scale-95 group cursor-default">
 
         <CloverIcon showGlow={showGlow} className="w-[120px] h-[120px] md:w-[179px] md:h-[179px] transition-transform duration-300 group-hover:scale-105" />
 
-        {/* Arching Golden Date Text SVG Layer */}
         <svg
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none overflow-visible drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
           style={{
@@ -199,7 +208,7 @@ const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details,
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -208,17 +217,19 @@ export default function TimelineSection() {
     // Fixed: Added transform-gpu and backface-hidden class hint to section root container to prevent browser flickering artifacts
     <section className="relative w-full pt-4 pb-12 md:pt-8 md:pb-20 px-4 md:px-8 max-w-[1440px] mx-auto min-h-[700px] flex flex-col bg-transparent overflow-visible transform-gpu backface-hidden">
 
-      {/* ======================================================= */}
-      {/* DESKTOP LAYOUT                                            */}
-      {/* ======================================================= */}
       <div className="relative hidden md:block w-full max-w-[1412px] aspect-[1412/966] mx-auto mt-4 transform-gpu">
 
-        {/* Timeline Title positioned perfectly absolute */}
-        <div className="absolute z-20 w-[380px] lg:w-[450px] xl:w-[520px]" style={{ left: "4%", top: "14%" }}>
+        <motion.div
+          initial={{ opacity: 0, ...offset.left }}
+          whileInView={rest}
+          viewport={inViewOnce}
+          transition={{ duration, ease }}
+          className="absolute z-20 w-[380px] lg:w-[450px] xl:w-[520px]"
+          style={{ left: "4%", top: "14%" }}
+        >
           <TimelineTitle className="w-full h-auto" />
-        </div>
+        </motion.div>
 
-        {/* Exact Figma Vector Path rendering */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <svg
             viewBox="0 0 1412 966"
@@ -244,14 +255,12 @@ export default function TimelineSection() {
               </filter>
             </defs>
 
-            {/* The exact green ambient background shape */}
             <path
               d="M32.369 200L-179.617 508.217C0.705827 607.735 136.542 547.629 183.973 529.815C254.87 503.188 597.976 700.498 621.942 765.291L464.433 407.361L32.369 200Z"
               fill="url(#blurGrad)"
               className="blur-[100px] opacity-80"
             />
 
-            {/* The exact winding ribbon shape */}
             <path
               d="M-24 331.86C-6.91685 355.414 4.91677 381.992 12.5764 409.08C19.5641 433.319 23.4529 458.44 28.654 483.739C36.0051 520.455 47.5893 570.554 91.2197 591.494C131.976 611.332 174.084 610.229 214.37 608.827C294.893 604.145 372.084 588.449 450.132 571.581C492.023 562.396 531.079 554.715 571.059 549.573C592.269 546.924 611.082 545.266 630.126 545.702C638.797 545.94 648.231 546.884 654.551 548.829C656.148 549.313 657.358 549.798 658.237 550.227C659.347 550.754 659.855 551.165 659.936 551.286C660.052 551.439 659.61 551.172 659.162 550.565C658.713 549.995 658.331 549.091 658.223 548.708C658.319 547.065 657.082 554.734 652.892 561.873C649.098 568.945 643.598 577.1 637.923 584.885C626.339 600.814 613.014 616.829 600.035 634.777C593.415 644.103 587.025 653.194 580.967 665.829C578.226 671.797 575.038 679.279 573.835 689.52C572.211 699.32 575.632 716.864 585.767 726.715C606.49 745.578 621.902 743.441 634.231 745.199C647.766 745.937 657.698 745.395 670.444 744.296C844.216 727.261 1011.66 686.924 1178.02 642.963C1206.22 635.354 1234.31 627.572 1262.4 619.324C1272.83 616.23 1281.52 609.129 1286.52 599.471C1291.52 589.82 1292.43 578.403 1289.08 567.843C1285.73 557.284 1278.4 548.479 1268.75 543.479C1259.09 538.473 1247.9 537.681 1237.6 541.164C1237.6 541.164 1237.6 541.164 1237.6 541.164C1211.3 549.975 1183.47 558.801 1156.14 567.266C994.271 616.553 829.571 662.236 664.079 684.447C653.525 685.729 645.497 686.379 637.077 686.212C633.735 686.178 629.299 685.71 627.444 685.297C627.192 685.246 626.966 685.198 626.764 685.152C626.499 685.089 626.279 685.031 626.104 684.984C625.754 684.889 625.583 684.834 625.579 684.857C625.582 684.887 625.704 684.964 626.048 685.223C626.42 685.502 626.992 685.977 627.608 686.656C628.828 687.926 630.229 690.391 630.665 692.309C631.152 694.306 630.947 695.169 630.91 695.235C630.726 695.297 631.398 692.238 632.706 689.253C635.522 682.602 640.329 674.675 645.758 666.522C656.534 650.359 669.37 633.721 681.693 615.464C692.498 595.77 711.354 581.785 708.38 538.843C703.914 514.043 678.745 502.864 667.666 500.604C653.737 497.129 641.467 496.836 630.509 496.87C606.971 497.216 586.913 499.935 564.354 503.52C522.17 510.549 482.667 519.956 440.364 530.824C364.063 550.326 288.333 568.568 212.103 575.906C174.246 578.995 134.862 580.034 103.895 566.041C72.5065 552.919 60.9095 516.298 51.8322 478.423C45.6847 453.605 37.9248 427.655 26.4174 403.797C13.6836 377.003 -3.76383 352.64 -24 331.86Z"
               fill="url(#ribbonGrad)"
@@ -260,13 +269,13 @@ export default function TimelineSection() {
           </svg>
         </div>
 
-        {/* Milestone 1 */}
         <div
           className="absolute"
           style={{ left: "17.37%", top: "63.99%", transform: "translate(-50%, -50%)" }}
         >
           <MilestoneNode
             id="milestone-1"
+            delay={0.15}
             date="13 July - 14 August"
             title={
               <>
@@ -279,13 +288,13 @@ export default function TimelineSection() {
           />
         </div>
 
-        {/* Milestone 2 */}
         <div
           className="absolute"
           style={{ left: "53.20%", top: "72.58%", transform: "translate(-50%, -50%)" }}
         >
           <MilestoneNode
             id="milestone-2"
+            delay={0.3}
             date="25 Agustus - 8 September"
             title="Semifinal"
             rotateLabelDeg={25}
@@ -293,13 +302,13 @@ export default function TimelineSection() {
           />
         </div>
 
-        {/* Milestone 3 */}
         <div
           className="absolute"
           style={{ left: "88.47%", top: "59.85%", transform: "translate(-50%, -50%)" }}
         >
           <MilestoneNode
             id="milestone-3"
+            delay={0.45}
             date="3 October"
             title="Main Event"
             details={[
@@ -314,13 +323,16 @@ export default function TimelineSection() {
         </div>
       </div>
 
-      {/* ======================================================= */}
-      {/* MOBILE LAYOUT — custom serpentine neon "vine" ribbon     */}
-      {/* ======================================================= */}
       <div className="relative md:hidden w-full pb-6 transform-gpu">
-        <div className="w-full pl-4 mb-1 z-20 flex justify-start">
+        <motion.div
+          initial={{ opacity: 0, ...offset.left }}
+          whileInView={rest}
+          viewport={inViewOnce}
+          transition={{ duration, ease }}
+          className="w-full pl-4 mb-1 z-20 flex justify-start"
+        >
           <TimelineTitle className="w-[72%] max-w-[320px] h-auto" />
-        </div>
+        </motion.div>
 
         {/* Aspect-locked stage: ribbon SVG + nodes share one coordinate space (340 x 1040) */}
         <div className="relative w-full max-w-[360px] mx-auto aspect-[340/1040]">
@@ -355,16 +367,11 @@ export default function TimelineSection() {
               </filter>
             </defs>
 
-            {/* Soft ambient green wash hugging the path */}
             <path d={pathD} fill="none" stroke="url(#ambientGradM)" strokeWidth="40" strokeLinecap="round" className="blur-[22px] opacity-50" />
-            {/* Main glowing ribbon body */}
             <path d={pathD} fill="none" stroke="url(#ribbonGradM)" strokeWidth="13" strokeLinecap="round" filter="url(#neonGlowM)" />
-            {/* Glossy inner highlight */}
             <path d={pathD} fill="none" stroke="rgb(var(--brand-cream))" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
-            {/* Travelling dashed stitch */}
             <path d={pathD} fill="none" stroke="rgb(var(--brand-teal))" strokeWidth="1.6" strokeDasharray="2 13" strokeLinecap="round" opacity="0.6" />
 
-            {/* Decorative sparkles along the vine */}
             {[
               { x: 258, y: 130, s: 0.9 },
               { x: 78, y: 320, s: 0.7 },
@@ -385,7 +392,6 @@ export default function TimelineSection() {
             );
           })()}
 
-          {/* Decorative small clover leaves growing off the vine */}
           <div className="absolute z-[1]" style={{ left: "80%", top: "27%", transform: "translate(-50%,-50%) rotate(20deg)" }}>
             <CloverIcon className="w-[34px] h-[34px] opacity-25" />
           </div>
@@ -393,7 +399,6 @@ export default function TimelineSection() {
             <CloverIcon className="w-[30px] h-[30px] opacity-20" />
           </div>
 
-          {/* Milestone nodes pinned to the ribbon's bends */}
           {[
             { left: "30%", top: "17.3%", date: "13 July - 14 August", title: (<>Open Registration<br />& Preliminary</>), glow: false, details: undefined as string[] | undefined },
             { left: "68.2%", top: "47.1%", date: "25 Agustus - 8 September", title: "Semifinal", glow: false, details: undefined },
@@ -411,6 +416,7 @@ export default function TimelineSection() {
                 details={item.details}
                 rotateLabelDeg={0}
                 showGlow={item.glow}
+                delay={idx * 0.15}
               />
             </div>
           ))}

@@ -72,14 +72,8 @@ async function ResubmitBody({ params }: { params: Promise<{ id: string }> }) {
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8">
         <div className="mb-6 flex items-center gap-3 border-b border-white/10 pb-6">
           {cfg && (
-            <div
-              className="relative h-12 w-12 shrink-0 rounded-xl p-2 ring-1 ring-white/10"
-              style={{
-                background:
-                  "radial-gradient(circle at 30% 20%, rgba(var(--brand-teal-mid),0.5), rgba(var(--brand-green),0.9))",
-              }}
-            >
-              <Image src={cfg.logo} alt={`${cfg.name} logo`} fill sizes="48px" className="object-contain p-2" />
+            <div className="relative h-12 w-12 shrink-0">
+              <Image src={cfg.logo} alt={`${cfg.name} logo`} fill sizes="48px" className="object-contain" />
             </div>
           )}
           <div>
