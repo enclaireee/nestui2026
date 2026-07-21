@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   X,
   ArrowRight,
+  BookOpen,
   Trophy,
   CalendarDays,
   Wallet,
@@ -388,9 +389,21 @@ export function CompetitionModal({
           </div>
         </div>
 
-        <div className="border-t border-white/10 p-4">
-          <Link href={registerHref} className="btn-brand w-full py-3.5 text-sm">
-            Register for {cfg.name}
+        {/* Split footer: read first, then enter. Guidebook is the secondary
+            action so it doesn't compete with Register — and it's a plain <a>,
+            not next/link, because it leaves the app for Google Drive. */}
+        <div className="grid grid-cols-2 gap-3 border-t border-white/10 p-4">
+          <a
+            href={cfg.guidebookUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-ghost py-3.5 text-sm"
+          >
+            <BookOpen className="h-5 w-5" />
+            Guidebook
+          </a>
+          <Link href={registerHref} className="btn-brand py-3.5 text-sm">
+            Register
             <ArrowRight className="h-5 w-5 stroke-[3]" />
           </Link>
         </div>

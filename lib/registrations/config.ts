@@ -24,6 +24,12 @@ export interface CompetitionConfig {
    * out a single shared link would have teams sign the wrong document.
    */
   originalityTemplateUrl: string;
+  /**
+   * Public guidebook (Google Drive). Linked from the competition modal on the
+   * landing page, beside Register — entrants read it before they enter, so it
+   * sits next to the entry point rather than inside the wizard.
+   */
+  guidebookUrl: string;
   /** Registration fee tiers, earliest first. See `currentFee`. */
   fees: FeeTier[];
 }
@@ -53,6 +59,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     qr: "/qrmedhack.png",
     originalityTemplateUrl:
       "https://docs.google.com/document/d/12qEaJLfTeOMSdf9wCd50p3zsopmMw63A191xvI2QYpA/edit?usp=drivesdk",
+    guidebookUrl:
+      "https://drive.google.com/file/d/1_G3Ancvkj_6P_xzhrwJGJw0Kf8I_xmGR/view?usp=sharing",
     fees: [
       { label: "Early Bird", amount: 200_000, until: "2026-07-27" },
       { label: "Normal", amount: 220_000, until: "2026-08-22" },
@@ -74,6 +82,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     qr: "/qrhealthyneer.png",
     originalityTemplateUrl:
       "https://docs.google.com/document/d/1706y-HFKhKQvfAVP0-W47DuODTvm5cFnTFtPiblDFBA/edit?usp=drivesdk",
+    guidebookUrl:
+      "https://drive.google.com/file/d/1VQNpWrcQ4JSPgUojqUm6k3ctEg__Y7ob/view?usp=sharing",
     fees: [
       { label: "Early Bird", amount: 175_000, until: "2026-07-19" },
       { label: "Normal", amount: 200_000, until: "2026-07-31" },
@@ -96,6 +106,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     qr: "/qrhealthynovation.png",
     originalityTemplateUrl:
       "https://docs.google.com/document/d/1Ei7ZYa37yngw3fgjnhtIgKXOFlvYnhKsxmruCTteX20/edit?usp=drivesdk",
+    guidebookUrl:
+      "https://drive.google.com/file/d/1Jmxf4J3TvJuj1DkLs_GGsOWKUSN0N992/view?usp=sharing",
     fees: [
       { label: "Early Bird", amount: 80_000, until: "2026-07-19" },
       { label: "Normal", amount: 100_000, until: "2026-07-31" },
