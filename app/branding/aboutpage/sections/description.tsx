@@ -14,7 +14,7 @@ export function Description() {
       className="flex w-full flex-col items-center pt-20 pb-12 sm:pt-24 sm:pb-16"
     >
       {/* Mobile-only glass container to make the hero stand out; transparent on desktop */}
-      <div className="flex w-full max-w-4xl flex-col items-center rounded-3xl border border-white/15 bg-white/10 px-5 py-6 shadow-xl backdrop-blur-md sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none sm:backdrop-blur-none">
+      <div className="flex w-full max-w-4xl flex-col items-center rounded-3xl border border-white/15 bg-white/[0.12] px-5 py-6 shadow-xl sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none">
       <motion.div variants={fadeUp} className="w-full max-w-4xl">
         <Image
           src="/aboutheronest.webp"

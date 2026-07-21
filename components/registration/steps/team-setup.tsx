@@ -5,7 +5,6 @@ import { Users, Check, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RegistrationInput } from "../registration-input";
 import { SectionLabel } from "../section-label";
-import { formatIDR } from "@/lib/payment";
 import {
   competitionsForCategory,
   currentFee,
@@ -26,15 +25,6 @@ interface TeamSetupProps {
   onSelectSize: (n: number) => void;
   onNext: () => void;
 }
-
-const titleGradient: React.CSSProperties = {
-  backgroundImage:
-    "linear-gradient(90deg, rgb(var(--brand-green)) 0%, rgb(var(--brand-teal)) 60%, rgb(var(--brand-emerald)) 100%)",
-  WebkitBackgroundClip: "text",
-  backgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  color: "transparent",
-};
 
 export function TeamSetup({
   category,
@@ -60,7 +50,7 @@ export function TeamSetup({
   const canNext = !!competition && !!teamName.trim() && teamSize != null;
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-lg">
+    <div className="flex w-full flex-col gap-8">
       <section className="flex flex-col gap-4">
         <SectionLabel icon={Trophy}>Choose a Competition</SectionLabel>
         <div className="flex flex-col gap-5">
@@ -69,10 +59,10 @@ export function TeamSetup({
               {/* Category divider — keeps Undergraduate and Highschool
                   competitions from ever reading as one flat, unlabeled list. */}
               <div className="flex items-center gap-3">
-                <span className="text-xs font-black uppercase tracking-[0.15em] text-brand-green/60">
+                <span className="text-xs font-bold uppercase tracking-[0.15em] text-brand-cream/45">
                   {group.label}
                 </span>
-                <span className="h-px flex-1 bg-brand-green/15" />
+                <span className="h-px flex-1 bg-brand-cream/12" />
               </div>
 
               <div className="flex flex-col gap-3">
@@ -91,18 +81,19 @@ export function TeamSetup({
                       disabled={disabled}
                       aria-pressed={active}
                       className={cn(
-                        "group relative overflow-hidden rounded-3xl p-4 text-left transition-all duration-150",
-                        "bg-gradient-to-br from-white/95 to-brand-cream/60",
-                        disabled && "cursor-not-allowed opacity-55 grayscale",
-                        !disabled && "hover:-translate-y-0.5",
+                        // Dark option cards, to match the wizard surface they
+                        // now sit on. Selection is carried by a lime ring +
+                        // tinted fill rather than by a glow, which at this size
+                        // just smeared into the neighbouring card.
+                        "group relative overflow-hidden rounded-xl p-4 text-left transition-colors duration-150",
+                        disabled && "cursor-not-allowed opacity-45",
+                        "border",
                         active
-                          ? "ring-2 ring-brand-lime shadow-[0_0_30px_-6px_rgb(var(--brand-lime)/0.75)]"
-                          : "ring-1 ring-white/50 shadow-md",
-                        !disabled && !active && "hover:shadow-lg",
+                          ? "border-brand-lime bg-brand-lime/[0.10]"
+                          : "border-brand-cream/15 bg-brand-cream/[0.05]",
+                        !disabled && !active && "hover:border-brand-cream/30 hover:bg-brand-cream/[0.09]",
                       )}
                     >
-                      <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br from-brand-lime/40 to-brand-teal/10 blur-2xl transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
-
                       <div className="relative flex items-start gap-4">
                         <div className="flex h-14 w-14 shrink-0 items-center justify-center">
                           <span className="relative block h-full w-full">
@@ -118,34 +109,25 @@ export function TeamSetup({
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <h3 className="truncate text-lg font-extrabold" style={titleGradient}>
+                            <h3 className="truncate text-lg font-bold text-brand-cream">
                               {c.name}
                             </h3>
                             <span
                               className={cn(
-                                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-all",
-                                active
-                                  ? "bg-gradient-to-br from-brand-lime to-brand-cream scale-100"
-                                  : "scale-0",
+                                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-transform",
+                                active ? "scale-100 bg-brand-lime" : "scale-0",
                               )}
                             >
-                              <Check className="h-4 w-4 stroke-[3] text-brand-teal" />
+                              <Check className="h-4 w-4 stroke-[3] text-brand-green" />
                             </span>
                           </div>
                           <div className="mt-1.5 flex flex-wrap gap-1.5">
                             <Pill>{c.minSize}–{c.maxSize} members</Pill>
-                            {/* The fee decides which competition people enter,
-                                so it belongs here rather than on the last step. */}
-                            {fee && (
-                              <Pill>
-                                {formatIDR(fee.amount)} · {fee.label}
-                              </Pill>
-                            )}
                             {disabled && (
                               <Pill tone="muted">Registration closed</Pill>
                             )}
                           </div>
-                          <p className="mt-2 text-xs font-medium leading-relaxed text-brand-green/70">
+                          <p className="mt-2 text-xs font-medium leading-relaxed text-brand-cream/55">
                             {c.blurb}
                           </p>
                         </div>
@@ -163,6 +145,7 @@ export function TeamSetup({
         <SectionLabel icon={Users}>Team Name</SectionLabel>
         <RegistrationInput
           icon={Users}
+          tone="dark"
           label="Team name"
           placeholder="Enter your team name"
           maxLength={80}
@@ -174,13 +157,13 @@ export function TeamSetup({
       <section className="flex flex-col gap-3">
         <SectionLabel icon={Users}>
           Team Size
-          <span className="ml-2 text-xs font-semibold text-brand-green/60">
+          <span className="ml-2 text-xs font-medium text-brand-cream/45">
             {cfg ? `including leader · ${cfg.minSize}–${cfg.maxSize}` : "pick a competition first"}
           </span>
         </SectionLabel>
         <div className="flex flex-wrap gap-3">
           {sizes.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-brand-green/25 px-4 py-3 text-xs font-semibold text-brand-green/50">
+            <div className="rounded-2xl border border-dashed border-brand-cream/20 px-4 py-3 text-xs font-medium text-brand-cream/45">
               Select a competition to choose your team size.
             </div>
           )}
@@ -193,10 +176,10 @@ export function TeamSetup({
                 onClick={() => onSelectSize(n)}
                 aria-pressed={active}
                 className={cn(
-                  "relative h-16 w-16 rounded-2xl text-2xl font-black transition-all duration-150",
+                  "relative h-14 w-14 rounded-xl text-lg font-bold transition-colors duration-150",
                   active
-                    ? "scale-105 bg-gradient-to-br from-brand-lime to-brand-cream text-brand-teal shadow-[0_8px_20px_-6px_rgb(var(--brand-lime)/0.8)] ring-2 ring-brand-lime"
-                    : "bg-white/70 text-brand-green/80 ring-1 ring-white/60 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-md",
+                    ? "border border-brand-lime bg-brand-lime text-brand-green"
+                    : "border border-brand-cream/15 bg-brand-cream/[0.06] text-brand-cream/70 hover:border-brand-cream/30 hover:bg-brand-cream/[0.12] hover:text-brand-cream",
                 )}
               >
                 {n}
@@ -232,8 +215,8 @@ function Pill({
       className={cn(
         "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
         tone === "muted"
-          ? "bg-brand-green/70 text-brand-cream"
-          : "bg-brand-green/10 text-brand-green",
+          ? "bg-brand-cream/10 text-brand-cream/50"
+          : "bg-brand-lime/12 text-brand-lime/90",
       )}
     >
       {children}

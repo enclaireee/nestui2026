@@ -27,25 +27,27 @@ const CARDS = [
 ];
 
 export function Theme() {
+    // One panel is always open. The old version let all three toggle
+    // independently, which left the row ragged and gave the section no
+    // resting state — there was never a "correct" thing to look at.
+    const [active, setActive] = useState(0);
+
     return (
         <section className="flex flex-col w-full mt-10 px-6 py-12 items-center overflow-hidden">
 
-            <div className="relative flex flex-col items-center text-center">
-                {/* Shadow and gradient layer animate separately but on the same
-                    timing, so the blurred layer never lags behind the text.
-                    A shared wrapper isn't an option: the shadow is absolutely
-                    positioned against this flex container. */}
+            {/* PERF: each heading here used to be rendered TWICE — a second
+                copy underneath with `blur-[10px]`, faking a drop shadow. A CSS
+                filter forces its own compositing layer and re-rasterises a
+                full-size blurred surface of a `text-8xl` string; four of those
+                sat permanently behind this section and had to be recomposited
+                on every frame of the panel transition below. `text-shadow` is
+                painted inline with the glyphs, costs no extra layer, and looks
+                the same at this blur radius. */}
+            <div className="flex flex-col items-center text-center">
                 <motion.h2
                     {...entry}
                     transition={{ duration, ease }}
-                    className="absolute text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold text-brand-green/[0.76] blur-[10px] opacity-100 select-none"
-                >
-                    The theme is...
-                </motion.h2>
-                <motion.h2
-                    {...entry}
-                    transition={{ duration, ease }}
-                    className="relative text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold bg-gradient-to-t from-brand-lime to-brand-cream bg-clip-text text-transparent"
+                    className="text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold bg-gradient-to-t from-brand-lime to-brand-cream bg-clip-text text-transparent [text-shadow:0_4px_18px_rgb(var(--brand-green)/0.55)]"
                 >
                     The theme is...
                 </motion.h2>
@@ -53,16 +55,10 @@ export function Theme() {
                 <motion.div
                     {...entry}
                     transition={{ duration, ease, delay: 0.12 }}
-                    className="relative mt-6 px-4 max-w-5xl"
+                    className="mt-6 px-4 max-w-5xl"
                 >
                     <p
-                        className="absolute inset-0 px-4 text-lg sm:text-xl md:text-4xl font-bold text-brand-green/[0.76] blur-[10px] opacity-100 select-none pb-2"
-                        style={{ lineHeight: 1.5 }}
-                    >
-                        “Shaping the future of Healthcare Through Intelligent and Inclusive Innovation”
-                    </p>
-                    <p
-                        className="relative text-lg sm:text-xl md:text-4xl font-bold bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent pb-2"
+                        className="text-lg sm:text-xl md:text-4xl font-bold bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent pb-2 [text-shadow:0_3px_14px_rgb(var(--brand-green)/0.5)]"
                         style={{ lineHeight: 1.5 }}
                     >
                         “Shaping the future of Healthcare Through Intelligent and Inclusive Innovation”
@@ -70,80 +66,171 @@ export function Theme() {
                 </motion.div>
             </div>
 
-            {/* items-start so an expanded card grows on its own without
-                stretching its row-mates. */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl mt-12 md:mt-16 relative z-10 items-start">
+            {/* Below lg this is a vertical accordion (flex-col, panels grow in
+                height); at lg+ the same markup becomes a horizontal filmstrip
+                (flex-row, panels grow in width). One implementation, one state,
+                both axes — flex-grow doesn't care which direction it runs in. */}
+            <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={inViewOnce}
+                variants={{ show: { transition: { staggerChildren: 0.1 } } }}
+                className="mt-12 md:mt-16 flex w-full max-w-7xl flex-col gap-4 lg:h-[440px] lg:flex-row lg:gap-5"
+            >
                 {CARDS.map((c, i) => (
-                    <ThemeCard key={c.title} {...c} delay={i * 0.12} />
+                    <ThemePanel
+                        key={c.title}
+                        index={i}
+                        title={c.title}
+                        desc={c.desc}
+                        expanded={i === active}
+                        onSelect={() => setActive(i)}
+                    />
                 ))}
-            </div>
+            </motion.div>
         </section>
     );
 }
 
-
-interface ThemeCardProps {
+interface ThemePanelProps {
+    index: number;
     title: string;
     desc: string;
-    /** Stagger offset in seconds across the card row. */
-    delay?: number;
+    expanded: boolean;
+    onSelect: () => void;
 }
 
-function ThemeCard({ title, desc, delay = 0 }: ThemeCardProps) {
-    const [open, setOpen] = useState(false);
-
+function ThemePanel({ index, title, desc, expanded, onSelect }: ThemePanelProps) {
     return (
         <motion.div
-            {...entry}
-            transition={{ duration, ease, delay }}
-            className={`group relative flex flex-col justify-between min-h-[250px] p-8 border rounded-3xl bg-white/15 backdrop-blur-md shadow-2xl transition-colors duration-200 ${
-                open
-                    ? "border-brand-lime/50 bg-white/25"
-                    : "border-white/20 hover:bg-white/25 hover:border-white/30"
-            }`}
+            variants={{
+                hidden: { opacity: 0, ...offset.up },
+                show: { ...rest, transition: { duration, ease } },
+            }}
+            // The expansion itself: a CSS transition on flex-grow. Native,
+            // interruptible, and it already obeys the global
+            // prefers-reduced-motion rule in globals.css — none of which is
+            // true of a JS-driven height animation.
+            //
+            // The grow/basis pair is lg-only ON PURPOSE. Below lg the row is a
+            // column with no fixed height, and `basis-0` there gave every panel
+            // a zero base size with no free space to grow into — they collapsed
+            // to ~100px and the titles were clipped away entirely. So: content
+            // height on mobile (the description's grid-rows accordion does the
+            // expanding), proportional widths from lg up.
+            // PERF: no backdrop-filter and no cursor-tracked blob. Both were
+            // re-rasterising large areas on every frame of this transition;
+            // the glass is a flat translucent fill instead, which over the
+            // backdrop reads near-identically and costs nothing.
+            className={`group relative flex basis-auto grow-0 flex-col overflow-hidden rounded-3xl border p-7 text-left
+                transition-[flex-grow,background-color,border-color] duration-300 ease-out
+                lg:basis-0 lg:p-8
+                ${expanded ? "lg:grow-[2.6]" : "lg:grow"}
+                ${
+                    expanded
+                        ? "border-brand-lime/45 bg-white/[0.28] lg:bg-white/[0.22]"
+                        : "border-white/20 bg-white/[0.16] hover:border-white/35 lg:bg-white/[0.10] lg:hover:bg-white/[0.16]"
+                }`}
         >
-            <div>
-                <div className="relative w-full text-center">
-                    <h3 className="absolute inset-x-0 top-0 pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide text-brand-green/[0.76] blur-[8px] opacity-100 select-none">
-                        {title}
-                    </h3>
-                    <h3 className="relative pt-4 text-xl sm:text-3xl font-extrabold leading-snug tracking-wide bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent transition-colors duration-300 group-hover:from-white group-hover:to-white">
-                        {title}
-                    </h3>
-                </div>
+            {/* Top-edge highlight: the one-pixel bright line along the upper
+                border is most of what separates real glass from a translucent
+                rectangle. Brightens on the open panel. */}
+            <div
+                aria-hidden
+                className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent transition-opacity duration-500 ${
+                    expanded ? "via-brand-lime/70 opacity-100" : "via-white/60 opacity-70"
+                }`}
+            />
 
-                {/* Description mounts on open; a one-shot opacity+translate
-                    (GPU-composited) fades it in — no per-frame layout animation. */}
-                {open && (
-                    <div className="mt-6 border-t border-white/25 pt-5 text-left animate-in fade-in slide-in-from-top-2 duration-300">
-                        <p className="text-sm sm:text-base leading-relaxed text-white/90">
+            {/* Oversized index watermark, anchored bottom-right so it fills
+                the lower half of the panel rather than leaving it empty. */}
+            <span
+                aria-hidden
+                className={`pointer-events-none absolute -bottom-8 -right-3 select-none text-[9rem] font-extrabold leading-none transition-all duration-300 ${
+                    expanded ? "text-brand-lime/[0.12]" : "text-white/[0.07] group-hover:text-white/[0.12]"
+                }`}
+            >
+                {index + 1}
+            </span>
+
+            <button
+                type="button"
+                onClick={onSelect}
+                onFocus={onSelect}
+                aria-expanded={expanded}
+                aria-controls={`subtheme-panel-${index}`}
+                // Stretched hit area — the ::after has no `relative` on this
+                // button, so it anchors to the panel and covers the whole
+                // thing. It's applied ONLY while collapsed: an open panel's
+                // click is a no-op anyway, and a full-bleed overlay there
+                // would make its description impossible to select.
+                className={`z-10 text-left focus-visible:outline-none ${
+                    expanded ? "" : "after:absolute after:inset-0 after:content-['']"
+                }`}
+            >
+                <span className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.14em] text-brand-lime/90">
+                    <span
+                        className={`h-px bg-brand-lime/60 transition-all duration-300 ease-out ${
+                            expanded ? "w-10" : "w-6"
+                        }`}
+                    />
+                    Subtheme {String(index + 1).padStart(2, "0")}
+                </span>
+
+                {/* Scale, not font-size. Animating font-size relayouts and
+                    rewraps the text every frame — that was the jank. A
+                    transform is composited, so the growth is genuinely smooth,
+                    and origin-left keeps it pinned to the column edge.
+                    `break-words` is the belt-and-braces for the longest name. */}
+                {/* Scale, not font-size. Animating font-size relayouts and
+                    rewraps the text every frame — that was the jank. A
+                    transform is composited, so the growth is genuinely smooth.
+                    The paired 80% width is what keeps it honest: scaling 1.25
+                    from origin-top-left pushes the right edge 25% past the box,
+                    and the panel's overflow-hidden was chopping the longest
+                    title. 0.8 × 1.25 = 1, so it lands exactly on the column. */}
+                <h3
+                    className={`mt-4 origin-top-left break-words text-2xl font-extrabold leading-tight tracking-wide text-white transition-transform duration-300 ease-out ${
+                        expanded ? "lg:w-4/5 lg:scale-[1.25]" : "lg:w-full lg:scale-100"
+                    }`}
+                >
+                    {title}
+                </h3>
+            </button>
+
+            {/* Description. `grid-template-rows: 0fr → 1fr` is the native way
+                to animate to height:auto — no measuring, no JS, no jump. The
+                old version mounted this with `{open && …}`, so it appeared
+                instantly at full height and shoved the page down.
+
+                The inner wrapper is width-locked at lg so the copy doesn't
+                reflow while the panel is still growing; the panel's
+                overflow-hidden clips it instead of rewrapping every frame. */}
+            <div
+                id={`subtheme-panel-${index}`}
+                // Asymmetric timing is what sells it: on open the copy waits
+                // ~120ms so the panel is already moving before text appears;
+                // on close it drops out immediately so it never lingers over a
+                // shrinking panel. Same trick both directions would read as
+                // sluggish one way and abrupt the other.
+                className={`relative z-10 grid transition-[grid-template-rows,opacity] ease-out ${
+                    expanded
+                        ? "grid-rows-[1fr] opacity-100 duration-300"
+                        : "grid-rows-[0fr] opacity-0 duration-200"
+                }`}
+            >
+                <div className="overflow-hidden">
+                    {/* Width-locked at lg so the copy doesn't rewrap on every
+                        frame while the panel is still growing; the panel's
+                        overflow-hidden clips it instead. */}
+                    <div className="pt-6 lg:w-[380px]">
+                        <div className="h-px w-full bg-gradient-to-r from-brand-lime/50 to-transparent" />
+                        <p className="mt-5 text-sm leading-relaxed text-white/90 lg:text-base">
                             {desc}
                         </p>
                     </div>
-                )}
+                </div>
             </div>
-
-            <button
-                onClick={() => setOpen((v) => !v)}
-                aria-expanded={open}
-                className="btn-brand mt-8 px-6 py-2.5 text-sm"
-            >
-                <span>{open ? "Show Less" : "See Details"}</span>
-                <svg
-                    className={`h-4 w-4 stroke-[3] text-brand-teal transition-transform duration-200 ${
-                        open ? "rotate-90" : ""
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                    />
-                </svg>
-            </button>
         </motion.div>
     );
 }

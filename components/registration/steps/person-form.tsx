@@ -42,8 +42,8 @@ export function PersonForm({
           <User className="h-5 w-5" />
         </span>
         <div>
-          <h3 className="text-xl font-bold leading-tight text-brand-green">{title}</h3>
-          <p className="text-xs font-medium text-brand-green/60">Personal &amp; contact details</p>
+          <h3 className="text-xl font-bold leading-tight text-brand-cream">{title}</h3>
+          <p className="text-xs font-medium text-brand-cream/50">Personal &amp; contact details</p>
         </div>
       </div>
 
@@ -53,6 +53,7 @@ export function PersonForm({
           plain field names rather than a section-scoped token. */}
       <div className="flex flex-col gap-4">
         <RegistrationInput
+          tone="dark"
           icon={User}
           label="Full name"
           placeholder="e.g. Budi Santoso"
@@ -62,6 +63,7 @@ export function PersonForm({
           onChange={(e) => onChange("name", e.target.value)}
         />
         <RegistrationInput
+          tone="dark"
           icon={Mail}
           type="email"
           label="Email"
@@ -73,6 +75,7 @@ export function PersonForm({
           onChange={(e) => onChange("email", e.target.value)}
         />
         <RegistrationInput
+          tone="dark"
           icon={Phone}
           type="tel"
           label="Phone number"
@@ -85,6 +88,7 @@ export function PersonForm({
           onChange={(e) => onChange("phone", e.target.value)}
         />
         <RegistrationInput
+          tone="dark"
           icon={IdCard}
           label={cfg.studentIdLabel}
           placeholder={cfg.studentIdLabel}
@@ -93,6 +97,7 @@ export function PersonForm({
           onChange={(e) => onChange("studentId", e.target.value)}
         />
         <RegistrationInput
+          tone="dark"
           icon={Building}
           label={cfg.institutionLabel}
           placeholder={`Your ${cfg.institutionLabel.toLowerCase()}`}
@@ -103,6 +108,7 @@ export function PersonForm({
         />
         {cfg.hasMajor && (
           <RegistrationInput
+            tone="dark"
             icon={BookOpen}
             label="Major / Jurusan"
             placeholder="e.g. Electrical Engineering"
@@ -115,7 +121,7 @@ export function PersonForm({
 
       <div className="flex flex-col gap-3 border-t border-brand-green/10 pt-4">
         <SectionLabel icon={Upload}>Confirmation</SectionLabel>
-        <div className="rounded-xl bg-brand-green/5 px-3 py-2.5 text-xs leading-relaxed text-brand-green/80 ring-1 ring-brand-green/10">
+        <div className="rounded-xl bg-brand-cream/[0.05] px-3 py-2.5 text-xs leading-relaxed text-brand-cream/65 border border-brand-cream/15">
           <p className="font-semibold">
             Submit one Google Drive folder containing all of the following:
           </p>
@@ -127,7 +133,7 @@ export function PersonForm({
                 href="https://instagram.com/nest_ui"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-brand-teal underline decoration-brand-lime underline-offset-2 hover:text-brand-green"
+                className="font-semibold text-brand-lime underline decoration-brand-lime underline-offset-2 hover:text-brand-lime"
               >
                 @nest_ui
               </a>{" "}
@@ -137,6 +143,7 @@ export function PersonForm({
           </ul>
         </div>
         <RegistrationInput
+          tone="dark"
           icon={LinkIcon}
           type="url"
           label="Confirmation folder link"
@@ -151,7 +158,7 @@ export function PersonForm({
       {originality && (
         <div className="flex flex-col gap-3 border-t border-brand-green/10 pt-4">
           <SectionLabel icon={FileSignature}>Letter of Originality</SectionLabel>
-          <div className="rounded-xl bg-brand-green/5 px-3 py-2.5 text-xs leading-relaxed text-brand-green/80 ring-1 ring-brand-green/10">
+          <div className="rounded-xl bg-brand-cream/[0.05] px-3 py-2.5 text-xs leading-relaxed text-brand-cream/65 border border-brand-cream/15">
             <p>
               Open the {cfg.name} template below, copy it, fill and sign it, then upload
               the signed copy to Google Drive and paste the link here. One letter per
@@ -161,12 +168,13 @@ export function PersonForm({
               href={cfg.originalityTemplateUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1.5 inline-block font-semibold text-brand-teal underline decoration-brand-lime underline-offset-2 hover:text-brand-green"
+              className="mt-1.5 inline-block font-semibold text-brand-lime underline decoration-brand-lime underline-offset-2 hover:text-brand-lime"
             >
               Open the {cfg.name} letter of originality template →
             </a>
           </div>
           <RegistrationInput
+            tone="dark"
             icon={LinkIcon}
             type="url"
             label="Letter of originality link"

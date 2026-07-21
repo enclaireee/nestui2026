@@ -179,9 +179,17 @@ export function CompetitionModal({
   const registerHref =
     cfg.category === "sma" ? "/branding/registration/sma" : "/branding/registration";
 
+
+  // A tier whose window has already closed. `currentFee` tells us which one is
+  // live; anything with an earlier deadline is spent. Rendering those as
+  // struck-through rather than just dimmed means the fee strip now reads as a
+  // schedule — you can see what you missed and what's next, which the flat
+  // "opacity-60 on everything that isn't active" version couldn't show.
+  const today = new Date().toISOString().slice(0, 10);
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-in fade-in duration-150"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -189,21 +197,17 @@ export function CompetitionModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] border border-white/15 bg-brand-green/95 shadow-2xl ring-1 ring-white/5 animate-in fade-in zoom-in-95 duration-200"
+        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/15 bg-brand-green/95 shadow-2xl ring-1 ring-white/5 animate-in fade-in zoom-in-95 duration-200"
       >
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-lime/20 blur-3xl" />
-
         <div className="relative flex items-center gap-4 border-b border-white/10 p-6 pr-14">
-          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center">
-            <span className="relative block h-full w-full">
-              <Image
-                src={cfg.logo}
-                alt={`${cfg.name} logo`}
-                fill
-                sizes="80px"
-                className="object-contain drop-shadow-[0_0_14px_rgba(227,239,38,0.35)]"
-              />
-            </span>
+          <div className="relative h-20 w-20 shrink-0">
+            <Image
+              src={cfg.logo}
+              alt={`${cfg.name} logo`}
+              fill
+              sizes="80px"
+              className="object-contain drop-shadow-[0_0_14px_rgba(227,239,38,0.35)]"
+            />
           </div>
           <div className="min-w-0">
             <h2 className="text-3xl font-bold text-gradient-brand">{cfg.name}</h2>
@@ -215,128 +219,178 @@ export function CompetitionModal({
 
           <button
             onClick={onClose}
-            className="absolute right-5 top-5 text-white/60 transition-colors hover:text-white focus:outline-none"
+            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/70 ring-1 ring-white/10 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
             aria-label="Close"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex flex-col gap-8 overflow-y-auto px-6 py-7 [scrollbar-width:thin] [scrollbar-color:rgb(var(--brand-lime))_transparent]">
-          <p className="text-sm leading-relaxed text-white/75">{detail.about}</p>
+        <div className="overflow-y-auto px-6 py-7 [scrollbar-width:thin] [scrollbar-color:rgb(var(--brand-lime))_transparent]">
+          <p className="max-w-[68ch] text-sm leading-relaxed text-white/75">{detail.about}</p>
 
-          <Section icon={Layers} title="Tahapan Kompetisi">
-            <div className="flex flex-col gap-3">
-              {detail.stages.map((st, i) => (
-                <div key={st.name} className="flex gap-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-lime to-brand-cream text-sm font-black text-brand-teal">
-                    {i + 1}
-                  </div>
-                  <div>
-                    <p className="font-bold text-white">{st.name}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-white/60">{st.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
+          {/* Two columns from lg. All six sections used to stack in a single
+              672px-wide scroll, which made even the short competitions a long
+              drag to the register button. Same content, roughly half the
+              scroll — narrative on the left, the reference numbers you scan
+              for (prizes, fees, who to contact) on the right. */}
+          <div className="mt-8 grid gap-8 lg:grid-cols-5 lg:gap-10">
+            <div className="flex flex-col gap-8 lg:col-span-3">
+              <Section icon={Layers} title="Competition Stages">
+                {/* Connector line behind the numbers, so the stages read as a
+                    sequence instead of two unrelated rows. */}
+                <ol className="relative flex flex-col gap-5 before:absolute before:left-[17px] before:top-4 before:h-[calc(100%-2rem)] before:w-px before:bg-white/15">
+                  {detail.stages.map((st, i) => (
+                    <li key={st.name} className="relative flex gap-4">
+                      <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-lime to-brand-cream text-sm font-black text-brand-teal ring-4 ring-brand-green">
+                        {i + 1}
+                      </span>
+                      <div className="pt-1">
+                        <p className="font-bold text-white">{st.name}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-white/60">{st.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </Section>
 
-          <Section icon={CalendarDays} title="Timeline">
-            <ol className="relative ml-1 border-l border-white/15 pl-5">
-              {detail.timeline.map((t, i) => (
-                <li key={i} className="relative pb-4 last:pb-0">
-                  <span
-                    className={`absolute -left-[27px] top-1 h-3 w-3 rounded-full ring-4 ring-brand-green ${
-                      t.highlight ? "bg-brand-lime" : "bg-white/40"
-                    }`}
-                  />
-                  <p
-                    className={`text-sm font-semibold ${
-                      t.highlight ? "text-brand-lime" : "text-white/85"
-                    }`}
-                  >
-                    {t.label}
-                  </p>
-                  <p className="text-xs text-white/50">{t.date}</p>
-                </li>
-              ))}
-            </ol>
-          </Section>
-
-          <Section icon={Trophy} title="Prize Pool">
-            <div className="flex flex-col gap-2">
-              {detail.prizes.map((p) => (
-                <div
-                  key={p.label}
-                  className="flex items-center gap-3 rounded-xl bg-white/8 px-4 py-3 ring-1 ring-brand-lime/25"
-                >
-                  <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black bg-gradient-to-br ${RANK_STYLES[p.rank]}`}
-                  >
-                    {p.rank}
-                  </span>
-                  <span className="flex-1 text-sm font-semibold text-white/85">{p.label}</span>
-                  <span className="text-right text-sm font-bold text-brand-butter">{p.value}</span>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Section icon={Wallet} title="Biaya Registrasi">
-            <div className="flex flex-wrap gap-3">
-              {cfg.fees.map((f) => {
-                const active = f.label === activeFee?.label;
-                return (
-                  <div
-                    key={f.label}
-                    className={
-                      "flex-1 min-w-[120px] rounded-2xl p-4 text-center ring-1 " +
-                      (active
-                        ? "bg-brand-lime/10 ring-brand-lime/50"
-                        : "bg-white/5 ring-white/10 opacity-60")
-                    }
-                  >
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-white/50">
-                      {f.label}
-                    </p>
-                    <p className="mt-1 text-lg font-black text-brand-lime">
-                      {formatIDR(f.amount)}
-                    </p>
-                    {active && (
-                      <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-brand-lime/80">
-                        Berlaku sekarang
+              <Section icon={CalendarDays} title="Timeline">
+                <ol className="relative ml-1 border-l border-white/15 pl-5">
+                  {detail.timeline.map((t, i) => (
+                    <li key={i} className="relative pb-4 last:pb-0">
+                      <span
+                        className={`absolute -left-[27px] top-1 h-3 w-3 rounded-full ring-4 ring-brand-green ${
+                          t.highlight ? "bg-brand-lime" : "bg-white/40"
+                        }`}
+                      />
+                      <p
+                        className={`text-sm font-semibold ${
+                          t.highlight ? "text-brand-lime" : "text-white/85"
+                        }`}
+                      >
+                        {t.label}
                       </p>
-                    )}
-                  </div>
-                );
-              })}
+                      <p className="text-xs text-white/50">{t.date}</p>
+                    </li>
+                  ))}
+                </ol>
+              </Section>
             </div>
-          </Section>
 
-          <Section icon={Phone} title="Contact Person">
-            <div className="flex flex-wrap gap-2">
-              {COMPETITION_CONTACTS[competitionId].map((c) => (
-                <a
-                  key={c.name}
-                  href={waLink(c.phone)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-full bg-white/10 px-3 py-1.5 text-sm ring-1 ring-white/10 transition-colors hover:bg-white/20"
-                >
-                  <span className="font-bold text-white">{c.name}</span>{" "}
-                  <span className="text-white/60">· {c.phone}</span>
-                </a>
-              ))}
+            <div className="flex flex-col gap-8 lg:col-span-2">
+              <Section icon={Trophy} title="Prize Pool">
+                {/* Rank 1 gets a genuinely different treatment. Previously all
+                    three prizes were identical rows distinguished only by a
+                    24px badge, so the headline number didn't read as the
+                    headline. */}
+                <div className="flex flex-col gap-2.5">
+                  {detail.prizes.map((p) => (
+                    <div
+                      key={p.label}
+                      className={`flex items-center gap-3 rounded-2xl px-4 ring-1 ${
+                        p.rank === 1
+                          ? "bg-brand-lime/10 py-4 ring-brand-lime/40"
+                          : "bg-white/[0.06] py-3 ring-white/10"
+                      }`}
+                    >
+                      <span
+                        className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br font-black ${
+                          RANK_STYLES[p.rank]
+                        } ${p.rank === 1 ? "h-9 w-9 text-sm" : "h-7 w-7 text-xs"}`}
+                      >
+                        {p.rank}
+                      </span>
+                      {/* Label over value, not label | value. Side-by-side in
+                          a 2-of-5 column broke both halves onto two lines
+                          ("1st / Place", "Rp4,500,000 + / Certificate") — the
+                          prize amounts are long enough that they need the full
+                          row width to themselves. */}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-white/55">
+                          {p.label}
+                        </p>
+                        <p
+                          className={`font-bold text-brand-butter ${
+                            p.rank === 1 ? "text-base" : "text-sm"
+                          }`}
+                        >
+                          {p.value}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+
+              <Section icon={Wallet} title="Registration Fee">
+                <div className="flex flex-col gap-2">
+                  {cfg.fees.map((f) => {
+                    const active = f.label === activeFee?.label;
+                    const past = !active && f.until < today;
+                    return (
+                      <div
+                        key={f.label}
+                        className={`flex items-center justify-between gap-3 rounded-2xl px-4 py-3 ring-1 ${
+                          active
+                            ? "bg-brand-lime/10 ring-brand-lime/50"
+                            : "bg-white/[0.04] ring-white/10"
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <p
+                            className={`text-[11px] font-bold uppercase tracking-wide ${
+                              active ? "text-brand-lime/80" : "text-white/45"
+                            }`}
+                          >
+                            {f.label}
+                            {active && " · active now"}
+                            {past && " · closed"}
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-white/40">until {f.until}</p>
+                        </div>
+                        <p
+                          className={`shrink-0 text-base font-black ${
+                            active
+                              ? "text-brand-lime"
+                              : past
+                                ? "text-white/35 line-through"
+                                : "text-white/60"
+                          }`}
+                        >
+                          {formatIDR(f.amount)}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Section>
+
+              <Section icon={Phone} title="Contact Person">
+                <div className="flex flex-col gap-2">
+                  {COMPETITION_CONTACTS[competitionId].map((c) => (
+                    <a
+                      key={c.name}
+                      href={waLink(c.phone)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center justify-between gap-3 rounded-2xl bg-white/[0.06] px-4 py-3 ring-1 ring-white/10 transition-colors hover:bg-white/12 hover:ring-brand-lime/40"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-bold text-white">{c.name}</span>
+                        <span className="block text-xs text-white/50">{c.phone}</span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-brand-lime transition-transform group-hover:translate-x-0.5" />
+                    </a>
+                  ))}
+                </div>
+              </Section>
             </div>
-          </Section>
+          </div>
         </div>
 
         <div className="border-t border-white/10 p-4">
-          <Link
-            href={registerHref}
-            className="btn-brand w-full py-3.5 text-sm"
-          >
-            Daftar {cfg.name}
+          <Link href={registerHref} className="btn-brand w-full py-3.5 text-sm">
+            Register for {cfg.name}
             <ArrowRight className="h-5 w-5 stroke-[3]" />
           </Link>
         </div>
@@ -370,11 +424,11 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-lime/15">
+    <div className="flex items-center gap-2 border-b border-white/10 pb-2.5">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-lime/15">
         <Icon className="h-4 w-4 text-brand-lime" />
       </span>
-      <span className="text-lg font-bold text-white">{children}</span>
+      <span className="text-sm font-bold uppercase tracking-[0.1em] text-white/90">{children}</span>
     </div>
   );
 }

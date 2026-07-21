@@ -168,7 +168,7 @@ function Card({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
   return (
     <Reveal
       delay={delay}
-      className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm"
+      className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-6"
     >
       {children}
     </Reveal>

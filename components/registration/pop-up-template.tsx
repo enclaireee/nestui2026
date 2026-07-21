@@ -50,7 +50,7 @@ export function PopUpTemplate({
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
-      className="max-w-sm rounded-[2rem] border border-white/15 bg-brand-green/95 p-8 text-left text-white shadow-2xl ring-1 ring-white/5 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      className="max-w-sm rounded-[2rem] border border-white/15 bg-brand-green/95 p-8 text-left text-white shadow-2xl ring-1 ring-white/5 backdrop:bg-black/60"
     >
       <button
         type="button"

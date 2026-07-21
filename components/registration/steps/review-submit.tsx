@@ -33,16 +33,16 @@ export function ReviewSubmit({
     <div className="flex flex-col gap-6 w-full max-w-md">
       <div className="flex flex-col gap-3">
         <SectionLabel icon={Wallet}>Payment</SectionLabel>
-        <div className="rounded-2xl bg-brand-green/5 p-4 ring-1 ring-brand-green/10">
+        <div className="rounded-2xl bg-brand-cream/[0.05] p-4 border border-brand-cream/15">
           {fee && (
             <div className="mb-3 border-b border-brand-green/10 pb-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-brand-green/50">
+              <p className="text-xs font-bold uppercase tracking-wider text-brand-cream/45">
                 Amount to transfer
               </p>
-              <p className="mt-0.5 text-2xl font-bold text-brand-green">
+              <p className="mt-0.5 text-2xl font-bold text-brand-cream">
                 {formatIDR(fee.amount)}
               </p>
-              <p className="mt-0.5 text-xs text-brand-green/60">
+              <p className="mt-0.5 text-xs text-brand-cream/50">
                 {cfg?.name} · {fee.label} rate, until{" "}
                 {new Date(`${fee.until}T00:00:00+07:00`).toLocaleDateString("en-GB", {
                   day: "numeric",
@@ -54,12 +54,12 @@ export function ReviewSubmit({
             </div>
           )}
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-            <dt className="text-brand-green/50">Bank</dt>
-            <dd className="font-semibold text-brand-green">{PAYMENT_INFO.bank}</dd>
-            <dt className="text-brand-green/50">Account</dt>
-            <dd className="font-mono font-semibold text-brand-green">{PAYMENT_INFO.accountNumber}</dd>
-            <dt className="text-brand-green/50">Holder</dt>
-            <dd className="font-semibold text-brand-green">{PAYMENT_INFO.accountHolder}</dd>
+            <dt className="text-brand-cream/45">Bank</dt>
+            <dd className="font-semibold text-brand-cream">{PAYMENT_INFO.bank}</dd>
+            <dt className="text-brand-cream/45">Account</dt>
+            <dd className="font-mono font-semibold text-brand-cream">{PAYMENT_INFO.accountNumber}</dd>
+            <dt className="text-brand-cream/45">Holder</dt>
+            <dd className="font-semibold text-brand-cream">{PAYMENT_INFO.accountHolder}</dd>
           </dl>
         </div>
         <LinkField
@@ -80,7 +80,7 @@ export function ReviewSubmit({
 
       <div className="flex flex-col gap-3">
         <SectionLabel icon={ClipboardList}>Review</SectionLabel>
-        <div className="rounded-2xl bg-white/70 p-4 text-sm text-brand-green ring-1 ring-brand-green/10">
+        <div className="rounded-2xl bg-brand-cream/[0.05] p-4 text-sm text-brand-cream border border-brand-cream/15">
           {cfg && (
             <div className="mb-2 flex items-center gap-2 border-b border-brand-green/10 pb-2">
               <span className="relative block h-7 w-7 shrink-0">
@@ -152,7 +152,7 @@ function LinkField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex h-12 w-full rounded-xl border-none bg-white/90 py-2 pl-10 pr-4 text-sm text-brand-green placeholder:text-gray-400 shadow-sm ring-1 ring-brand-green/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
+        className="flex h-12 w-full rounded-xl border-none bg-brand-cream/[0.06] py-2 pl-10 pr-4 text-sm text-brand-cream placeholder:text-brand-cream/30 shadow-sm border border-brand-cream/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
       />
     </div>
   );
@@ -161,7 +161,7 @@ function LinkField({
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4 border-b border-brand-green/10 py-1 last:border-0">
-      <span className="font-semibold text-brand-green/70">{label}</span>
+      <span className="font-semibold text-brand-cream/60">{label}</span>
       <span className="text-right font-medium">{value}</span>
     </div>
   );

@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { GlassCard } from "@/components/registration/glass-card";
 import { friendlyAuthError } from "@/lib/auth-errors";
 
 interface AuthFormProps {
-  /** Omitted on forgot-password, where the page shell's h1 is the only title. */
-  heading?: string;
   /** Button copy: resting, then while the request is in flight. */
   submitLabel: string;
   pendingLabel: string;
@@ -24,7 +21,6 @@ interface AuthFormProps {
 }
 
 export function AuthForm({
-  heading,
   submitLabel,
   pendingLabel,
   children,
@@ -49,34 +45,43 @@ export function AuthForm({
     }
   }
 
+  // No card. The references wrap their auth fields in nothing at all — a
+  // bordered panel floating on a page that is already a single flat colour
+  // just draws a box around empty contrast. The form sits directly on the
+  // shell's brand-green.
   return (
-    <div className="flex flex-col gap-6">
-      <GlassCard className="lg:p-12">
-        {done ?? (
-          <form onSubmit={handleSubmit}>
-            {heading && (
-              <h2 className="mb-6 text-2xl font-bold text-brand-green md:mb-8 md:text-3xl">
-                {heading}
-              </h2>
-            )}
-            <div className="flex flex-col gap-4 md:gap-5">
-              {children}
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <button type="submit" disabled={isLoading} className="btn-brand mt-2 w-full px-4 py-2.5 text-sm md:py-3.5 md:text-base">
-                {isLoading ? pendingLabel : submitLabel}
-              </button>
-            </div>
-            {footer && (
-              <div className="mt-4 text-center text-sm text-brand-green md:mt-6 md:text-base">
-                {footer}
-              </div>
-            )}
-          </form>
-        )}
-      </GlassCard>
+    <div className="flex flex-col">
+      {done ?? (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {children}
+
+          {error && (
+            <p
+              role="alert"
+              className="rounded-xl bg-red-500/10 px-3.5 py-2.5 text-sm font-medium text-red-300 ring-1 ring-red-500/25"
+            >
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="btn-brand mt-1 h-12 w-full text-sm"
+          >
+            {isLoading ? pendingLabel : submitLabel}
+          </button>
+        </form>
+      )}
+
+      {footer && (
+        <div className="mt-7 border-t border-brand-cream/10 pt-5 text-center text-sm text-brand-cream/55">
+          {footer}
+        </div>
+      )}
     </div>
   );
 }
 
-/** Every auth field is the same input at the same size. */
-export const authFieldClass = "md:h-14 md:text-base";
+/** Every auth field is the same input at the same size, on the dark shell. */
+export const authFieldClass = "h-12";

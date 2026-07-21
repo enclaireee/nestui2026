@@ -46,7 +46,7 @@ export function PastSponsors() {
 
         <motion.div
           variants={fadeUp}
-          className="mt-10 sm:mt-14 rounded-3xl border border-white/10 bg-white/5 p-4 sm:p-8 backdrop-blur-sm"
+          className="mt-10 sm:mt-14 rounded-3xl border border-white/10 bg-white/[0.07] p-4 sm:p-8"
         >
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-5">
             {logos.map((src) => (
