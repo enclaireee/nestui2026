@@ -25,7 +25,6 @@ export function LoginForm() {
 
   return (
     <AuthForm
-      heading="Welcome Back!"
       submitLabel="Login"
       pendingLabel="Logging in..."
       onSubmit={login}
@@ -47,6 +46,7 @@ export function LoginForm() {
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
       <RegistrationInput
@@ -58,13 +58,17 @@ export function LoginForm() {
         required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
+      {/* Right-aligned under the password field, the way every reference does
+          it. Was `text-brand-green/80` — dark green on the new dark green
+          shell, i.e. completely invisible. */}
       <Link
         href="/auth/forgot-password"
-        className="-mt-2 text-xs font-semibold text-brand-green/80 underline-offset-4 hover:underline md:text-sm"
+        className="-mt-1 self-end text-xs font-medium text-brand-cream/55 underline-offset-4 transition-colors hover:text-brand-lime hover:underline"
       >
-        Forgot Password?
+        Forgot password?
       </Link>
     </AuthForm>
   );

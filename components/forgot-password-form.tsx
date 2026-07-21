@@ -19,15 +19,15 @@ export function ForgotPasswordForm() {
     if (error) throw error;
     // Returning a node swaps it in for the form — see AuthForm.
     return (
-      <>
-        <h2 className="mb-2 text-2xl font-bold text-brand-green md:text-3xl">
-          Check Your Email
-        </h2>
-        <p className="text-sm text-brand-green/80 md:text-base">
+      // Confirmation state. Recoloured for the dark shell — this was
+      // brand-green text, which on the new background was invisible.
+      <div className="rounded-xl bg-brand-lime/[0.08] px-5 py-6 text-center ring-1 ring-brand-lime/25">
+        <p className="text-base font-bold text-brand-cream">Check your email</p>
+        <p className="mt-2 text-sm leading-relaxed text-brand-cream/60">
           If you registered using your email and password, you will receive a
           password reset email.
         </p>
-      </>
+      </div>
     );
   }
 
@@ -54,10 +54,11 @@ export function ForgotPasswordForm() {
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
-      <p className="-mt-2 text-xs font-semibold text-brand-green/80 md:text-sm">
-        Enter your email to send the verification link
+      <p className="-mt-1 text-xs text-brand-cream/45">
+        Enter your email to send the verification link.
       </p>
     </AuthForm>
   );

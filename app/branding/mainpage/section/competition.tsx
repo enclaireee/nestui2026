@@ -74,119 +74,111 @@ const CompetitionTitle: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+const CARDS = [
+  {
+    id: "medhack" as const,
+    description:
+      "A team hackathon competition (3–5 participants) that challenges participants to develop healthcare-technology-based business solutions by designing an innovative, impactful business model and digital product.",
+  },
+  {
+    id: "healthineer" as const,
+    description:
+      "A team competition (3–5 participants) to develop healthcare technology solutions in the form of an innovative, applicable scientific paper and prototype with real implementation potential.",
+  },
+  {
+    id: "healthynovation" as const,
+    description:
+      "A scientific paper competition for highschool students (1–3 participants) that encourages innovative ideas to address healthcare challenges through a scientific paper and poster.",
+  },
+];
+
 interface CompetitionCardProps {
-  title: string;
+  id: CompetitionId;
   description: string;
-  logoSrc: string;
-  titleGradient: string;
-  descGradient: string;
   onDetails: () => void;
+  /** Wide horizontal treatment — used for the lone Highschool card. */
+  featured?: boolean;
   /** Stagger offset in seconds when several cards share a row. */
   delay?: number;
 }
 
 const CompetitionCard: React.FC<CompetitionCardProps> = ({
-  title,
+  id,
   description,
-  logoSrc,
-  titleGradient,
-  descGradient,
   onDetails,
+  featured = false,
   delay = 0,
 }) => {
+  const competition = COMPETITIONS[id];
+
   return (
     <motion.div
       initial={{ opacity: 0, ...offset.up }}
       whileInView={rest}
       viewport={inViewOnce}
       transition={{ duration, ease, delay }}
-      // Hover lift lives here, not in a `hover:-translate-y-1` class: framer
-      // writes an inline transform, which a Tailwind hover transform can't beat.
-      whileHover={{ y: -6 }}
-      className="group relative flex flex-col sm:flex-row items-center p-6 gap-6 overflow-hidden"
-      style={{
-        width: "100%",
-        maxWidth: "537px",
-        minHeight: "299px",
-        background:
-          "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 100%)",
-        boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.45)",
-        borderRadius: "24px",
-        border: "1px solid rgba(255,255,255,0.18)",
-      }}
+      className="flex"
     >
-      <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-gradient-to-br from-brand-lime/30 to-brand-teal/0 blur-3xl transition-opacity duration-300 opacity-60 group-hover:opacity-100" />
+    <div
+      // PERF: the 3D tilt and the cursor-tracked blob are gone, along with
+      // backdrop-filter. All three were re-rasterising this card continuously;
+      // hover is now a plain colour change, which the compositor handles.
+      className={`group relative flex w-full overflow-hidden rounded-3xl border border-white/20 bg-white/[0.16]
+        p-7 transition-[transform,background-color,border-color] duration-200 ease-out
+        hover:border-brand-lime/40 motion-reduce:!transform-none
+        lg:bg-white/[0.10] lg:hover:bg-white/[0.16]
+        ${featured ? "flex-col gap-7 sm:flex-row sm:items-center sm:gap-10 sm:p-9" : "flex-col"}`}
+    >
+      {/* Top-edge highlight — the 1px bright line is most of what separates
+          real glass from a plain translucent rectangle. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent opacity-70 transition-opacity duration-500 group-hover:via-brand-lime/70 group-hover:opacity-100"
+      />
 
       <div
-        className="relative flex-shrink-0 flex items-center justify-center"
-        style={{ width: "150px", height: "150px" }}
+        className={`relative shrink-0 ${
+          featured ? "h-32 w-32 sm:h-40 sm:w-40" : "h-24 w-24"
+        }`}
       >
-        <span className="relative block h-full w-full">
-          <Image
-            src={logoSrc}
-            alt={`${title} logo`}
-            fill
-            sizes="150px"
-            className="object-contain drop-shadow-[0_0_18px_rgba(227,239,38,0.35)]"
-          />
-        </span>
+        <Image
+          src={competition.logo}
+          alt=""
+          aria-hidden
+          fill
+          sizes="160px"
+          className="object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
+        />
       </div>
 
-      <div className="relative flex flex-col justify-between h-full flex-1 w-full gap-6 sm:gap-2 min-h-[176px]">
-        <div className="flex flex-col gap-2">
-          <h4
-            style={{
-              fontFamily: "var(--font-oddval), sans-serif",
-              fontWeight: 600,
-              fontSize: "35px",
-              lineHeight: "54px",
-              backgroundImage: titleGradient,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            {title}
-          </h4>
+      <div className="relative flex flex-1 flex-col">
+        <span className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.14em] text-brand-lime/90">
+          <span className="h-px w-6 bg-brand-lime/60 transition-all duration-300 group-hover:w-10" />
+          {competition.categoryLabel}
+        </span>
 
-          <p
-            style={{
-              fontFamily: "'SF Pro', ui-sans-serif, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              lineHeight: "19px",
-              backgroundImage: descGradient,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            {description}
-          </p>
-        </div>
+        <h4 className={`mt-3 font-extrabold leading-tight tracking-wide text-white ${featured ? "text-3xl sm:text-4xl" : "text-3xl"}`}>
+          {competition.name}
+        </h4>
 
-        <button
-          onClick={onDetails}
-          className="flex items-center justify-center gap-2 transition-all hover:brightness-110 shadow-sm mt-auto sm:mt-4"
-          style={{
-            width: "214px",
-            height: "48px",
-            background: "linear-gradient(214.92deg, rgb(var(--brand-cream)) 4.89%, rgb(var(--brand-lime)) 97.74%)",
-            borderRadius: "10px",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'SF Pro', ui-sans-serif, sans-serif",
-              fontWeight: 700,
-              fontSize: "16px",
-              lineHeight: "19px",
-              color: "rgb(var(--brand-teal))",
-            }}
+        <p className="mt-3 flex-1 text-sm leading-relaxed text-white/85">
+          {description}
+        </p>
+
+        <div className="mt-6">
+          {/* Stretched hit area: the ::after has no positioning context of its
+              own here, so it anchors to the card and makes the whole panel
+              clickable while the accessible name stays on the real button. */}
+          <button
+            onClick={onDetails}
+            className="btn-brand px-6 py-2.5 text-sm after:absolute after:inset-0 after:content-['']"
           >
             See Details
-          </span>
-          <ArrowRight className="h-5 w-5 stroke-[3] text-brand-teal" />
-        </button>
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+          </button>
+        </div>
       </div>
+    </div>
     </motion.div>
   );
 };
@@ -194,90 +186,48 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
 export default function CompetitionSection() {
   const [openId, setOpenId] = useState<CompetitionId | null>(null);
 
-  return (
-    <section className="relative w-full py-16 px-4 md:px-8 max-w-[1440px] mx-auto overflow-hidden min-h-[1000px] flex flex-col items-center">
+  const undergrad = CARDS.filter((c) => COMPETITIONS[c.id].category === "mahasiswa");
+  const highschool = CARDS.filter((c) => COMPETITIONS[c.id].category === "sma");
 
+  return (
+    <section className="relative mx-auto flex w-full max-w-[1440px] flex-col items-center overflow-hidden px-4 py-16 md:px-8">
       <motion.div
         initial={{ opacity: 0, ...offset.up }}
         whileInView={rest}
         viewport={inViewOnce}
         transition={{ duration, ease }}
-        className="flex justify-center w-full mb-8 md:mb-12 z-10 px-2 md:px-0"
+        className="z-10 mb-10 flex w-full justify-center px-2 md:mb-14 md:px-0"
       >
-        <CompetitionTitle className="w-full max-w-[800px] lg:max-w-[1026px] h-auto drop-shadow-xl" />
+        <CompetitionTitle className="h-auto w-full max-w-[800px] drop-shadow-xl lg:max-w-[1026px]" />
       </motion.div>
 
-      <div className="w-full max-w-[1150px] flex flex-col items-center z-10">
-        <div className="mb-12 w-full flex flex-col items-center">
-          <motion.h3
-            initial={{ opacity: 0, ...offset.up }}
-            whileInView={rest}
-            viewport={inViewOnce}
-            transition={{ duration, ease }}
-            className="mb-6 select-none text-center tracking-wide"
-            style={{
-              fontFamily: "var(--font-oddval), sans-serif",
-              fontWeight: 600,
-              fontSize: "35px",
-              lineHeight: "54px",
-              color: "rgb(var(--brand-butter))",
-              textShadow: "4px 4px 35px rgba(0, 0, 0, 0.35)",
-            }}
-          >
-            Undergraduate
-          </motion.h3>
-
-          <div className="flex flex-col xl:flex-row gap-8 justify-center items-center w-full">
+      <div className="z-10 flex w-full max-w-[1150px] flex-col gap-8">
+        {/* Two equal cards. items-stretch so they share a baseline rather than
+            ragging when one description runs longer. */}
+        <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2">
+          {undergrad.map((c, i) => (
             <CompetitionCard
-              title="Medhack"
-              logoSrc={COMPETITIONS.medhack.logo}
-              onDetails={() => setOpenId("medhack")}
-              titleGradient="linear-gradient(227.28deg, rgb(var(--brand-lime)) 8.58%, rgb(var(--brand-teal)) 52.85%, rgb(var(--brand-green)) 87.95%)"
-              description="A team hackathon competition (3–5 participants) that challenges participants to develop healthcare-technology-based business solutions by designing an innovative, impactful business model and digital product."
-              descGradient="linear-gradient(269.27deg, rgb(var(--brand-cream)) 69.75%, rgb(var(--brand-lime)) 155.54%)"
+              key={c.id}
+              {...c}
+              onDetails={() => setOpenId(c.id)}
+              delay={i * 0.12}
             />
-            <CompetitionCard
-              title="Healthineer"
-              delay={0.12}
-              logoSrc={COMPETITIONS.healthineer.logo}
-              onDetails={() => setOpenId("healthineer")}
-              titleGradient="linear-gradient(227.28deg, rgb(var(--brand-lime)) 8.58%, rgb(var(--brand-teal)) 52.85%, rgb(var(--brand-green)) 87.95%)"
-              description="A team competition (3–5 participants) to develop healthcare technology solutions in the form of an innovative, applicable scientific paper and prototype with real implementation potential."
-              descGradient="linear-gradient(269.27deg, rgb(var(--brand-cream)) 69.75%, rgb(var(--brand-lime)) 155.54%)"
-            />
-          </div>
+          ))}
         </div>
 
-        <div className="w-full flex flex-col items-center">
-          <motion.h3
-            initial={{ opacity: 0, ...offset.up }}
-            whileInView={rest}
-            viewport={inViewOnce}
-            transition={{ duration, ease }}
-            className="mb-6 select-none text-center tracking-wide"
-            style={{
-              fontFamily: "var(--font-oddval), sans-serif",
-              fontWeight: 600,
-              fontSize: "35px",
-              lineHeight: "54px",
-              color: "rgb(var(--brand-butter))",
-              textShadow: "4px 4px 35px rgba(0, 0, 0, 0.37)",
-            }}
-          >
-            Highschool
-          </motion.h3>
-
-          <div className="flex justify-center items-center w-full">
-            <CompetitionCard
-              title="Healthynovation"
-              logoSrc={COMPETITIONS.healthynovation.logo}
-              onDetails={() => setOpenId("healthynovation")}
-              titleGradient="linear-gradient(72.46deg, rgb(var(--brand-cream)) -51.59%, rgb(var(--brand-lime)) -46.93%, rgb(var(--brand-teal)) 45.25%)"
-              description="A scientific paper competition for highschool students (1–3 participants) that encourages innovative ideas to address healthcare challenges through a scientific paper and poster."
-              descGradient="linear-gradient(260.23deg, rgb(var(--brand-cream)) 60.52%, rgb(var(--brand-lime)) 128%)"
-            />
-          </div>
-        </div>
+        {/* The lone Highschool card gets a wide horizontal treatment rather
+            than sitting centred at half width under the row above — a single
+            card in a 2-up grid reads as an orphan, the same card full-bleed
+            reads as a deliberate feature. */}
+        {highschool.map((c) => (
+          <CompetitionCard
+            key={c.id}
+            {...c}
+            featured
+            onDetails={() => setOpenId(c.id)}
+            delay={0.12}
+          />
+        ))}
       </div>
 
       <CompetitionModal competitionId={openId} onClose={() => setOpenId(null)} />

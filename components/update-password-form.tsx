@@ -24,7 +24,6 @@ export function UpdatePasswordForm() {
 
   return (
     <AuthForm
-      heading="Reset Password"
       submitLabel="Change Password"
       pendingLabel="Saving..."
       onSubmit={updatePassword}
@@ -38,6 +37,7 @@ export function UpdatePasswordForm() {
         required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
       <RegistrationInput
@@ -49,6 +49,7 @@ export function UpdatePasswordForm() {
         required
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
     </AuthForm>

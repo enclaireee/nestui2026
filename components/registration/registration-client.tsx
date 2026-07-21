@@ -4,7 +4,6 @@ import { useEffect, useReducer } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { duration, ease } from "@/lib/motion";
 import { StepIndicator } from "./step-indicator";
-import { GlassCard } from "./glass-card";
 import { TeamSetup } from "./steps/team-setup";
 import { PersonForm } from "./steps/person-form";
 import { ReviewSubmit } from "./steps/review-submit";
@@ -44,6 +43,14 @@ const TIMELINE_INDEX: Record<StepKey, number> = {
   leader: 1,
   members: 2,
   review: 3,
+};
+
+/** One line of orientation per step, shown in the card header. */
+const STEP_HINTS: Record<StepKey, string> = {
+  team: "Pick a competition and name your team",
+  leader: "Details for the person leading the team",
+  members: "Details for everyone else on the team",
+  review: "Check everything, pay, and submit",
 };
 
 // This wizard is up to 36 fields across 4 steps, filled under deadline pressure
@@ -247,11 +254,11 @@ export function RegistrationClient({ category }: { category?: Category }) {
   }
 
   return (
-    <div className="relative flex flex-col min-h-screen w-full items-center justify-center pt-24 pb-24 px-4 md:px-8">
-      <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-gradient-brand drop-shadow-md pb-3 text-center">
-        {state.submittedCode ? "Thank You" : STEP_LABELS[step]}
-      </h1>
-
+    // The `text-7xl` gradient <h1> that used to sit here was the third place
+    // the same words appeared — it repeated the step label that the rail and
+    // the card header both already show, and on a phone it pushed the first
+    // field below the fold. The card header is now the single title.
+    <div className="relative flex min-h-screen w-full flex-col items-center px-4 pb-24 pt-28 md:px-8">
       {state.submittedCode ? (
         <AnimatePresence mode="wait">
           <motion.div
@@ -264,13 +271,35 @@ export function RegistrationClient({ category }: { category?: Category }) {
           </motion.div>
         </AnimatePresence>
       ) : (
-        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-12 md:gap-24 items-start justify-center">
-          <div className="w-full md:w-1/3 pt-8 pl-4 md:pl-0 flex justify-start md:justify-end">
+        // Rail left, card right, on one grid. Was `md:w-1/3` + `md:w-2/3`
+        // with a `gap-24` trench between them, which left the card visually
+        // adrift from its own steps.
+        <div className="grid w-full max-w-5xl grid-cols-1 items-start gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:gap-10 lg:gap-12">
+          {/* Sticky so the step artwork stays in view through the long
+              Member step. */}
+          <div className="md:sticky md:top-28">
             <StepIndicator currentStep={TIMELINE_INDEX[step]} />
           </div>
 
-          <div className="w-full md:w-2/3 max-w-2xl">
-            <GlassCard>
+          {/* Solid surface, not GlassCard. Two reasons: the wizard sits on the
+              same bright backdrop the rest of the site does, and translucent
+              white over it left labels and helper text far under AA; and
+              a solid surface needs no backdrop-filter at all. */}
+          <div className="overflow-hidden rounded-2xl border border-brand-cream/12 bg-brand-green/95 shadow-2xl shadow-black/30">
+            {/* Card header: the step's identity, and how far along you are. */}
+            <div className="border-b border-brand-cream/10 px-6 py-5 sm:px-8">
+              <div className="flex items-baseline justify-between gap-4">
+                <h1 className="text-lg font-bold text-brand-cream sm:text-xl">
+                  {STEP_LABELS[step]}
+                </h1>
+                <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-brand-cream/45">
+                  Step {state.stepIndex + 1} of {steps.length}
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-brand-cream/50">{STEP_HINTS[step]}</p>
+            </div>
+
+            <div className="px-6 py-7 sm:px-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
@@ -295,7 +324,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
                   )}
 
                   {step === "leader" && cfg && (
-                    <div className="flex flex-col gap-6 w-full max-w-md">
+                    <div className="flex w-full flex-col gap-6">
                       <PersonForm
                         title="Team Leader"
                         person={draft.leader}
@@ -314,7 +343,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
                   )}
 
                   {step === "members" && cfg && (
-                    <div className="flex flex-col gap-6 w-full max-w-md">
+                    <div className="flex w-full flex-col gap-6">
                       {draft.members.map((m, i) => (
                         <PersonForm
                           key={i}
@@ -347,7 +376,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
                   )}
                 </motion.div>
               </AnimatePresence>
-            </GlassCard>
+            </div>
           </div>
         </div>
       )}

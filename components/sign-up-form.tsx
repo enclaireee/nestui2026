@@ -34,7 +34,6 @@ export function SignUpForm() {
 
   return (
     <AuthForm
-      heading="Welcome!"
       submitLabel="Sign Up"
       pendingLabel="Creating an account..."
       onSubmit={signUp}
@@ -56,6 +55,7 @@ export function SignUpForm() {
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
       <RegistrationInput
@@ -67,6 +67,7 @@ export function SignUpForm() {
         required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
       <RegistrationInput
@@ -78,6 +79,7 @@ export function SignUpForm() {
         required
         value={repeatPassword}
         onChange={(e) => setRepeatPassword(e.target.value)}
+        tone="dark"
         className={authFieldClass}
       />
     </AuthForm>
