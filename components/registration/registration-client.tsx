@@ -23,6 +23,7 @@ import {
 } from "@/lib/registrations/types";
 import {
   hasDuplicateEmails,
+  validateLeader,
   validatePerson,
   type FieldErrors,
 } from "@/lib/registrations/validate";
@@ -90,6 +91,7 @@ type Action =
   | { type: "SET_TEAM_NAME"; value: string }
   | { type: "UPDATE_LEADER"; field: keyof PersonDraft; value: string }
   | { type: "UPDATE_MEMBER"; index: number; field: keyof PersonDraft; value: string }
+  | { type: "SET_ORIGINALITY_URL"; value: string }
   | { type: "SET_PAYMENT_URL"; value: string }
   | { type: "SET_SUBMISSION_URL"; value: string }
   | { type: "NEXT" }
@@ -130,6 +132,14 @@ function reducer(state: WizardState, action: Action): WizardState {
       );
       return { ...state, draft: { ...state.draft, members }, memberErrors };
     }
+    case "SET_ORIGINALITY_URL":
+      // Errors for this field render inside the leader step, so clear it the
+      // same way UPDATE_LEADER clears a person field.
+      return {
+        ...state,
+        draft: { ...state.draft, originalityLetterUrl: action.value },
+        leaderErrors: { ...state.leaderErrors, originalityLetterUrl: "" },
+      };
     case "SET_PAYMENT_URL":
       return { ...state, draft: { ...state.draft, paymentProofUrl: action.value }, submitError: null };
     case "SET_SUBMISSION_URL":
@@ -201,7 +211,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
 
   function goNext() {
     if (step === "leader" && cfg) {
-      const errs = validatePerson(draft.leader, cfg);
+      const errs = validateLeader(draft, cfg);
       if (Object.keys(errs).length) {
         dispatch({ type: "LEADER_ERRORS", errors: errs });
         return focusFirstError();
@@ -292,6 +302,12 @@ export function RegistrationClient({ category }: { category?: Category }) {
                         cfg={cfg}
                         errors={state.leaderErrors}
                         onChange={(field, value) => dispatch({ type: "UPDATE_LEADER", field, value })}
+                        originality={{
+                          value: draft.originalityLetterUrl,
+                          error: state.leaderErrors.originalityLetterUrl,
+                          onChange: (value) =>
+                            dispatch({ type: "SET_ORIGINALITY_URL", value }),
+                        }}
                       />
                       <NavButtons onBack={() => dispatch({ type: "BACK" })} onNext={goNext} />
                     </div>

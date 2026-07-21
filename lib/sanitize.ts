@@ -39,6 +39,7 @@ export function sanitizeDraft(d: RegistrationDraft): RegistrationDraft {
     teamName: stripHtml(d.teamName),
     leader: sanitizePerson(d.leader),
     members: d.members.map(sanitizePerson),
+    originalityLetterUrl: stripHtml(d.originalityLetterUrl),
     paymentProofUrl: stripHtml(d.paymentProofUrl),
     submissionUrl: stripHtml(d.submissionUrl),
   };

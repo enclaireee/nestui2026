@@ -60,6 +60,9 @@ export interface AdminRegistration {
   leader_institution: string;
   leader_major: string | null;
   leader_confirmation_url: string;
+  // Nullable: teams that registered before the letter of originality was added
+  // to the form have no value here.
+  originality_letter_url: string | null;
   payment_proof_url: string;
   submission_url: string;
   status: "pending" | "verified" | "rejected";

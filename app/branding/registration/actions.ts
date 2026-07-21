@@ -70,6 +70,7 @@ export async function submitRegistration(draft: RegistrationDraft): Promise<Subm
     p_leader_institution: clean.leader.institution,
     p_leader_major: cfg.hasMajor ? clean.leader.major : null,
     p_leader_confirmation_url: clean.leader.confirmationUrl,
+    p_originality_letter_url: clean.originalityLetterUrl,
     p_payment_proof_url: clean.paymentProofUrl,
     p_submission_url: clean.submissionUrl,
     p_members: members,

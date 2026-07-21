@@ -598,6 +598,155 @@ To read the log: query `public.audit_logs` from the SQL editor or the admin serv
 
 ---
 
+## Step 19 — Letter of originality — **required for the current registration form**
+
+Adds the team's signed letter-of-originality link. It is **one document per team**, signed by the leader, so it is a column on `registrations` (next to the payment/submission links) — not a per-person field on `team_members`.
+
+> **Run this whole block, top to bottom, in one go.** Unlike the earlier steps this one is *not* a pure `create or replace`: it drops and recreates two objects, and skipping either half leaves the app broken in a way that is not obvious. The reasons are inline below.
+
+**(a) The column.** Deliberately **nullable** — teams that registered before this field existed have no letter, and a `not null` column would fail to add at all while those rows are present. New submissions are required to supply it by `validateLeader()` in `lib/registrations/validate.ts`, client-side and again server-side.
+
+```sql
+alter table public.registrations
+  add column if not exists originality_letter_url text;
+```
+
+**(b) Replace the submission function.** Adding a parameter creates a *new* overload rather than replacing the old one — leaving both, PostgREST cannot pick between them and every submission fails with `Could not choose the best candidate function`. The old signature has to go first, explicitly.
+
+```sql
+-- drop the OLD 14-arg signature (9 text params) — not optional, see above
+drop function if exists public.submit_registration(
+  uuid, competition_type, text, int, text, text, text, text, text, text, text, text, text, jsonb
+);
+
+create or replace function public.submit_registration(
+  p_user_id            uuid,
+  p_competition        competition_type,
+  p_team_name          text,
+  p_team_size          int,
+  p_leader_name        text,
+  p_leader_email       text,
+  p_leader_phone       text,
+  p_leader_student_id  text,
+  p_leader_institution text,
+  p_leader_major       text,
+  p_leader_confirmation_url text,
+  p_originality_letter_url  text,
+  p_payment_proof_url  text,
+  p_submission_url     text,
+  p_members            jsonb   -- [{name,email,phone,student_id,institution,major,confirmation_url}, ...]
+)
+returns text  -- returns the generated registration code
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_reg_id  uuid;
+  v_code    text;
+  v_count   int;
+  v_emails  text[];
+  m         jsonb;
+  i         int := 0;
+begin
+  v_count := jsonb_array_length(coalesce(p_members, '[]'::jsonb));
+
+  -- member count must match declared team size (server-side, even if client lies)
+  if v_count <> p_team_size - 1 then
+    raise exception 'member_count_mismatch: expected %, got %', p_team_size - 1, v_count;
+  end if;
+
+  -- team size must be in the competition's allowed range (defense in depth vs the CHECK)
+  if (p_competition in ('medhack','healthineer') and p_team_size not between 3 and 5)
+     or (p_competition = 'healthynovation' and p_team_size not between 1 and 3) then
+    raise exception 'invalid_team_size for %: %', p_competition, p_team_size;
+  end if;
+
+  -- collect all emails (leader + members) and reject duplicates
+  v_emails := array[lower(trim(p_leader_email))];
+  for m in select * from jsonb_array_elements(coalesce(p_members, '[]'::jsonb)) loop
+    v_emails := v_emails || lower(trim(m->>'email'));
+  end loop;
+  if (select count(distinct e) from unnest(v_emails) e) <> array_length(v_emails, 1) then
+    raise exception 'duplicate_email_in_team';
+  end if;
+
+  insert into public.registrations (
+    user_id, competition, team_name, team_size,
+    leader_name, leader_email, leader_phone, leader_student_id,
+    leader_institution, leader_major, leader_confirmation_url,
+    originality_letter_url, payment_proof_url, submission_url
+  ) values (
+    p_user_id, p_competition, p_team_name, p_team_size,
+    p_leader_name, p_leader_email, p_leader_phone, p_leader_student_id,
+    p_leader_institution, nullif(p_leader_major, ''), p_leader_confirmation_url,
+    nullif(p_originality_letter_url, ''), p_payment_proof_url, p_submission_url
+  )
+  returning id, code into v_reg_id, v_code;
+
+  for m in select * from jsonb_array_elements(coalesce(p_members, '[]'::jsonb)) loop
+    i := i + 1;
+    insert into public.team_members (
+      registration_id, member_index, name, email, phone,
+      student_id, institution, major, confirmation_url
+    ) values (
+      v_reg_id, i, m->>'name', m->>'email', m->>'phone',
+      m->>'student_id', m->>'institution', nullif(m->>'major',''), m->>'confirmation_url'
+    );
+  end loop;
+
+  return v_code;
+end$$;
+
+-- re-apply the Step 11 lockdown to the NEW signature (grants do not carry over)
+revoke all on function public.submit_registration(
+  uuid, competition_type, text, int, text, text, text, text, text, text, text, text, text, text, jsonb
+) from public, anon, authenticated;
+grant execute on function public.submit_registration(
+  uuid, competition_type, text, int, text, text, text, text, text, text, text, text, text, text, jsonb
+) to service_role;
+```
+
+**(c) Rebuild the admin view.** `admin_registrations_detail` was defined as `select r.*`, and Postgres expands that to a fixed column list **at creation time** — a new table column does not appear in the view on its own. It also cannot be patched with `create or replace view`: the new column lands *before* the trailing `members` column, and replace refuses any reordering (`cannot change name of view column`). So it must be dropped and rebuilt. Without this the admin panel and CSV export silently show an empty letter for every team.
+
+```sql
+drop view if exists public.admin_registrations_detail;
+
+create view public.admin_registrations_detail
+with (security_invoker = true) as
+select
+  r.*,
+  coalesce(
+    (select jsonb_agg(to_jsonb(tm) order by tm.member_index)
+       from public.team_members tm
+      where tm.registration_id = r.id),
+    '[]'::jsonb
+  ) as members
+from public.registrations r;
+
+-- the revoke does not survive the drop — re-apply it
+revoke all on public.admin_registrations_detail from anon, authenticated;
+```
+
+`admin_submissions_detail` (Step 16) selects its registration columns explicitly, so it is unaffected and needs no change.
+
+**Verify:**
+
+```sql
+-- column present?
+select column_name, is_nullable from information_schema.columns
+where table_name = 'registrations' and column_name = 'originality_letter_url';
+
+-- exactly ONE submit_registration, taking 15 args?
+select proname, pronargs from pg_proc where proname = 'submit_registration';
+
+-- view exposes the new column?
+select column_name from information_schema.columns
+where table_name = 'admin_registrations_detail' and column_name = 'originality_letter_url';
+```
+
+---
+
 ## Environment Variables Checklist
 
 Add these in Vercel (Project → Settings → Environment Variables) and to local `.env.local`. **Never** prefix a secret with `NEXT_PUBLIC_`.

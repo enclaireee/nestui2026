@@ -18,6 +18,12 @@ export interface CompetitionConfig {
   blurb: string;
   logo: string; // path in /public
   qr: string; // WhatsApp group QR, path in /public
+  /**
+   * Google Docs template for the letter of originality. Each competition has
+   * its own wording, so the leader step links the one that matches — handing
+   * out a single shared link would have teams sign the wrong document.
+   */
+  originalityTemplateUrl: string;
   /** Registration fee tiers, earliest first. See `currentFee`. */
   fees: FeeTier[];
 }
@@ -45,6 +51,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "A team hackathon that challenges participants to develop healthcare-technology-based business solutions.",
     logo: "/medhacklogo.webp",
     qr: "/qrmedhack.png",
+    originalityTemplateUrl:
+      "https://docs.google.com/document/d/12qEaJLfTeOMSdf9wCd50p3zsopmMw63A191xvI2QYpA/edit?usp=drivesdk",
     fees: [
       { label: "Early Bird", amount: 200_000, until: "2026-07-27" },
       { label: "Normal", amount: 220_000, until: "2026-08-22" },
@@ -64,6 +72,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "A team competition to develop healthcare technology solutions in the form of a scientific paper and prototype.",
     logo: "/healthineerlogo.webp",
     qr: "/qrhealthyneer.png",
+    originalityTemplateUrl:
+      "https://docs.google.com/document/d/1706y-HFKhKQvfAVP0-W47DuODTvm5cFnTFtPiblDFBA/edit?usp=drivesdk",
     fees: [
       { label: "Early Bird", amount: 175_000, until: "2026-07-19" },
       { label: "Normal", amount: 200_000, until: "2026-07-31" },
@@ -84,6 +94,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "A scientific paper competition for highschool students that encourages innovative ideas in healthcare.",
     logo: "/healthynovationlogo.webp",
     qr: "/qrhealthynovation.png",
+    originalityTemplateUrl:
+      "https://docs.google.com/document/d/1Ei7ZYa37yngw3fgjnhtIgKXOFlvYnhKsxmruCTteX20/edit?usp=drivesdk",
     fees: [
       { label: "Early Bird", amount: 80_000, until: "2026-07-19" },
       { label: "Normal", amount: 100_000, until: "2026-07-31" },

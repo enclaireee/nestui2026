@@ -16,6 +16,12 @@ export interface RegistrationDraft {
   teamName: string;
   leader: PersonDraft;
   members: PersonDraft[];
+  /**
+   * One signed letter of originality per team, not per person — so it sits at
+   * team level next to the payment/submission links, even though the leader
+   * step is where it gets filled in.
+   */
+  originalityLetterUrl: string;
   paymentProofUrl: string;
   submissionUrl: string;
 }
@@ -39,6 +45,7 @@ export function emptyDraft(): RegistrationDraft {
     teamName: "",
     leader: emptyPerson(),
     members: [],
+    originalityLetterUrl: "",
     paymentProofUrl: "",
     submissionUrl: "",
   };

@@ -7,7 +7,7 @@ No test framework is added (per scope — manual checklist + runnable probes bel
 ## A. Registration flow (happy path, per competition)
 - [ ] **Medhack / Healthineer**: log in → `/branding/registration` → pick competition → team size **3–5** → fill leader → fill `size−1` members → enter payment + submission links → Submit → see the `NEST2026-…` code on the Thank You screen. Confirm a row in `registrations` + `size−1` rows in `team_members`.
 - [ ] **Healthynovation**: `/branding/registration/sma` → size **1** → the **member step is skipped** → submit → 1 registration, 0 members. Also try size 3 → 2 members.
-- [ ] **Major field**: shows for Medhack/Healthineer, hidden for Healthynovation. Student-ID label = NIM (undergrad) / NISN (SMA).
+- [ ] **Major field**: shows for Medhack/Healthineer, hidden for Healthynovation. Student-ID label = NIM (undergrad) / Kartu Identitas Siswa (SMA).
 
 ## B. Client validation (before "Next")
 - [ ] Empty required field → red ring + inline message, "Next" blocked.

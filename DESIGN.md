@@ -9,7 +9,7 @@
 ## Assumptions (flagged — correct me before Phase 2 if wrong)
 1. **Competitions are the three already on the site**: `medhack`, `healthineer` (undergrad, **team size 3–5**), `healthynovation` (SMA, **team size 1–3**). Ranges taken from `app/branding/mainpage/section/competition.tsx`.
 2. **Members have their own email.** The current UI omitted member email, but requirement §0.2 (“no duplicate emails between leader/members”) requires it. Added.
-3. **Per-person field set**: `name`, `email`, `phone`, `student_id` (NIM for undergrad / NISN for SMA), `institution` (University / Sekolah), `major` (undergrad only, nullable), `confirmation_url` (the Google-Drive proof link the current form already collects per person).
+3. **Per-person field set**: `name`, `email`, `phone`, `student_id` (NIM for undergrad / Kartu Identitas Siswa for SMA), `institution` (University / Sekolah), `major` (undergrad only, nullable), `confirmation_url` (the Google-Drive proof link the current form already collects per person).
 4. **Team-level fields**: `team_name`, `competition`, `team_size`, `payment_proof_url`, `submission_url` (both from the existing “Submission” step), `status`, `code`, `submitted_at`.
 5. **One team per user per competition** (`UNIQUE(user_id, competition)`) — prevents a single account spamming unlimited teams. A user may still enter different competitions.
 6. **Statuses**: `pending` (default) / `verified` / `rejected`.

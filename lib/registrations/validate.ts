@@ -27,6 +27,23 @@ export function validatePerson(p: PersonDraft, cfg: CompetitionConfig): FieldErr
   return e;
 }
 
+/**
+ * Everything the leader step collects: the leader's own fields plus the team's
+ * letter of originality. Keyed the same way as validatePerson so the wizard can
+ * render both sets of errors inline off one object.
+ */
+export function validateLeader(
+  draft: RegistrationDraft,
+  cfg: CompetitionConfig,
+): FieldErrors {
+  const e = validatePerson(draft.leader, cfg);
+  const url = draft.originalityLetterUrl.trim();
+  if (!url) e.originalityLetterUrl = "Letter of originality link is required.";
+  else if (!URL_RE.test(url))
+    e.originalityLetterUrl = "Enter a valid link (starting with http).";
+  return e;
+}
+
 function allEmails(draft: RegistrationDraft): string[] {
   return [draft.leader.email, ...draft.members.map((m) => m.email)]
     .map((x) => x.trim().toLowerCase())
@@ -57,7 +74,7 @@ export function validateDraft(
     return fail("Member count does not match the chosen team size.");
   if (!draft.teamName.trim()) return fail("Team name is required.");
 
-  const leaderErr = validatePerson(draft.leader, cfg);
+  const leaderErr = validateLeader(draft, cfg);
   if (Object.keys(leaderErr).length) return fail(`Team leader: ${firstOf(leaderErr)}`);
 
   for (let i = 0; i < draft.members.length; i++) {
