@@ -1,6 +1,6 @@
 "use client";
 
-import { User, IdCard, Building, BookOpen, Mail, Phone, Link as LinkIcon, Upload } from "lucide-react";
+import { User, IdCard, Building, BookOpen, Mail, Phone, Link as LinkIcon, Upload, FileSignature } from "lucide-react";
 import { RegistrationInput } from "../registration-input";
 import { SectionLabel } from "../section-label";
 import type { CompetitionConfig } from "@/lib/registrations/config";
@@ -13,11 +13,28 @@ interface PersonFormProps {
   cfg: CompetitionConfig;
   errors: FieldErrors;
   onChange: (field: keyof PersonDraft, value: string) => void;
+  /**
+   * Leader step only. The letter of originality is one document per team, so it
+   * lives on the draft rather than in PersonDraft — it renders here because the
+   * leader is the one who signs and submits it.
+   */
+  originality?: {
+    value: string;
+    error?: string;
+    onChange: (value: string) => void;
+  };
 }
 
 // Reusable form for the leader and every member — the only difference between
 // competitions (major field, ID/institution labels) comes from `cfg`.
-export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormProps) {
+export function PersonForm({
+  title,
+  person,
+  cfg,
+  errors,
+  onChange,
+  originality,
+}: PersonFormProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-3">
@@ -130,6 +147,37 @@ export function PersonForm({ title, person, cfg, errors, onChange }: PersonFormP
           onChange={(e) => onChange("confirmationUrl", e.target.value)}
         />
       </div>
+
+      {originality && (
+        <div className="flex flex-col gap-3 border-t border-brand-green/10 pt-4">
+          <SectionLabel icon={FileSignature}>Letter of Originality</SectionLabel>
+          <div className="rounded-xl bg-brand-green/5 px-3 py-2.5 text-xs leading-relaxed text-brand-green/80 ring-1 ring-brand-green/10">
+            <p>
+              Open the {cfg.name} template below, copy it, fill and sign it, then upload
+              the signed copy to Google Drive and paste the link here. One letter per
+              team — the leader signs on the team&rsquo;s behalf.
+            </p>
+            <a
+              href={cfg.originalityTemplateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1.5 inline-block font-semibold text-brand-teal underline decoration-brand-lime underline-offset-2 hover:text-brand-green"
+            >
+              Open the {cfg.name} letter of originality template →
+            </a>
+          </div>
+          <RegistrationInput
+            icon={LinkIcon}
+            type="url"
+            label="Letter of originality link"
+            placeholder="https://drive.google.com/..."
+            hint="Make sure the file is shared as “Anyone with the link can view”."
+            value={originality.value}
+            error={originality.error}
+            onChange={(e) => originality.onChange(e.target.value)}
+          />
+        </div>
+      )}
     </div>
   );
 }

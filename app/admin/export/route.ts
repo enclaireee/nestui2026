@@ -88,6 +88,7 @@ export async function GET(request: NextRequest) {
     "Leader_Institution",
     "Leader_Major",
     "Leader_ConfirmationUrl",
+    "OriginalityLetterUrl",
   ];
   for (let i = 1; i <= maxMembers; i++) {
     header.push(
@@ -124,6 +125,7 @@ export async function GET(request: NextRequest) {
       r.leader_institution,
       r.leader_major ?? "",
       r.leader_confirmation_url,
+      r.originality_letter_url ?? "",
     ];
     for (let i = 0; i < maxMembers; i++) {
       const m = r.members[i];

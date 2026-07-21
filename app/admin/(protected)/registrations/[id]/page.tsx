@@ -65,6 +65,14 @@ export default async function RegistrationDetail({
 
       <Section title="Team Leader">
         <PersonCard person={leaderAsMember(reg)} hasMajor={cfg?.hasMajor ?? false} labels={cfg} />
+        {/* One letter per team, signed by the leader — shown here rather than on
+            a member card because it belongs to the team, not to a person. */}
+        <div className="mt-4 rounded-lg bg-white/5 p-4 text-sm">
+          <LinkRow
+            label="Letter of originality (team)"
+            href={reg.originality_letter_url ?? ""}
+          />
+        </div>
       </Section>
 
       {reg.members.length > 0 && (

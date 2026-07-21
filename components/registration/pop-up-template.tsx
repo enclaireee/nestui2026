@@ -12,14 +12,7 @@ interface PopUpTemplateProps {
   children?: React.ReactNode;
 }
 
-/**
- * ponytail: a native <dialog> opened with showModal(), not a hand-rolled
- * overlay. The platform then provides — for free and correctly — the focus
- * trap, Esc-to-close, inert background, top-layer stacking (no z-index
- * arithmetic) and focus restored to whatever opened it. The previous div
- * version had none of those: keyboard users could tab out of the modal into
- * the content hidden behind the scrim.
- */
+
 export function PopUpTemplate({
   isOpen,
   onClose,
