@@ -18,25 +18,25 @@ export default async function RegistrationDetail({
 }) {
   const { id } = await params;
   const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("admin_registrations_detail")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  // Neither query depends on the other's result — both are keyed off `id`
+  // from params — so run them concurrently instead of paying two round trips
+  // in serial.
+  const [{ data }, { data: subData }] = await Promise.all([
+    supabase.from("admin_registrations_detail").select("*").eq("id", id).maybeSingle(),
+    // Every submission for this team — Entry 1 (inline) + resubmissions. If the
+    // submissions view isn't present yet, fall back to the inline Entry 1 so
+    // the page still works.
+    supabase
+      .from("admin_submissions_detail")
+      .select("*")
+      .eq("registration_id", id)
+      .order("entry_no", { ascending: true }),
+  ]);
 
   const reg = data as AdminRegistration | null;
   if (!reg) notFound();
 
   const cfg = COMPETITIONS[reg.competition];
-
-  // Every submission for this team — Entry 1 (inline) + resubmissions. If the
-  // submissions view isn't present yet, fall back to the inline Entry 1 so the
-  // page still works.
-  const { data: subData } = await supabase
-    .from("admin_submissions_detail")
-    .select("*")
-    .eq("registration_id", id)
-    .order("entry_no", { ascending: true });
   const entries: AdminSubmissionDetail[] =
     (subData as AdminSubmissionDetail[] | null)?.length
       ? (subData as AdminSubmissionDetail[])
