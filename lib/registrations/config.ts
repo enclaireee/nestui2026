@@ -62,8 +62,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     guidebookUrl:
       "https://drive.google.com/file/d/1_G3Ancvkj_6P_xzhrwJGJw0Kf8I_xmGR/view?usp=sharing",
     fees: [
-      { label: "Early Bird", amount: 200_000, until: "2026-07-27" },
-      { label: "Normal", amount: 220_000, until: "2026-08-22" },
+      { label: "Early Bird", amount: 200_000, until: "2026-08-02" },
+      { label: "Normal", amount: 220_000, until: "2026-08-25" },
     ],
   },
   healthineer: {
@@ -85,9 +85,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     guidebookUrl:
       "https://drive.google.com/file/d/1VQNpWrcQ4JSPgUojqUm6k3ctEg__Y7ob/view?usp=sharing",
     fees: [
-      { label: "Early Bird", amount: 175_000, until: "2026-07-19" },
-      { label: "Normal", amount: 200_000, until: "2026-07-31" },
-      { label: "Extend", amount: 210_000, until: "2026-08-07" },
+      { label: "Early Bird", amount: 175_000, until: "2026-08-02" },
+      { label: "Normal", amount: 200_000, until: "2026-08-14" },
     ],
   },
   healthynovation: {
@@ -109,9 +108,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     guidebookUrl:
       "https://drive.google.com/file/d/1Jmxf4J3TvJuj1DkLs_GGsOWKUSN0N992/view?usp=sharing",
     fees: [
-      { label: "Early Bird", amount: 80_000, until: "2026-07-19" },
-      { label: "Normal", amount: 100_000, until: "2026-07-31" },
-      { label: "Late", amount: 120_000, until: "2026-08-07" },
+      { label: "Early Bird", amount: 80_000, until: "2026-08-02" },
+      { label: "Normal", amount: 100_000, until: "2026-08-14" },
     ],
   },
 };

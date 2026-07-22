@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { AnimatePresence, motion, useScroll } from "framer-motion";
-import { LogOut, LayoutDashboard, Menu, X } from "lucide-react";
+import { LogOut, LayoutDashboard, Menu, X, ArrowRight, Home, Users, ClipboardList, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,10 +10,10 @@ import { createClient } from "@/lib/supabase/client";
 import { PopUpTemplate } from "@/components/registration/pop-up-template";
 
 const navLinks = [
-  { label: "Home", href: "/branding/mainpage" },
-  { label: "About us", href: "/branding/aboutpage" },
-  { label: "Registration", href: "/branding/registration" },
-  { label: "Contact", href: "/branding/contact" },
+  { label: "Home", href: "/branding/mainpage", icon: Home },
+  { label: "About us", href: "/branding/aboutpage", icon: Users },
+  { label: "Registration", href: "/branding/registration", icon: ClipboardList },
+  { label: "Contact", href: "/branding/contact", icon: Mail },
 ];
 
 /**
@@ -42,6 +42,7 @@ function NavList({
       <>
         {navLinks.map((link, i) => {
           const active = pathname === link.href;
+          const Icon = link.icon;
           return (
             <motion.div
               key={link.href}
@@ -54,12 +55,21 @@ function NavList({
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 onClick={onNavigate}
-                className={`block rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors ${
                   active
                     ? "bg-brand-lime/15 text-brand-lime ring-1 ring-brand-lime/30"
-                    : "text-white/90 hover:bg-white/10 hover:text-brand-lime"
+                    : "text-white/85 hover:bg-white/10 hover:text-brand-lime"
                 }`}
               >
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${
+                    active
+                      ? "bg-brand-lime/20 text-brand-lime"
+                      : "bg-white/5 text-white/60 group-hover:bg-white/10 group-hover:text-brand-lime"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
                 {link.label}
               </Link>
             </motion.div>
@@ -252,24 +262,36 @@ export function SiteHeader() {
             <ActiveNavList variant="desktop" />
           </Suspense>
 
+          {/* One CTA for both breakpoints. `group` + an overflow-hidden sheen
+              span gives a light sweep on hover; the arrow (logged out) and the
+              dashboard glyph (logged in) are the only per-state differences. */}
           <Link
             href={isLoggedIn ? "/protected" : "/auth/login"}
-            className={
+            className={`group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-1.5 text-sm font-semibold text-brand-teal shadow-sm ring-1 ring-black/5 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 ${
               isLoggedIn
-                ? "flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-lime to-brand-cream px-5 py-1.5 text-sm font-semibold text-brand-teal shadow-sm transition-all duration-150 hover:scale-105 hover:shadow-md"
-                : "rounded-full bg-white/95 px-5 py-1.5 text-sm font-semibold text-brand-teal shadow-sm transition-colors hover:bg-white"
-            }
+                ? "bg-gradient-to-r from-brand-lime to-brand-cream hover:shadow-lg hover:shadow-brand-lime/40"
+                : "bg-brand-cream hover:shadow-lg hover:shadow-brand-lime/25"
+            }`}
           >
-            {isLoggedIn && <LayoutDashboard className="h-4 w-4" />}
-            {isLoggedIn ? "Dashboard" : "Login Now"}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -translate-x-[120%] bg-gradient-to-r from-transparent via-white/60 to-transparent transition-transform duration-[600ms] ease-out group-hover:translate-x-[120%]"
+            />
+            {isLoggedIn && <LayoutDashboard className="relative h-4 w-4" />}
+            <span className="relative">{isLoggedIn ? "Dashboard" : "Login Now"}</span>
+            {!isLoggedIn && (
+              <ArrowRight className="relative h-4 w-4 -mr-0.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+            )}
           </Link>
 
+          {/* Desktop only — on mobile logout lives in the sheet so the pill
+              stays a clean [CTA] [menu] pair instead of cramming three chips. */}
           {isLoggedIn && (
             <button
               onClick={() => setShowLogoutConfirm(true)}
               aria-label="Log out"
               title="Log out"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-red-300"
+              className="hidden h-8 w-8 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-red-300 md:flex"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -317,13 +339,38 @@ export function SiteHeader() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.97 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute right-4 top-[calc(100%+0.6rem)] z-50 flex w-52 origin-top-right flex-col rounded-2xl border border-white/15 bg-brand-green p-2 shadow-2xl shadow-black/40 ring-1 ring-white/5 md:hidden"
+              className="absolute right-4 top-[calc(100%+0.6rem)] z-50 flex w-64 origin-top-right flex-col overflow-hidden rounded-3xl border border-white/10 bg-brand-green/95 p-2 shadow-2xl shadow-black/50 ring-1 ring-white/10 backdrop-blur-xl md:hidden"
             >
-              <Suspense
-                fallback={<NavList variant="mobile" pathname={null} onNavigate={() => setMenuOpen(false)} />}
-              >
-                <ActiveNavList variant="mobile" onNavigate={() => setMenuOpen(false)} />
-              </Suspense>
+              {/* Lime glow bleeding in from the top corner — reads as intent,
+                  not the flat box it was. */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-brand-lime/20 blur-2xl"
+              />
+              <div className="relative flex flex-col gap-1">
+                <Suspense
+                  fallback={<NavList variant="mobile" pathname={null} onNavigate={() => setMenuOpen(false)} />}
+                >
+                  <ActiveNavList variant="mobile" onNavigate={() => setMenuOpen(false)} />
+                </Suspense>
+              </div>
+
+              {isLoggedIn && (
+                <div className="relative mt-1 border-t border-white/10 pt-1">
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setShowLogoutConfirm(true);
+                    }}
+                    className="group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-white/80 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                  >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-white/60 transition-colors group-hover:bg-red-500/15 group-hover:text-red-300">
+                      <LogOut className="h-4 w-4" />
+                    </span>
+                    Log out
+                  </button>
+                </div>
+              )}
             </motion.div>
           </>
         )}
