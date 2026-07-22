@@ -276,7 +276,7 @@ export default function TimelineSection() {
           <MilestoneNode
             id="milestone-1"
             delay={0.15}
-            date="13 July - 14 August"
+            date="20 July - 14 August"
             title={
               <>
                 Open Registration
@@ -295,7 +295,7 @@ export default function TimelineSection() {
           <MilestoneNode
             id="milestone-2"
             delay={0.3}
-            date="25 Agustus - 8 September"
+            date="29 August - 13 September"
             title="Semifinal"
             rotateLabelDeg={25}
             showGlow={false}
@@ -400,8 +400,8 @@ export default function TimelineSection() {
           </div>
 
           {[
-            { left: "30%", top: "17.3%", date: "13 July - 14 August", title: (<>Open Registration<br />& Preliminary</>), glow: false, details: undefined as string[] | undefined },
-            { left: "68.2%", top: "47.1%", date: "25 Agustus - 8 September", title: "Semifinal", glow: false, details: undefined },
+            { left: "30%", top: "17.3%", date: "20 July - 14 August", title: (<>Open Registration<br />& Preliminary</>), glow: false, details: undefined as string[] | undefined },
+            { left: "68.2%", top: "47.1%", date: "29 August - 13 September", title: "Semifinal", glow: false, details: undefined },
             { left: "44.1%", top: "76.9%", date: "3 October", title: "Main Event", glow: true, details: ["Final Presentation", "Booth Exhibition", "Main Conference", "Awarding"] },
           ].map((item, idx) => (
             <div
