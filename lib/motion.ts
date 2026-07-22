@@ -31,14 +31,6 @@ export const staggerContainer: Variants = {
   },
 };
 
-/** Parent: tighter cadence for long lists so the tail doesn't lag behind. */
-export const staggerFast: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.05 },
-  },
-};
-
 const variant = (from: keyof typeof offset): Variants => ({
   hidden: { opacity: 0, ...offset[from] },
   show: { ...rest, transition: { duration, ease } },
@@ -50,19 +42,5 @@ export const fadeUp = variant("up");
 /** Child: fades and slides in from the left (for side-by-side rows). */
 export const fadeRight = variant("left");
 
-/** Child: fades and slides in from the right (mirror of fadeRight). */
-export const fadeLeft = variant("right");
-
-/** Child: settles in from slightly behind. For cards, logos, badges. */
-export const scaleIn = variant("scale");
-
 /** Sensible defaults for whileInView so it triggers a touch before fully visible. */
 export const inViewOnce = { once: true, margin: "-100px" } as const;
-
-/** Shorthand for the four props every scroll-revealed section repeats. */
-export const revealOnScroll = {
-  variants: staggerContainer,
-  initial: "hidden" as const,
-  whileInView: "show" as const,
-  viewport: inViewOnce,
-};

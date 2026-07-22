@@ -14,8 +14,6 @@ export default {
       fontFamily: {
         // Default font: anything using `font-sans` (and the base body) gets Oddval.
         sans: ["var(--font-oddval)", "ui-sans-serif", "system-ui", "sans-serif"],
-        // Use the `font-geller` utility class to opt into Geller.
-        geller: ["var(--font-geller)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         // Brand palette — values live in app/globals.css as RGB channels.

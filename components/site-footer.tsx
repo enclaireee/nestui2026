@@ -69,6 +69,13 @@ export function SiteFooter() {
             <Mail className="h-4 w-4 text-brand-lime" />
             nestui.ft@gmail.com
           </Link>
+
+          <Link
+            href="/branding/privacy"
+            className="text-xs font-semibold text-white/60 transition-colors duration-150 hover:text-brand-lime"
+          >
+            Privacy Policy
+          </Link>
         </div>
       </div>
     </footer>
