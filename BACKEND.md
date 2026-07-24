@@ -378,11 +378,17 @@ grant  execute on function public.set_registration_status(uuid, registration_sta
 
 ---
 
-## Step 14 — Admin "delete team" support — **no migration required**
+## Step 14 — Admin "delete team" support — **REMOVED**
 
-The admin panel’s "Delete" button removes a whole team and all its members. **You do not need to run any SQL for this.** The server action deletes the `registrations` row with the secret key (bypasses RLS), and `team_members.registration_id` was declared `on delete cascade` in Step 5 — so the members rows are removed automatically in the same operation.
+Team deletion has been removed from the admin panel. There is no longer a Delete button, and — importantly — **no server action that deletes a registration** (leaving one in place would leave a live deletion endpoint any valid admin session could hit). Registration rows are participant data and are not destroyable from the app.
 
-Nothing to paste here. (If you would rather route deletes through an audited RPC to match `set_registration_status`, the optional function below does that; the app currently uses the direct delete and does **not** require it.)
+If you ever genuinely need to remove a team, do it directly in the Supabase SQL editor:
+
+```sql
+-- Deletes the team and, via ON DELETE CASCADE on team_members.registration_id
+-- (Step 5), all its members in the same operation.
+delete from public.registrations where code = 'THE-TEAM-CODE';
+```
 
 ```sql
 -- OPTIONAL — only if you prefer an RPC entry point over the direct delete.
@@ -769,6 +775,92 @@ ADMIN_USERNAME=nest2026
 ADMIN_PASSWORD=ADMIN123
 ADMIN_SESSION_SECRET=paste-openssl-rand-base64-48-output-here
 ```
+
+## Step 20 — Admin brute-force lockout — **required for the punishing login lock**
+
+An escalating, per-IP hard lockout for the admin login, on top of the plain rate limit (Step 12). Backed by the DB so it's correct across serverless instances. Consumed by `lib/admin/lockout.ts` via three RPCs. **Safe to deploy the code before running this** — until the functions exist the app treats the feature as "not installed" and admin login still works with no lock (see `UNDEFINED_FUNCTION` in `lib/admin/lockout.ts`). Run this block once in the Supabase SQL editor to switch the lock on. Idempotent.
+
+**Escalation (per IP):** fails 1–4 are free (fat-finger grace), then `5 → 5 min`, `6 → 15 min`, `7 → 1 hour`, `8 → 6 hours`, `9+ → 24 hours`. A lock **holds even if the correct password is entered while it's active** (the gate is checked before the credential compare), and only a *successful* login clears the streak. Keyed per-IP on purpose: a global hard-lock would let an attacker brick the real admin out just by failing repeatedly — distributed floods are handled by the global window in Step 12 instead.
+
+```sql
+create table if not exists public.admin_lockouts (
+  key          text primary key,
+  fails        int not null default 0,
+  locked_until timestamptz,
+  updated_at   timestamptz not null default now()
+);
+alter table public.admin_lockouts enable row level security;  -- deny all clients; server bypasses
+
+-- Seconds still locked for this key (0 if free). Read-only — never increments.
+create or replace function public.admin_lockout_status(p_key text)
+returns int
+language sql security definer set search_path = public
+as $$
+  select coalesce((
+    select greatest(0, ceil(extract(epoch from (locked_until - now())))::int)
+    from public.admin_lockouts
+    where key = p_key and locked_until is not null and locked_until > now()
+  ), 0);
+$$;
+
+-- Record one failed attempt and (past the grace window) escalate the lock.
+-- Returns the seconds this key is now locked (0 while still in grace).
+create or replace function public.admin_lockout_fail(p_key text)
+returns int
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_fails int;
+  v_secs  int;
+begin
+  insert into public.admin_lockouts(key, fails, updated_at)
+    values (p_key, 1, now())
+  on conflict (key) do update
+    set fails = public.admin_lockouts.fails + 1, updated_at = now()
+  returning fails into v_fails;
+
+  v_secs := case
+    when v_fails <= 4 then 0
+    when v_fails = 5  then 300     -- 5 min
+    when v_fails = 6  then 900     -- 15 min
+    when v_fails = 7  then 3600    -- 1 hour
+    when v_fails = 8  then 21600   -- 6 hours
+    else 86400                     -- 24 hours, and stays there
+  end;
+
+  if v_secs > 0 then
+    update public.admin_lockouts
+      set locked_until = now() + make_interval(secs => v_secs)
+      where key = p_key;
+  end if;
+
+  return v_secs;
+end$$;
+
+-- Wipe a key's streak on a good login.
+create or replace function public.admin_lockout_clear(p_key text)
+returns void
+language sql security definer set search_path = public
+as $$
+  delete from public.admin_lockouts where key = p_key;
+$$;
+
+revoke all on function public.admin_lockout_status(text) from public, anon, authenticated;
+revoke all on function public.admin_lockout_fail(text)   from public, anon, authenticated;
+revoke all on function public.admin_lockout_clear(text)  from public, anon, authenticated;
+grant execute on function public.admin_lockout_status(text) to service_role;
+grant execute on function public.admin_lockout_fail(text)   to service_role;
+grant execute on function public.admin_lockout_clear(text)  to service_role;
+```
+
+**If you lock yourself out** (e.g. while testing the new Vercel credentials), clear it directly in the SQL editor — no need to wait out the timer:
+
+```sql
+delete from public.admin_lockouts;                       -- clears every device
+-- or just yours, if you know the key: delete from public.admin_lockouts where key = 'admin_login:<your-ip>';
+```
+
+---
 
 ## Verify (optional, after running all steps)
 ```sql

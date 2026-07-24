@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { COMPETITIONS } from "@/lib/registrations/config";
 import type { AdminRegistration, MemberRow, SubmissionRow } from "@/lib/admin/types";
 import { StatusBadge } from "@/components/status-badge";
+import { LinkRow } from "@/components/link-row";
+import { GENERAL_CONTACT } from "@/lib/contacts";
 
 // The plain `registrations` table row (unlike admin_registrations_detail) has no `members` join.
 type Registration = Omit<AdminRegistration, "members">;
@@ -273,8 +275,7 @@ const STATUS_HELP: Record<string, string> = {
   pending:
     "Our team is checking your payment and submission links. No action needed — we'll contact the leader by WhatsApp if anything is unclear.",
   verified: "Payment and submission confirmed. You're in — see you in the WhatsApp group.",
-  rejected:
-    "Something didn't check out — usually an unreadable transfer receipt or a Drive link that isn't shared publicly. Email nestui.ft@gmail.com and we'll sort it out, or submit again below.",
+  rejected: `Something didn't check out — usually an unreadable transfer receipt or a Drive link that isn't shared publicly. Email ${GENERAL_CONTACT.email} and we'll sort it out, or submit again below.`,
 };
 
 function EntryCard({ entry, index }: { entry: Entry; index: number }) {
@@ -310,26 +311,6 @@ function EntryCard({ entry, index }: { entry: Entry; index: number }) {
         <LinkRow label="Submission" href={entry.submissionUrl} />
       </div>
     </div>
-  );
-}
-
-function LinkRow({ label, href }: { label: string; href: string }) {
-  return (
-    <p className="text-white/80">
-      <span className="text-white/45">{label}:</span>{" "}
-      {href ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="break-all text-brand-lime hover:underline"
-        >
-          {href}
-        </a>
-      ) : (
-        <span className="text-white/40">—</span>
-      )}
-    </p>
   );
 }
 

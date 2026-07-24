@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { fadeUp, inViewOnce, staggerContainer } from "@/lib/motion";
+import { fadeLeft, fadeRight, fadeUp, inViewOnce, staggerContainer } from "@/lib/motion";
 
 const MISSIONS = [
   "Providing a competitive platform for highschool and university students to develop innovative solutions in healthcare technology, grounded in Electrical Engineering, Computer Engineering, and Biomedical Engineering.",
@@ -33,7 +33,8 @@ export function Mission() {
 
       <div className="mt-8 flex flex-col gap-5 sm:gap-6">
         {MISSIONS.map((text, i) => (
-          <motion.div key={i} variants={fadeUp} className="flex items-stretch">
+          // Alternating entry sides turn five identical pills into a weave.
+          <motion.div key={i} variants={i % 2 ? fadeLeft : fadeRight} className="flex items-stretch">
             {/* Gradient pill — misicontainer image (its left cap is the circle), same height for all.
                 Mobile stretches the image; desktop covers. */}
             <div className="flex h-24 flex-1 items-center rounded-full bg-[url('/misicontainerMobile.webp')] bg-[length:100%_100%] bg-center bg-no-repeat shadow-lg sm:h-28 sm:bg-[url('/misicontainer.webp')] sm:bg-cover">

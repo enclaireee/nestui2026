@@ -3,6 +3,7 @@
 import { User, IdCard, Building, BookOpen, Mail, Phone, Link as LinkIcon, Upload, FileSignature } from "lucide-react";
 import { RegistrationInput } from "../registration-input";
 import { SectionLabel } from "../section-label";
+import { GENERAL_CONTACT } from "@/lib/contacts";
 import type { CompetitionConfig } from "@/lib/registrations/config";
 import type { PersonDraft } from "@/lib/registrations/types";
 import type { FieldErrors } from "@/lib/registrations/validate";
@@ -130,12 +131,12 @@ export function PersonForm({
             <li>
               Proof of following{" "}
               <a
-                href="https://instagram.com/nest_ui"
+                href={GENERAL_CONTACT.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-semibold text-brand-lime underline decoration-brand-lime underline-offset-2 hover:text-brand-lime"
               >
-                @nest_ui
+                {GENERAL_CONTACT.instagramHandle}
               </a>{" "}
               on Instagram
             </li>

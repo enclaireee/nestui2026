@@ -8,8 +8,8 @@ import type {
   MemberRow,
 } from "@/lib/admin/types";
 import { setRegistrationStatus, setSubmissionStatus } from "@/app/admin/actions";
-import { DeleteTeamButton } from "@/components/admin/delete-team-button";
 import { StatusBadge } from "@/components/status-badge";
+import { LinkRow } from "@/components/link-row";
 
 export default async function RegistrationDetail({
   params,
@@ -48,19 +48,12 @@ export default async function RegistrationDetail({
         ← Back to all registrations
       </Link>
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">{reg.team_name}</h1>
-          <p className="font-mono text-sm text-white/60">
-            {reg.code} · {cfg?.name ?? reg.competition} · {reg.team_size} members ·{" "}
-            {entries.length} submission{entries.length === 1 ? "" : "s"}
-          </p>
-        </div>
-        <DeleteTeamButton
-          id={reg.id}
-          teamName={reg.team_name}
-          memberCount={reg.members.length}
-        />
+      <div>
+        <h1 className="text-2xl font-bold">{reg.team_name}</h1>
+        <p className="font-mono text-sm text-white/60">
+          {reg.code} · {cfg?.name ?? reg.competition} · {reg.team_size} members ·{" "}
+          {entries.length} submission{entries.length === 1 ? "" : "s"}
+        </p>
       </div>
 
       <Section title="Team Leader">
@@ -235,26 +228,6 @@ function Field({ label, value }: { label: string; value: string }) {
   return (
     <p className="text-white/80">
       <span className="text-white/50">{label}:</span> {value}
-    </p>
-  );
-}
-
-function LinkRow({ label, href }: { label: string; href: string }) {
-  return (
-    <p className="text-white/80">
-      <span className="text-white/50">{label}:</span>{" "}
-      {href ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="break-all text-brand-lime hover:underline"
-        >
-          {href}
-        </a>
-      ) : (
-        <span className="text-white/40">—</span>
-      )}
     </p>
   );
 }

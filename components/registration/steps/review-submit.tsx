@@ -5,6 +5,7 @@ import { Link as LinkIcon, Wallet, Upload, ClipboardList } from "lucide-react";
 import { COMPETITIONS, currentFee } from "@/lib/registrations/config";
 import { PAYMENT_INFO, formatIDR } from "@/lib/payment";
 import { SectionLabel } from "../section-label";
+import { RegistrationInput } from "../registration-input";
 import type { RegistrationDraft } from "@/lib/registrations/types";
 
 interface ReviewSubmitProps {
@@ -62,19 +63,27 @@ export function ReviewSubmit({
             <dd className="font-semibold text-brand-cream">{PAYMENT_INFO.accountHolder}</dd>
           </dl>
         </div>
-        <LinkField
+        <RegistrationInput
+          tone="dark"
+          icon={LinkIcon}
+          type="url"
+          label="Payment proof link"
           placeholder="Payment proof Google Drive link"
           value={draft.paymentProofUrl}
-          onChange={onPaymentUrl}
+          onChange={(e) => onPaymentUrl(e.target.value)}
         />
       </div>
 
       <div className="flex flex-col gap-3">
         <SectionLabel icon={Upload}>Submission</SectionLabel>
-        <LinkField
+        <RegistrationInput
+          tone="dark"
+          icon={LinkIcon}
+          type="url"
+          label="Submission link"
           placeholder="Submission Google Drive link"
           value={draft.submissionUrl}
-          onChange={onSubmissionUrl}
+          onChange={(e) => onSubmissionUrl(e.target.value)}
         />
       </div>
 
@@ -129,31 +138,6 @@ export function ReviewSubmit({
           {submitting ? "Submitting..." : "Submit"}
         </button>
       </div>
-    </div>
-  );
-}
-
-function LinkField({
-  placeholder,
-  value,
-  onChange,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="relative">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-        <LinkIcon className="h-5 w-5" />
-      </div>
-      <input
-        type="url"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="flex h-12 w-full rounded-xl border-none bg-brand-cream/[0.06] py-2 pl-10 pr-4 text-sm text-brand-cream placeholder:text-brand-cream/30 shadow-sm border border-brand-cream/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
-      />
     </div>
   );
 }

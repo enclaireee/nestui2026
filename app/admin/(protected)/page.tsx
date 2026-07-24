@@ -6,7 +6,6 @@ import {
   type AdminRegistration,
   type AdminSubmissionDetail,
 } from "@/lib/admin/types";
-import { DeleteTeamButton } from "@/components/admin/delete-team-button";
 import { StatusBadge } from "@/components/status-badge";
 
 const PAGE_SIZE = 20;
@@ -158,13 +157,12 @@ async function TeamsTable({
               <Th>Submissions</Th>
               <Th>Registered</Th>
               <Th>Status</Th>
-              <Th>Actions</Th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-4 py-8 text-center text-white/50">
+                <td colSpan={9} className="px-4 py-8 text-center text-white/50">
                   No registrations found.
                 </td>
               </tr>
@@ -202,13 +200,6 @@ async function TeamsTable({
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={r.status} />
-                </td>
-                <td className="px-4 py-3">
-                  <DeleteTeamButton
-                    id={r.id}
-                    teamName={r.team_name}
-                    memberCount={r.members.length}
-                  />
                 </td>
               </tr>
             ))}

@@ -9,6 +9,12 @@ import {
   ADMIN_SESSION_TTL_SECONDS,
   createSessionToken,
 } from "@/lib/admin/session";
+import {
+  clearAdminLockout,
+  formatLockDuration,
+  lockoutSecondsRemaining,
+  recordAdminFailure,
+} from "@/lib/admin/lockout";
 
 export interface AdminLoginState {
   error?: string;
@@ -29,20 +35,27 @@ export async function adminLogin(
   _prev: AdminLoginState,
   formData: FormData,
 ): Promise<AdminLoginState> {
-  // Brute-force defense over a single static credential, so both limits fail
-  // CLOSED — a DB error must not silently switch throttling off.
-  //   per-IP:  10 / 10 min — stops the obvious hammering.
-  //   global: 100 / hour   — the per-IP key is useless against a rotating-IP or
-  //                          spoofed-XFF attacker, this one is not tied to IP.
   const hdrs = await headers();
-  const perIp = await checkRateLimit(`admin_login:${clientIp(hdrs)}`, 10, 600, {
+  const ip = clientIp(hdrs);
+  const lockKey = `admin_login:${ip}`;
+
+  // Distributed-flood throttle: 100 / hour across ALL IPs, fail CLOSED. The
+  // per-IP hard lockout below is the primary brute-force defense; this is the
+  // backstop a single-IP counter can't provide against rotating-IP / spoofed-XFF
+  // attacks. It is a plain window (no hard lock) precisely so an attacker can't
+  // weaponise it to lock the real admin out — that's the per-IP lock's job.
+  const globalOk = await checkRateLimit("admin_login:global", 100, 3600, {
     failClosed: true,
   });
-  const global = await checkRateLimit("admin_login:global", 100, 3600, {
-    failClosed: true,
-  });
-  if (!perIp || !global)
-    return { error: "Too many attempts. Please wait and try again." };
+  if (!globalOk) return { error: "Too many attempts. Please wait and try again." };
+
+  // Hard escalating lockout, checked BEFORE the credential compare so a correct
+  // guess cannot slip past an active lock. Fail CLOSED (see lib/admin/lockout).
+  const lockedFor = await lockoutSecondsRemaining(lockKey);
+  if (lockedFor > 0)
+    return {
+      error: `Too many failed attempts. This device is locked for ${formatLockDuration(lockedFor)}.`,
+    };
 
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
@@ -51,7 +64,18 @@ export async function adminLogin(
   if (!expectedUser || !expectedPass) return { error: "Admin login is not configured." };
 
   const ok = safeEqual(username, expectedUser) && safeEqual(password, expectedPass);
-  if (!ok) return { error: "Invalid username or password." };
+  if (!ok) {
+    // Escalate this device's failure streak. If that just tripped a lock, say so.
+    const secs = await recordAdminFailure(lockKey);
+    if (secs > 0)
+      return {
+        error: `Too many failed attempts. This device is locked for ${formatLockDuration(secs)}.`,
+      };
+    return { error: "Invalid username or password." };
+  }
+
+  // Good login — wipe this device's failure streak.
+  await clearAdminLockout(lockKey);
 
   // Admin auth is deliberately separate from the regular user login — clear
   // any existing Supabase user session so the two never overlap.

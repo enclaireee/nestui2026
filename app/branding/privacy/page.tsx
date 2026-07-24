@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   ShieldCheck,
   Database,
@@ -16,6 +14,7 @@ import {
 } from "lucide-react";
 import { GENERAL_CONTACT } from "@/lib/contacts";
 import { Reveal } from "@/components/reveal";
+import { bgSvg } from "@/lib/bg-svg";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -28,13 +27,6 @@ export const metadata: Metadata = {
 // processes it. The registration flow (app/branding/registration) and the
 // admin panel are the source of truth for the "what we collect" section.
 const LAST_UPDATED = "July 22, 2026";
-
-// Same SVG backdrop the home + contact pages use, inlined so it scales to the
-// full page height.
-const bgSvg = readFileSync(
-  join(process.cwd(), "public/mainpagebackground.svg"),
-  "utf8",
-).replace("<svg", '<svg preserveAspectRatio="xMidYMid slice"');
 
 export default function PrivacyPage() {
   return (

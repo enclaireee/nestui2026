@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import Image from "next/image";
 import { Mail, Phone, Instagram, Linkedin, Handshake } from "lucide-react";
 import { COMPETITIONS, COMPETITION_IDS } from "@/lib/registrations/config";
 import { COMPETITION_CONTACTS, GENERAL_CONTACT, waLink } from "@/lib/contacts";
 import { Reveal } from "@/components/reveal";
+import { bgSvg } from "@/lib/bg-svg";
+import { ParallaxFloat } from "@/components/parallax-float";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -16,13 +16,6 @@ export const metadata: Metadata = {
 
 const PARTNER_SUBJECT = "Partnership Inquiry — NEST UI 2026";
 
-// Same SVG backdrop the home + registration pages use, inlined so it scales to
-// the full page height.
-const bgSvg = readFileSync(
-  join(process.cwd(), "public/mainpagebackground.svg"),
-  "utf8",
-).replace("<svg", '<svg preserveAspectRatio="xMidYMid slice"');
-
 export default function ContactPage() {
   return (
     <main className="relative min-h-screen overflow-x-hidden">
@@ -31,20 +24,20 @@ export default function ContactPage() {
         className="pointer-events-none absolute inset-0 -z-20 transform-gpu [contain:paint] [&>svg]:h-full [&>svg]:w-full"
         dangerouslySetInnerHTML={{ __html: bgSvg }}
       />
-      {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
-      <img
-        src="/lefttopfloaterreg.svg"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute left-0 top-0 -z-10 h-auto w-44 opacity-80 sm:w-64 md:w-80"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
-      <img
-        src="/rightfloaterreg.svg"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute right-0 top-1/4 -z-10 h-auto w-96 opacity-80 sm:w-90 md:w-100"
-      />
+      <ParallaxFloat
+        distance={80}
+        className="pointer-events-none absolute left-0 top-0 -z-10 w-44 opacity-80 sm:w-64 md:w-80"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
+        <img src="/lefttopfloaterreg.svg" alt="" aria-hidden className="h-auto w-full" />
+      </ParallaxFloat>
+      <ParallaxFloat
+        distance={120}
+        className="pointer-events-none absolute right-0 top-1/4 -z-10 w-96 opacity-80 sm:w-90 md:w-100"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
+        <img src="/rightfloaterreg.svg" alt="" aria-hidden className="h-auto w-full" />
+      </ParallaxFloat>
 
       <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 pb-24 pt-28 md:px-8">
         <header className="text-center">
@@ -166,11 +159,12 @@ export default function ContactPage() {
 
 function Card({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
-    <Reveal
-      delay={delay}
-      className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-6"
-    >
-      {children}
+    // The hover lift lives on an inner div: framer leaves an inline transform
+    // on the Reveal element itself, which would override a CSS translate there.
+    <Reveal delay={delay} className="flex">
+      <div className="flex flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-6 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-brand-lime/30">
+        {children}
+      </div>
     </Reveal>
   );
 }

@@ -1,8 +1,20 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import Image from "next/image";
-import { fadeUp, inViewOnce, staggerContainer } from "@/lib/motion";
+import { duration, ease, fadeUp, inViewOnce, staggerContainer } from "@/lib/motion";
+
+// Per-logo cascade. Quicker than the page-level stagger (14 cells — the
+// full-length timing would take 1.3s to sweep the grid) and scale-led so the
+// logos read as "arriving" rather than sliding.
+const logoGrid: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.045 } },
+};
+const logoIn: Variants = {
+  hidden: { opacity: 0, scale: 0.85 },
+  show: { opacity: 1, scale: 1, transition: { duration: duration * 0.6, ease } },
+};
 
 // ponytail: hardcoded list, filenames are static assets. "Sponso11" is the actual file name.
 const logos = [
@@ -48,10 +60,14 @@ export function PastSponsors() {
           variants={fadeUp}
           className="mt-10 sm:mt-14 rounded-3xl border border-white/10 bg-white/[0.07] p-4 sm:p-8"
         >
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-5">
+          <motion.div
+            variants={logoGrid}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-5"
+          >
             {logos.map((src) => (
-              <div
+              <motion.div
                 key={src}
+                variants={logoIn}
                 className="group flex h-24 sm:h-32 items-center justify-center rounded-2xl bg-white/90 ring-1 ring-white/20 transition-all duration-200 hover:-translate-y-1 hover:bg-white hover:ring-yellow-400/50 hover:shadow-lg hover:shadow-yellow-400/10"
               >
                 <Image
@@ -61,9 +77,9 @@ export function PastSponsors() {
                   height={128}
                   className="max-h-full w-auto object-contain p-4 sm:p-6 opacity-80 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0"
                 />
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
 
       </div>

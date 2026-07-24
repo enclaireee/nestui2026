@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Link as LinkIcon, Wallet, Copy, Check } from "lucide-react";
 import { addSubmission } from "@/app/protected/actions";
 import { PAYMENT_INFO, formatIDR } from "@/lib/payment";
+import { RegistrationInput } from "@/components/registration/registration-input";
 import type { FeeTier } from "@/lib/registrations/config";
 
 export function ResubmitForm({
@@ -82,21 +83,27 @@ export function ResubmitForm({
         </dl>
       </div>
 
-      <Field label="Payment proof">
-        <UrlInput
-          placeholder="Google Drive link to your transfer receipt"
-          value={payment}
-          onChange={setPayment}
-        />
-      </Field>
+      <RegistrationInput
+        tone="dark"
+        icon={LinkIcon}
+        type="url"
+        required
+        label="Payment proof"
+        placeholder="Google Drive link to your transfer receipt"
+        value={payment}
+        onChange={(e) => setPayment(e.target.value)}
+      />
 
-      <Field label="Submission">
-        <UrlInput
-          placeholder="Google Drive link to your submission"
-          value={submission}
-          onChange={setSubmission}
-        />
-      </Field>
+      <RegistrationInput
+        tone="dark"
+        icon={LinkIcon}
+        type="url"
+        required
+        label="Submission"
+        placeholder="Google Drive link to your submission"
+        value={submission}
+        onChange={(e) => setSubmission(e.target.value)}
+      />
 
       {error && (
         <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300">
@@ -125,37 +132,3 @@ export function ResubmitForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-semibold text-white/80">{label}</span>
-      {children}
-    </div>
-  );
-}
-
-function UrlInput({
-  placeholder,
-  value,
-  onChange,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="relative">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
-        <LinkIcon className="h-5 w-5" />
-      </div>
-      <input
-        type="url"
-        required
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-10 pr-4 text-sm text-white placeholder:text-white/35 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
-      />
-    </div>
-  );
-}

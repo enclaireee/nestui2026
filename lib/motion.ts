@@ -42,5 +42,9 @@ export const fadeUp = variant("up");
 /** Child: fades and slides in from the left (for side-by-side rows). */
 export const fadeRight = variant("left");
 
+/** Child: fades and slides in from the right — mirror of fadeRight, for
+ * alternating rows. */
+export const fadeLeft = variant("right");
+
 /** Sensible defaults for whileInView so it triggers a touch before fully visible. */
 export const inViewOnce = { once: true, margin: "-100px" } as const;
