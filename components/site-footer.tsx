@@ -1,6 +1,7 @@
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { GENERAL_CONTACT } from "@/lib/contacts";
 
 export function SiteFooter() {
   return (
@@ -42,33 +43,35 @@ export function SiteFooter() {
             <span className="text-xs font-semibold text-brand-lime">
               Follow Our Socials
             </span>
-            <Link
-              href="https://instagram.com/nest_ui"
+            {/* Plain <a>, not next/link: Link's client router intercepts the
+                click and can't handle mailto:/external schemes. */}
+            <a
+              href={GENERAL_CONTACT.instagram}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Nest UI on Instagram"
               className="text-white transition-colors duration-150 hover:text-brand-lime"
             >
               <Instagram className="h-5 w-5" />
-            </Link>
-            <Link
-              href="https://www.linkedin.com/company/nest-ui/"
+            </a>
+            <a
+              href={GENERAL_CONTACT.linkedin}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Nest UI on LinkedIn"
               className="text-white transition-colors duration-150 hover:text-brand-lime"
             >
               <Linkedin className="h-5 w-5" />
-            </Link>
+            </a>
           </div>
 
-          <Link
-            href="mailto:nestui.ft@gmail.com"
+          <a
+            href={`mailto:${GENERAL_CONTACT.email}`}
             className="flex items-center gap-2 text-xs font-semibold text-white transition-colors duration-150 hover:text-brand-lime"
           >
             <Mail className="h-4 w-4 text-brand-lime" />
-            nestui.ft@gmail.com
-          </Link>
+            {GENERAL_CONTACT.email}
+          </a>
 
           <Link
             href="/branding/privacy"

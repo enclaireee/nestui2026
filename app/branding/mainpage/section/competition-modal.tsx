@@ -17,6 +17,7 @@ import {
 import { COMPETITIONS, currentFee, type CompetitionId } from "@/lib/registrations/config";
 import { COMPETITION_CONTACTS, waLink } from "@/lib/contacts";
 import { formatIDR } from "@/lib/payment";
+import { SectionLabel } from "@/components/registration/section-label";
 
 // Detail copy for each competition, extracted from the NEST UI 2026 guidebook
 // design briefs. Only the entrant-facing marketing copy lives here — the
@@ -424,23 +425,6 @@ function Section({
       <SectionLabel icon={icon}>{title}</SectionLabel>
       {children}
     </section>
-  );
-}
-
-function SectionLabel({
-  icon: Icon,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-2 border-b border-white/10 pb-2.5">
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-lime/15">
-        <Icon className="h-4 w-4 text-brand-lime" />
-      </span>
-      <span className="text-sm font-bold uppercase tracking-[0.1em] text-white/90">{children}</span>
-    </div>
   );
 }
 

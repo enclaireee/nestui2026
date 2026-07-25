@@ -1,20 +1,15 @@
 import { Suspense } from "react";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RegistrationClient } from "@/components/registration/registration-client";
 import { AlreadyRegistered } from "@/components/registration/already-registered";
+import { bgSvg } from "@/lib/bg-svg";
+import { ParallaxFloat } from "@/components/parallax-float";
 import {
   isCompetitionId,
   type Category,
   type CompetitionId,
 } from "@/lib/registrations/config";
-
-const bgSvg = readFileSync(
-  join(process.cwd(), "public/mainpagebackground.svg"),
-  "utf8",
-).replace("<svg", '<svg preserveAspectRatio="xMidYMid slice"');
 
 /**
  * Shared body for /branding/registration and /branding/registration/sma —
@@ -29,20 +24,20 @@ export function RegistrationPage({ category }: { category?: Category }) {
         className="pointer-events-none absolute inset-0 -z-20 transform-gpu [contain:paint] [&>svg]:h-full [&>svg]:w-full"
         dangerouslySetInnerHTML={{ __html: bgSvg }}
       />
-      {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
-      <img
-        src="/lefttopfloaterreg.svg"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute left-0 top-0 -z-10 h-auto w-44 sm:w-64 md:w-80 opacity-80"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
-      <img
-        src="/rightfloaterreg.svg"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute right-0 top-1/4 -z-10 h-auto w-96 sm:w-90 md:w-100 opacity-80"
-      />
+      <ParallaxFloat
+        distance={80}
+        className="pointer-events-none absolute left-0 top-0 -z-10 w-44 opacity-80 sm:w-64 md:w-80"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
+        <img src="/lefttopfloaterreg.svg" alt="" aria-hidden className="h-auto w-full" />
+      </ParallaxFloat>
+      <ParallaxFloat
+        distance={120}
+        className="pointer-events-none absolute right-0 top-1/4 -z-10 w-96 opacity-80 sm:w-90 md:w-100"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
+        <img src="/rightfloaterreg.svg" alt="" aria-hidden className="h-auto w-full" />
+      </ParallaxFloat>
 
       {/* The artwork above is static and streams immediately; only the part
           that needs the session waits. Without this boundary the whole route

@@ -34,8 +34,9 @@ export function Dokumentasi() {
               "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
           }}
         >
-          {/* Track is the slides rendered twice; animating it -50% loops seamlessly. */}
-          <div className="flex w-max animate-marquee gap-4">
+          {/* Track is the slides rendered twice; animating it -50% loops
+              seamlessly. Pauses on hover so a photo can actually be looked at. */}
+          <div className="flex w-max animate-marquee gap-4 hover:[animation-play-state:paused]">
             {[...SLIDES, ...SLIDES].map((src, i) => (
               <div
                 key={i}

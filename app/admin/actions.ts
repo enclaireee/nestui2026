@@ -7,6 +7,12 @@ import { isAdminAuthed } from "@/lib/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ADMIN_COOKIE } from "@/lib/admin/session";
 
+// NOTE: team deletion was deliberately removed. There is intentionally no
+// server action that deletes a registration — a registration is participant
+// data and must not be destroyable from the panel. (Do not re-add one without
+// an explicit, audited reason.) Registrations are removed only directly in the
+// database if ever truly necessary.
+
 export async function adminLogout(): Promise<void> {
   const store = await cookies();
   store.delete(ADMIN_COOKIE);
@@ -58,17 +64,3 @@ export async function setSubmissionStatus(
   revalidatePath(`/admin/registrations/${registrationId}`);
 }
 
-// Deletes a team and (via ON DELETE CASCADE on team_members.registration_id)
-// all its members. Secret key bypasses RLS; admin session required.
-export async function deleteRegistration(id: string): Promise<void> {
-  if (!(await isAdminAuthed())) redirect("/admin/login");
-
-  const admin = createAdminClient();
-  const { error } = await admin.from("registrations").delete().eq("id", id);
-  if (error) {
-    console.error("deleteRegistration failed:", error.message);
-    return;
-  }
-  revalidatePath("/admin");
-  redirect("/admin");
-}
