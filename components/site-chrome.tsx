@@ -32,7 +32,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
  */
 export function AuthChrome({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <div className="-mt-[60px] flex-1 sm:-mt-16">{children}</div>
       <SiteFooter />

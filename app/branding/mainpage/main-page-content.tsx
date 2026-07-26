@@ -9,7 +9,7 @@ import { ParallaxFloat } from "@/components/parallax-float";
 
 export function MainPageContent() {
   return (
-    <main className="relative min-h-screen flex flex-col items-center">
+    <main className="relative min-h-dvh flex flex-col items-center">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 transform-gpu [contain:paint] [&>svg]:h-full [&>svg]:w-full"
@@ -43,7 +43,10 @@ export function MainPageContent() {
           className="h-auto w-full"
         />
       </ParallaxFloat>
-      <div className="flex-1 justify-center w-full max-w-6xl flex flex-col p-5 gap-16 md:gap-24 my-8">
+      {/* gap-10 on mobile, not gap-16. Section gaps tuned for a wide desktop
+          layout read as dead air once everything is one narrow column — the
+          page was ~3 thumb-flicks of empty space between sections. */}
+      <div className="flex-1 justify-center w-full max-w-6xl flex flex-col px-4 py-5 gap-10 sm:px-5 sm:gap-16 md:gap-24 my-4 sm:my-8">
         <Hero />
 
         <div id="explore" className="scroll-mt-24">

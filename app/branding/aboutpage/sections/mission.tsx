@@ -35,10 +35,17 @@ export function Mission() {
         {MISSIONS.map((text, i) => (
           // Alternating entry sides turn five identical pills into a weave.
           <motion.div key={i} variants={i % 2 ? fadeLeft : fadeRight} className="flex items-stretch">
-            {/* Gradient pill — misicontainer image (its left cap is the circle), same height for all.
-                Mobile stretches the image; desktop covers. */}
-            <div className="flex h-24 flex-1 items-center rounded-full bg-[url('/misicontainerMobile.webp')] bg-[length:100%_100%] bg-center bg-no-repeat shadow-lg sm:h-28 sm:bg-[url('/misicontainer.webp')] sm:bg-cover">
-              <p className="pl-28 pr-12 text-justify text-[11px] font-semibold leading-tight text-white sm:pl-36 sm:pr-12 sm:text-base sm:leading-snug">
+            {/* Gradient pill — misicontainer image (its left cap is the circle).
+                `min-h-24`, not `h-24`: at a fixed 96px the longest three
+                missions overflowed their own pill by 7–14px and the copy
+                floated outside the artwork. bg-[length:100%_100%] already
+                stretches the image, so letting the box grow just works. */}
+            <div className="flex min-h-24 flex-1 items-center rounded-[2.5rem] bg-[url('/misicontainerMobile.webp')] bg-[length:100%_100%] bg-center bg-no-repeat py-3 shadow-lg sm:min-h-28 sm:rounded-full sm:bg-[url('/misicontainer.webp')] sm:bg-cover sm:py-0">
+              {/* 11px justified in a ~160px column was the only sub-12px text
+                  in the app, and justification at that measure is all rivers.
+                  Left-aligned 14px, with the left inset cut back to give the
+                  bigger type somewhere to go. */}
+              <p className="pl-24 pr-6 text-left text-sm font-semibold leading-snug text-white sm:pl-36 sm:pr-12 sm:text-base sm:text-justify">
                 {text}
               </p>
             </div>

@@ -107,6 +107,54 @@
     animation: hero-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 
+  /* ===================================================================
+     BOTTOM SHEET — the mobile nav drawer, on a native <dialog>.
+     showModal() gives focus trapping, an inert background and Esc for free;
+     the old dropdown had none of the three and would have needed ~40 lines
+     of React to get them.
+     Only the entry/exit mechanics live here. Appearance stays in the JSX.
+     `display` and `overlay` must be part of the transition or the sheet
+     disappears instantly on close instead of sliding out — that discrete
+     interpolation is the one thing framer's AnimatePresence was doing.
+     The global prefers-reduced-motion rule above already neutralises this.
+     =================================================================== */
+  .sheet {
+    translate: 0 100%;
+    opacity: 0;
+    transition:
+      translate 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.2s ease,
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
+  }
+  .sheet[open] {
+    translate: 0 0;
+    opacity: 1;
+  }
+  @starting-style {
+    .sheet[open] {
+      translate: 0 100%;
+      opacity: 0;
+    }
+  }
+
+  .sheet::backdrop {
+    background-color: rgb(0 0 0 / 0.55);
+    opacity: 0;
+    transition:
+      opacity 0.3s ease,
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
+  }
+  .sheet[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    .sheet[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
   /* Brand gradient text: lime → cream, clipped to the glyphs.
      Reused across the hero (countdown, headings). Pair with a
      `bg-gradient-to-*` utility only when a non-default direction is needed;
@@ -130,8 +178,19 @@
      150ms because these are micro-interactions — 300ms on a hover reads as
      lag, especially combined with a scale.
      =================================================================== */
+  /* Icon-only controls (close, hamburger, social glyphs) are 14–20px of art.
+     This gives them the 44px box Apple/Material ask for; pair with a negative
+     margin at the call site when the extra box would move neighbouring layout.
+     Was pasted-and-forgotten at ~8 call sites, none of which cleared 32px. */
+  .tap-icon {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center;
+  }
+
+  /* min-h-11 on all three button styles: `py-2.5 text-sm` lands at 39–40px,
+     which is under the touch floor on every phone. Height is the one thing
+     call sites must NOT be free to vary; px/w still come from utilities. */
   .btn-brand {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl
       bg-gradient-to-r from-brand-lime to-brand-cream font-bold tracking-wide
       text-brand-teal shadow-md transition-all duration-150
       hover:scale-[1.02] hover:shadow-lg active:scale-95
@@ -143,7 +202,7 @@
   /* Secondary action: the outline-lime twin of .btn-brand. Was pasted in four
      places with three different radii. */
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border-2
       border-brand-lime font-bold tracking-wide text-brand-lime
       transition-all duration-150 hover:scale-[1.02] hover:bg-brand-lime/10
       active:scale-95 focus-visible:outline-none focus-visible:ring-2
@@ -155,7 +214,7 @@
   /* Same shape on the dark dashboard surfaces, where lime-on-dark outline is
      too loud for a Cancel action. */
   .btn-ghost-muted {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border-2
       border-white/20 font-bold tracking-wide text-white/80
       transition-all duration-150 hover:scale-[1.02] hover:bg-white/5
       active:scale-95 focus-visible:outline-none focus-visible:ring-2

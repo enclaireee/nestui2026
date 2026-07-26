@@ -178,12 +178,18 @@ const MilestoneNode: React.FC<MilestoneNodeProps> = ({ id, date, title, details,
         </svg>
       </div>
 
-      <div className="absolute top-[105%] flex flex-col items-center whitespace-nowrap mt-2 z-20">
+      {/* `whitespace-nowrap` only from sm. At 360px the longest label ("Open
+          Registration") is ~250px centred on a node pinned at 30% of a 328px
+          stage, which put its left edge at -3px — three pixels off the side of
+          the screen, clipped, with no scrollbar to reveal it (left overflow
+          doesn't create one). Wrapping is the fix; max-w keeps neighbouring
+          labels from colliding once they can wrap. */}
+      <div className="absolute top-[105%] z-20 mt-2 flex max-w-[46vw] flex-col items-center sm:max-w-none sm:whitespace-nowrap">
         <h4
           className="text-center text-transparent bg-clip-text"
           style={{
             fontFamily: "var(--font-oddval), sans-serif",
-            fontSize: "clamp(26px, 3vw, 36px)",
+            fontSize: "clamp(20px, 6vw, 36px)",
             lineHeight: "110%",
             fontWeight: 600,
             background: "linear-gradient(214.92deg, rgb(var(--brand-cream)) 4.89%, rgb(var(--brand-lime)) 97.74%)",
@@ -335,7 +341,10 @@ export default function TimelineSection() {
         </motion.div>
 
         {/* Aspect-locked stage: ribbon SVG + nodes share one coordinate space (340 x 1040) */}
-        <div className="relative w-full max-w-[360px] mx-auto aspect-[340/1040]">
+        {/* max-w up from 360px: the desktop ribbon only starts at md, so
+            540–767px was showing a 360px-wide illustration marooned in the
+            middle of a 600px column with ~120px of dead gutter each side. */}
+        <div className="relative w-full max-w-[360px] sm:max-w-[460px] mx-auto aspect-[340/1040]">
 
           {(() => {
             // single source of truth for the winding path (rendered as 4 stacked strokes)

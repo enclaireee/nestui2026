@@ -29,7 +29,7 @@ interface AuthPageShellProps {
  */
 export function AuthPageShell({ heading, subheading, children }: AuthPageShellProps) {
   return (
-    <main className="relative isolate flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-brand-green px-5 pb-20 pt-28">
+    <main className="relative isolate flex min-h-dvh w-full flex-col items-center justify-center overflow-x-hidden bg-brand-green px-5 pb-20 pt-28">
       {/* Brand backdrop, kept full-bleed. */}
       {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
       <img

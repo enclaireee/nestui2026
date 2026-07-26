@@ -13,7 +13,7 @@ export default function AdminProtectedLayout({
   // data fetches stream in inside the Suspense boundary, satisfying Next 16's
   // cacheComponents "no blocking data outside <Suspense>" rule.
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="relative min-h-dvh text-white">
       <AdminBackground />
       <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
         <Link href="/admin" className="text-lg font-bold text-gradient-brand">

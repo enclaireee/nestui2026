@@ -33,7 +33,7 @@ export function Theme() {
     const [active, setActive] = useState(0);
 
     return (
-        <section className="flex flex-col w-full mt-10 px-6 py-12 items-center overflow-hidden">
+        <section className="flex flex-col w-full mt-4 px-2 py-8 items-center overflow-hidden sm:mt-10 sm:px-6 sm:py-12">
 
             {/* PERF: each heading here used to be rendered TWICE — a second
                 copy underneath with `blur-[10px]`, faking a drop shadow. A CSS
@@ -47,7 +47,7 @@ export function Theme() {
                 <motion.h2
                     {...entry}
                     transition={{ duration, ease }}
-                    className="text-5xl sm:text-6xl md:text-8xl font-serif italic font-extrabold bg-gradient-to-t from-brand-lime to-brand-cream bg-clip-text text-transparent [text-shadow:0_4px_18px_rgb(var(--brand-green)/0.55)]"
+                    className="text-4xl sm:text-6xl md:text-8xl font-serif italic font-extrabold bg-gradient-to-t from-brand-lime to-brand-cream bg-clip-text text-transparent [text-shadow:0_4px_18px_rgb(var(--brand-green)/0.55)]"
                 >
                     The theme is...
                 </motion.h2>
@@ -55,7 +55,7 @@ export function Theme() {
                 <motion.div
                     {...entry}
                     transition={{ duration, ease, delay: 0.12 }}
-                    className="mt-6 px-4 max-w-5xl"
+                    className="mt-4 px-2 max-w-5xl sm:mt-6 sm:px-4"
                 >
                     <p
                         className="text-lg sm:text-xl md:text-4xl font-bold bg-gradient-to-b from-brand-cream to-brand-lime bg-clip-text text-transparent pb-2 [text-shadow:0_3px_14px_rgb(var(--brand-green)/0.5)]"
@@ -75,7 +75,7 @@ export function Theme() {
                 whileInView="show"
                 viewport={inViewOnce}
                 variants={{ show: { transition: { staggerChildren: 0.1 } } }}
-                className="mt-12 md:mt-16 flex w-full max-w-7xl flex-col gap-4 lg:h-[440px] lg:flex-row lg:gap-5"
+                className="mt-8 sm:mt-12 md:mt-16 flex w-full max-w-7xl flex-col gap-3 sm:gap-4 lg:h-[440px] lg:flex-row lg:gap-5"
             >
                 {CARDS.map((c, i) => (
                     <ThemePanel
@@ -122,7 +122,7 @@ function ThemePanel({ index, title, desc, expanded, onSelect }: ThemePanelProps)
             // re-rasterising large areas on every frame of this transition;
             // the glass is a flat translucent fill instead, which over the
             // backdrop reads near-identically and costs nothing.
-            className={`group relative flex basis-auto grow-0 flex-col overflow-hidden rounded-3xl border p-7 text-left
+            className={`group relative flex basis-auto grow-0 flex-col overflow-hidden rounded-3xl border p-5 sm:p-7 text-left
                 transition-[flex-grow,background-color,border-color] duration-300 ease-out
                 lg:basis-0 lg:p-8
                 ${expanded ? "lg:grow-[2.6]" : "lg:grow"}

@@ -207,14 +207,17 @@ function PersonCard({
 }: {
   person: MemberRow;
   hasMajor: boolean;
-  labels?: { studentIdLabel: string; institutionLabel: string };
+  labels?: { studentIdLabel: string | null; institutionLabel: string };
 }) {
   return (
     <div className="rounded-lg bg-white/5 p-4 text-sm">
       <p className="text-base font-bold">{person.name}</p>
       <Field label="Email" value={person.email} />
       <Field label="Phone" value={person.phone} />
-      <Field label={labels?.studentIdLabel ?? "Student ID"} value={person.student_id} />
+      {/* Competitions with no student-number field store "N/A" — don't show it. */}
+      {(labels ? labels.studentIdLabel : "Student ID") && (
+        <Field label={labels?.studentIdLabel ?? "Student ID"} value={person.student_id} />
+      )}
       <Field label={labels?.institutionLabel ?? "Institution"} value={person.institution} />
       {hasMajor && <Field label="Major" value={person.major ?? "—"} />}
       <div className="mt-1">

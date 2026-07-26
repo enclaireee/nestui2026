@@ -48,11 +48,14 @@ export async function submitRegistration(draft: RegistrationDraft): Promise<Subm
 
   // 4. Atomic insert via RPC (secret key bypasses RLS; function validates again).
   const admin = createAdminClient();
+  // student_id is NOT NULL in the DB, so competitions that don't collect one
+  // (no studentIdLabel) store a placeholder rather than an empty string.
+  const studentId = (v: string) => (cfg.studentIdLabel ? v : "N/A");
   const members: MemberPayload[] = clean.members.map((m) => ({
     name: m.name,
     email: m.email,
     phone: m.phone,
-    student_id: m.studentId,
+    student_id: studentId(m.studentId),
     institution: m.institution,
     major: cfg.hasMajor ? m.major || null : null,
     confirmation_url: m.confirmationUrl,
@@ -66,7 +69,7 @@ export async function submitRegistration(draft: RegistrationDraft): Promise<Subm
     p_leader_name: clean.leader.name,
     p_leader_email: clean.leader.email,
     p_leader_phone: clean.leader.phone,
-    p_leader_student_id: clean.leader.studentId,
+    p_leader_student_id: studentId(clean.leader.studentId),
     p_leader_institution: clean.leader.institution,
     p_leader_major: cfg.hasMajor ? clean.leader.major : null,
     p_leader_confirmation_url: clean.leader.confirmationUrl,

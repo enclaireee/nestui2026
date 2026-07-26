@@ -75,6 +75,9 @@ export function PastSponsors() {
                   alt="Past sponsor logo"
                   width={220}
                   height={128}
+                  // 14 logos were each pulling the 640w candidate for a ~95px
+                  // slot (up to 10.7x oversampled) because none declared sizes.
+                  sizes="(min-width: 768px) 220px, (min-width: 640px) 30vw, 45vw"
                   className="max-h-full w-auto object-contain p-4 sm:p-6 opacity-80 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0"
                 />
               </motion.div>

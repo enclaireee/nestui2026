@@ -30,7 +30,7 @@ const LAST_UPDATED = "July 22, 2026";
 
 export default function PrivacyPage() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden">
+    <main className="relative min-h-dvh overflow-x-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-20 transform-gpu [contain:paint] [&>svg]:h-full [&>svg]:w-full"

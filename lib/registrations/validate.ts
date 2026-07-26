@@ -18,7 +18,9 @@ export function validatePerson(p: PersonDraft, cfg: CompetitionConfig): FieldErr
   else if (!EMAIL_RE.test(p.email.trim())) e.email = "Enter a valid email.";
   if (!p.phone.trim()) e.phone = "Phone number is required.";
   else if (!PHONE_RE.test(p.phone.trim())) e.phone = "Enter a valid phone number.";
-  if (!p.studentId.trim()) e.studentId = `${cfg.studentIdLabel} is required.`;
+  // Competitions with no student-number field (SMA) skip this entirely.
+  if (cfg.studentIdLabel && !p.studentId.trim())
+    e.studentId = `${cfg.studentIdLabel} is required.`;
   if (!p.institution.trim()) e.institution = `${cfg.institutionLabel} is required.`;
   if (cfg.hasMajor && !p.major.trim()) e.major = "Major / Jurusan is required.";
   if (!p.confirmationUrl.trim()) e.confirmationUrl = "Confirmation link is required.";

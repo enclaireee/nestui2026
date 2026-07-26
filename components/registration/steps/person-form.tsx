@@ -88,15 +88,17 @@ export function PersonForm({
           error={errors.phone}
           onChange={(e) => onChange("phone", e.target.value)}
         />
-        <RegistrationInput
-          tone="dark"
-          icon={IdCard}
-          label={cfg.studentIdLabel}
-          placeholder={cfg.studentIdLabel}
-          value={person.studentId}
-          error={errors.studentId}
-          onChange={(e) => onChange("studentId", e.target.value)}
-        />
+        {cfg.studentIdLabel && (
+          <RegistrationInput
+            tone="dark"
+            icon={IdCard}
+            label={cfg.studentIdLabel}
+            placeholder={cfg.studentIdLabel}
+            value={person.studentId}
+            error={errors.studentId}
+            onChange={(e) => onChange("studentId", e.target.value)}
+          />
+        )}
         <RegistrationInput
           tone="dark"
           icon={Building}
@@ -127,7 +129,7 @@ export function PersonForm({
             Submit one Google Drive folder containing all of the following:
           </p>
           <ul className="mt-1 list-disc space-y-0.5 pl-4">
-            <li>Scan of your {cfg.studentIdLabel}</li>
+            <li>Scan of your {cfg.idCardLabel}</li>
             <li>
               Proof of following{" "}
               <a
@@ -140,7 +142,17 @@ export function PersonForm({
               </a>{" "}
               on Instagram
             </li>
-            <li>Proof of posting the NEST UI 2026 twibbon</li>
+            <li>
+              Proof of posting the{" "}
+              <a
+                href={cfg.twibbonUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-lime underline decoration-brand-lime underline-offset-2 hover:text-brand-lime"
+              >
+                {cfg.name} twibbon
+              </a>
+            </li>
           </ul>
         </div>
         <RegistrationInput

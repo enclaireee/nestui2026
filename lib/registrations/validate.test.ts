@@ -14,7 +14,6 @@ const person = () => ({
   name: "Budi",
   email: "budi@example.com",
   phone: "081234567890",
-  studentId: "12345",
   institution: "SMA 1",
   confirmationUrl: "https://drive.google.com/folder",
 });
@@ -43,5 +42,13 @@ assert.equal(validateLeader(draft("https://drive.google.com/x"), cfg).originalit
 assert.equal(validateDraft(draft(""), cfg).ok, false);
 assert.match(validateDraft(draft(""), cfg).message ?? "", /Letter of originality/);
 assert.equal(validateDraft(draft("https://drive.google.com/x"), cfg).ok, true);
+
+// Healthynovation collects no student number (studentIdLabel null) — an empty
+// studentId must pass, while the undergrad competitions still require it.
+assert.equal(validateLeader(draft("https://drive.google.com/x"), cfg).studentId, undefined);
+assert.match(
+  validateLeader(draft("https://drive.google.com/x"), COMPETITIONS.medhack).studentId ?? "",
+  /Nomor Induk Mahasiswa/,
+);
 
 console.log("validate ok");
