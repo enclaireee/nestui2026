@@ -8,7 +8,7 @@ export default function ProtectedLayout({
   return (
     <SiteChrome>
       <main
-      className="relative min-h-screen flex flex-col items-center bg-brand-green bg-top bg-no-repeat bg-[length:100%_auto] pt-24 pb-16 px-4 sm:pt-28 md:px-8"
+      className="relative min-h-dvh flex flex-col items-center bg-brand-green bg-top bg-no-repeat bg-[length:100%_auto] pt-24 pb-16 px-4 sm:pt-28 md:px-8"
       style={{ backgroundImage: "url('/aboutbackground.webp')" }}
     >
       {/* Darkening veil so the glass panels stay readable over the artwork. */}

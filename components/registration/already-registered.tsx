@@ -14,7 +14,7 @@ export function AlreadyRegistered({
   teams: { team_name: string; competition: CompetitionId }[];
 }) {
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 pb-24 pt-24 md:px-8">
+    <div className="relative flex min-h-dvh w-full flex-col items-center justify-center px-4 pb-24 pt-24 md:px-8">
       <h1 className="pb-3 text-center text-3xl font-bold text-gradient-brand drop-shadow-md sm:text-5xl md:text-6xl">
         You&apos;ve Already Registered
       </h1>

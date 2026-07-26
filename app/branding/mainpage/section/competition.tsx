@@ -124,7 +124,7 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
       // backdrop-filter. All three were re-rasterising this card continuously;
       // hover is now a plain colour change, which the compositor handles.
       className={`group relative flex w-full overflow-hidden rounded-3xl border border-white/20 bg-white/[0.16]
-        p-7 transition-[transform,background-color,border-color] duration-200 ease-out
+        p-5 transition-[transform,background-color,border-color] duration-200 ease-out sm:p-7
         hover:border-brand-lime/40 motion-reduce:!transform-none
         lg:bg-white/[0.10] lg:hover:bg-white/[0.16]
         ${featured ? "flex-col gap-7 sm:flex-row sm:items-center sm:gap-10 sm:p-9" : "flex-col"}`}
@@ -146,7 +146,10 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({
           alt=""
           aria-hidden
           fill
-          sizes="160px"
+          // Was a flat "160px", so a DPR-3 phone resolved 480 and pulled the
+          // 640w candidate for a 96px slot. These match the h-24/h-32/h-40
+          // boxes below.
+          sizes="(min-width: 640px) 160px, 96px"
           className="object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
         />
       </div>
@@ -190,7 +193,7 @@ export default function CompetitionSection() {
   const highschool = CARDS.filter((c) => COMPETITIONS[c.id].category === "sma");
 
   return (
-    <section className="relative mx-auto flex w-full max-w-[1440px] flex-col items-center overflow-hidden px-4 py-16 md:px-8">
+    <section className="relative mx-auto flex w-full max-w-[1440px] flex-col items-center overflow-hidden px-4 py-10 sm:py-16 md:px-8">
       <motion.div
         initial={{ opacity: 0, ...offset.up }}
         whileInView={rest}
@@ -201,10 +204,10 @@ export default function CompetitionSection() {
         <CompetitionTitle className="h-auto w-full max-w-[800px] drop-shadow-xl lg:max-w-[1026px]" />
       </motion.div>
 
-      <div className="z-10 flex w-full max-w-[1150px] flex-col gap-8">
+      <div className="z-10 flex w-full max-w-[1150px] flex-col gap-5 sm:gap-8">
         {/* Two equal cards. items-stretch so they share a baseline rather than
             ragging when one description runs longer. */}
-        <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-5 sm:gap-8 lg:grid-cols-2">
           {undergrad.map((c, i) => (
             <CompetitionCard
               key={c.id}

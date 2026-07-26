@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -157,10 +157,16 @@ export function CompetitionModal({
   competitionId: CompetitionId | null;
   onClose: () => void;
 }) {
-  // Scroll lock + Esc to close while open.
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  // Scroll lock + Esc to close while open, and move focus into the dialog.
+  // Without the focus move, `aria-modal` is a promise the dialog doesn't keep:
+  // activeElement stayed on <body>, so a keyboard or switch-control user was
+  // tabbing through the page behind an overlay they couldn't see past.
   useEffect(() => {
     if (!competitionId) return;
     document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => {
@@ -188,8 +194,13 @@ export function CompetitionModal({
   const today = new Date().toISOString().slice(0, 10);
 
   return (
+    // Full-height sheet on phones, centred dialog from sm up. A 90dvh box
+    // floating inside a 4px gutter is a desktop shape — on a phone it fights
+    // the viewport, and with `vh` (the large viewport on iOS) the footer
+    // holding Register fell under the address bar. `dvh` + edge-to-edge fixes
+    // both, and `items-end` means it rises from the thumb end of the screen.
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 animate-in fade-in duration-150 sm:items-center sm:p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -197,20 +208,20 @@ export function CompetitionModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/15 bg-brand-green/95 shadow-2xl ring-1 ring-white/5 animate-in fade-in zoom-in-95 duration-200"
+        className="relative flex h-[92dvh] w-full max-w-4xl flex-col overflow-hidden rounded-t-3xl border border-white/15 bg-brand-green/95 shadow-2xl ring-1 ring-white/5 animate-in slide-in-from-bottom-4 duration-200 sm:h-auto sm:max-h-[90dvh] sm:rounded-3xl sm:fade-in sm:zoom-in-95"
       >
-        <div className="relative flex items-center gap-4 border-b border-white/10 p-6 pr-14">
-          <div className="relative h-20 w-20 shrink-0">
+        <div className="relative flex items-center gap-3 border-b border-white/10 p-4 pr-14 sm:gap-4 sm:p-6">
+          <div className="relative h-14 w-14 shrink-0 sm:h-20 sm:w-20">
             <Image
               src={cfg.logo}
               alt={`${cfg.name} logo`}
               fill
-              sizes="80px"
+              sizes="(min-width: 640px) 80px, 56px"
               className="object-contain drop-shadow-[0_0_14px_rgba(227,239,38,0.35)]"
             />
           </div>
           <div className="min-w-0">
-            <h2 className="text-3xl font-bold text-gradient-brand">{cfg.name}</h2>
+            <h2 className="text-2xl font-bold text-gradient-brand sm:text-3xl">{cfg.name}</h2>
             <div className="mt-2 flex flex-wrap gap-2">
               <Pill icon={Users}>{cfg.categoryLabel}</Pill>
               <Pill icon={Users}>{cfg.minSize}–{cfg.maxSize} participants</Pill>
@@ -218,15 +229,18 @@ export function CompetitionModal({
           </div>
 
           <button
+            ref={closeRef}
             onClick={onClose}
-            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/70 ring-1 ring-white/10 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
+            className="tap-icon absolute right-2 top-2 rounded-full bg-white/5 text-white/70 ring-1 ring-white/10 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime sm:right-3 sm:top-3"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="overflow-y-auto px-6 py-7 [scrollbar-width:thin] [scrollbar-color:rgb(var(--brand-lime))_transparent]">
+        {/* overscroll-contain: flicking past the end of this list used to
+            chain the scroll to the page behind the modal. */}
+        <div className="overflow-y-auto overscroll-contain px-4 py-6 sm:px-6 sm:py-7 [scrollbar-width:thin] [scrollbar-color:rgb(var(--brand-lime))_transparent]">
           <p className="max-w-[68ch] text-sm leading-relaxed text-white/75">{detail.about}</p>
 
           {/* Two columns from lg. All six sections used to stack in a single
@@ -391,7 +405,10 @@ export function CompetitionModal({
         {/* Split footer: read first, then enter. Guidebook is the secondary
             action so it doesn't compete with Register — and it's a plain <a>,
             not next/link, because it leaves the app for Google Drive. */}
-        <div className="grid grid-cols-2 gap-3 border-t border-white/10 p-4">
+        {/* pb from the safe-area inset — this row is now flush with the bottom
+            edge of the screen on mobile, i.e. exactly where the iOS home
+            indicator lives. */}
+        <div className="grid grid-cols-2 gap-3 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4">
           <a
             href={cfg.guidebookUrl}
             target="_blank"

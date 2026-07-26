@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { AnimatePresence, motion, useScroll } from "framer-motion";
-import { LogOut, LayoutDashboard, Menu, X, ArrowRight, Home, Users, ClipboardList, Mail } from "lucide-react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { motion, useScroll } from "framer-motion";
+import { LogOut, LayoutDashboard, Menu, X, ArrowRight, ChevronRight, Home, Users, ClipboardList, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -38,41 +38,41 @@ function NavList({
   onNavigate?: () => void;
 }) {
   if (variant === "mobile") {
+    // 56px rows, full-bleed, chevron affordance — a phone navigation list,
+    // not the desktop pill row reflowed into a column. No per-item entry
+    // animation: the sheet itself slides in, and staggering four rows on top
+    // of that just delayed the thing the user already asked for.
     return (
       <>
-        {navLinks.map((link, i) => {
+        {navLinks.map((link) => {
           const active = pathname === link.href;
           const Icon = link.icon;
           return (
-            <motion.div
+            <Link
               key={link.href}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              // Cascade down the list rather than appearing as a block.
-              transition={{ delay: 0.04 + i * 0.045, duration: 0.25 }}
+              href={link.href}
+              aria-current={active ? "page" : undefined}
+              onClick={onNavigate}
+              className={`group flex min-h-14 items-center gap-4 rounded-2xl px-3 text-base font-semibold transition-colors active:scale-[0.98] ${
+                active
+                  ? "bg-brand-lime/15 text-brand-lime ring-1 ring-brand-lime/30"
+                  : "text-white/85 active:bg-white/10"
+              }`}
             >
-              <Link
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                onClick={onNavigate}
-                className={`group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors ${
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
                   active
-                    ? "bg-brand-lime/15 text-brand-lime ring-1 ring-brand-lime/30"
-                    : "text-white/85 hover:bg-white/10 hover:text-brand-lime"
+                    ? "bg-brand-lime/20 text-brand-lime"
+                    : "bg-white/[0.07] text-white/60"
                 }`}
               >
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${
-                    active
-                      ? "bg-brand-lime/20 text-brand-lime"
-                      : "bg-white/5 text-white/60 group-hover:bg-white/10 group-hover:text-brand-lime"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                {link.label}
-              </Link>
-            </motion.div>
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="flex-1">{link.label}</span>
+              <ChevronRight
+                className={`h-5 w-5 shrink-0 ${active ? "text-brand-lime/70" : "text-white/25"}`}
+              />
+            </Link>
           );
         })}
       </>
@@ -90,7 +90,10 @@ function NavList({
             key={link.href}
             href={link.href}
             aria-current={active ? "page" : undefined}
-            className={`relative rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 ${
+            // py-3, not py-1.5: from md up the hamburger is hidden, so THIS is
+            // the nav a tablet and a landscape phone actually get — and at
+            // py-1.5 every link was a 32px-tall touch target.
+            className={`relative inline-flex min-h-11 items-center rounded-full px-3.5 py-3 text-sm font-medium transition-colors duration-150 ${
               active ? "text-brand-lime" : "text-white/80 hover:text-white"
             }`}
           >
@@ -122,6 +125,7 @@ export function SiteHeader() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const sheetRef = useRef<HTMLDialogElement>(null);
   const router = useRouter();
 
   // Drives the hairline progress bar along the top edge. Reads scroll position
@@ -153,15 +157,28 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // The sheet closes on link tap (see onNavigate), on Escape, and on backdrop
-  // click. It deliberately does NOT watch pathname to auto-close: that would
-  // pull request-time data back into this component and re-break the build —
-  // the reason NavList takes pathname as a prop at all.
+  // Drive the native <dialog>. showModal() is what gives the sheet its focus
+  // trap, its inert background and its Esc handling — the old dropdown had
+  // none of them and left 15 elements behind it tabbable.
+  // The one thing showModal does NOT do is stop the page scrolling behind it,
+  // hence the explicit body lock.
+  //
+  // It deliberately does NOT watch pathname to auto-close: that would pull
+  // request-time data back into this component and re-break the build — the
+  // reason NavList takes pathname as a prop at all. Link taps call onNavigate.
   useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const el = sheetRef.current;
+    if (!el) return;
+    if (menuOpen && !el.open) {
+      el.showModal();
+      document.body.style.overflow = "hidden";
+    } else if (!menuOpen && el.open) {
+      el.close();
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [menuOpen]);
 
   const confirmLogout = async () => {
@@ -226,12 +243,16 @@ export function SiteHeader() {
               : "rounded-full border-white/15 bg-brand-green/80 shadow-lg shadow-black/10 ring-1 ring-white/5"
           }`}
         >
-          <Link href="/branding/mainpage" className="group flex items-center gap-2">
+          <Link
+            href="/branding/mainpage"
+            className="group flex min-h-11 items-center gap-2"
+          >
             <Image
               src="/nestlogo.webp"
               alt="Nest UI logo"
               width={32}
               height={32}
+              sizes="24px"
               className="h-6 w-6 object-contain transition-transform duration-300 group-hover:rotate-[8deg] group-hover:scale-110"
               priority
             />
@@ -250,7 +271,10 @@ export function SiteHeader() {
           transition={{ type: "spring", stiffness: 260, damping: 30 }}
           // Ring declared per-branch, not in the base — see the note on the
           // left pill for why.
-          className={`relative flex h-12 items-center gap-2 border py-0 pl-4 pr-2 transition-[background-color,border-color,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          // Tighter horizontal padding below sm. The hamburger went from 32px
+          // to a legal 44px box, and at 360px the two pills were already
+          // spanning x=16→344 of 360 — this is where the 12px comes from.
+          className={`relative flex h-12 items-center gap-1.5 border py-0 pl-3 pr-1.5 transition-[background-color,border-color,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:gap-2 sm:pl-4 sm:pr-2 ${
             scrolled
               ? "rounded-l-none rounded-r-full border-l-0 border-white/20 bg-brand-green shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)]"
               : "rounded-full border-white/15 bg-brand-green/80 shadow-lg shadow-black/10 ring-1 ring-white/5"
@@ -267,7 +291,7 @@ export function SiteHeader() {
               dashboard glyph (logged in) are the only per-state differences. */}
           <Link
             href={isLoggedIn ? "/protected" : "/auth/login"}
-            className={`group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-1.5 text-sm font-semibold text-brand-teal shadow-sm ring-1 ring-black/5 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 ${
+            className={`group relative inline-flex min-h-11 items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-sm font-semibold text-brand-teal shadow-sm ring-1 ring-black/5 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 sm:px-5 ${
               isLoggedIn
                 ? "bg-gradient-to-r from-brand-lime to-brand-cream hover:shadow-lg hover:shadow-brand-lime/40"
                 : "bg-brand-cream hover:shadow-lg hover:shadow-brand-lime/25"
@@ -278,7 +302,12 @@ export function SiteHeader() {
               className="pointer-events-none absolute inset-0 -translate-x-[120%] bg-gradient-to-r from-transparent via-white/60 to-transparent transition-transform duration-[600ms] ease-out group-hover:translate-x-[120%]"
             />
             {isLoggedIn && <LayoutDashboard className="relative h-4 w-4" />}
-            <span className="relative">{isLoggedIn ? "Dashboard" : "Login Now"}</span>
+            {/* "Login Now" → "Login" below sm. The label is the cheapest 35px
+                to give back, and it's the reason a 44px hamburger fits at 360. */}
+            <span className="relative">
+              {isLoggedIn ? "Dashboard" : "Login"}
+              {!isLoggedIn && <span className="hidden sm:inline"> Now</span>}
+            </span>
             {!isLoggedIn && (
               <ArrowRight className="relative h-4 w-4 -mr-0.5 transition-transform duration-200 group-hover:translate-x-0.5" />
             )}
@@ -291,90 +320,89 @@ export function SiteHeader() {
               onClick={() => setShowLogoutConfirm(true)}
               aria-label="Log out"
               title="Log out"
-              className="hidden h-8 w-8 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-red-300 md:flex"
+              className="tap-icon hidden rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-red-300 md:inline-flex"
             >
               <LogOut className="h-4 w-4" />
             </button>
           )}
 
-          {/* Was a native <details> disclosure. Swapped for real state so the
-              sheet can animate out as well as in — <details> removes its
-              content the instant `open` is dropped, so an exit animation is
-              impossible. This component already holds state, so it costs
-              nothing extra. */}
           <button
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 md:hidden"
+            aria-controls="mobile-nav-sheet"
+            className="tap-icon rounded-full text-white/90 transition-colors hover:bg-white/10 active:bg-white/15 md:hidden"
           >
-            <AnimatePresence initial={false} mode="wait">
-              <motion.span
-                key={menuOpen ? "close" : "open"}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex"
-              >
-                {menuOpen ? <X className="h-[18px] w-[18px]" /> : <Menu className="h-[18px] w-[18px]" />}
-              </motion.span>
-            </AnimatePresence>
+            {/* No open/close icon swap any more: the sheet is a modal, so when
+                it's open this button is behind the backdrop and unreachable.
+                Closing is the sheet's own X. */}
+            <Menu className="h-5 w-5" />
           </button>
         </motion.div>
       </motion.nav>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/20 md:hidden"
+      {/* THE MOBILE NAV SHEET.
+          Bottom sheet, not a 256px dropdown pinned to the top-right corner:
+          the bottom of the screen is the half a thumb can actually reach, and
+          full-bleed rows let each link be 56px instead of 40.
+          A click lands on the <dialog> itself only when it hits the backdrop —
+          the panel below covers everything else. Same trick as PopUpTemplate. */}
+      <dialog
+        id="mobile-nav-sheet"
+        ref={sheetRef}
+        aria-label="Site navigation"
+        onClose={() => setMenuOpen(false)}
+        onClick={(e) => {
+          if (e.target === sheetRef.current) setMenuOpen(false);
+        }}
+        // The UA stylesheet centres a modal dialog and caps it at
+        // `calc(100% - 6px - 2em)`; all three overrides below are needed to
+        // pin it full-bleed to the bottom edge instead.
+        // max-h in dvh + overflow so it still works in landscape (390px tall).
+        className="sheet fixed inset-x-0 bottom-0 top-auto m-0 max-h-[85dvh] w-full max-w-none overflow-y-auto overscroll-contain rounded-t-[1.75rem] border-t border-white/10 bg-brand-green p-0 text-white shadow-2xl shadow-black/60 md:hidden"
+      >
+        {/* pb from the safe-area inset, so the last row clears the iOS home
+            indicator instead of sitting under it. */}
+        <div className="flex flex-col px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+          <div className="mb-1 flex items-center justify-between">
+            {/* Grab handle. Purely an affordance that this panel came from the
+                bottom edge — no drag is wired up, tap the backdrop or the X. */}
+            <span aria-hidden className="h-1 w-10 rounded-full bg-white/20" />
+            <button
               onClick={() => setMenuOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.97 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute right-4 top-[calc(100%+0.6rem)] z-50 flex w-64 origin-top-right flex-col overflow-hidden rounded-3xl border border-white/10 bg-brand-green/95 p-2 shadow-2xl shadow-black/50 ring-1 ring-white/10 backdrop-blur-xl md:hidden"
+              aria-label="Close menu"
+              className="tap-icon -mr-2 rounded-full text-white/70 transition-colors active:bg-white/10"
             >
-              {/* Lime glow bleeding in from the top corner — reads as intent,
-                  not the flat box it was. */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-brand-lime/20 blur-2xl"
-              />
-              <div className="relative flex flex-col gap-1">
-                <Suspense
-                  fallback={<NavList variant="mobile" pathname={null} onNavigate={() => setMenuOpen(false)} />}
-                >
-                  <ActiveNavList variant="mobile" onNavigate={() => setMenuOpen(false)} />
-                </Suspense>
-              </div>
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-              {isLoggedIn && (
-                <div className="relative mt-1 border-t border-white/10 pt-1">
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setShowLogoutConfirm(true);
-                    }}
-                    className="group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-white/80 transition-colors hover:bg-red-500/10 hover:text-red-300"
-                  >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-white/60 transition-colors group-hover:bg-red-500/15 group-hover:text-red-300">
-                      <LogOut className="h-4 w-4" />
-                    </span>
-                    Log out
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          <div className="flex flex-col gap-1">
+            <Suspense
+              fallback={<NavList variant="mobile" pathname={null} onNavigate={() => setMenuOpen(false)} />}
+            >
+              <ActiveNavList variant="mobile" onNavigate={() => setMenuOpen(false)} />
+            </Suspense>
+          </div>
+
+          {isLoggedIn && (
+            <div className="mt-2 border-t border-white/10 pt-2">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setShowLogoutConfirm(true);
+                }}
+                className="flex min-h-14 w-full items-center gap-4 rounded-2xl px-3 text-base font-semibold text-white/80 transition-colors active:bg-red-500/10"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-white/60">
+                  <LogOut className="h-5 w-5" />
+                </span>
+                Log out
+              </button>
+            </div>
+          )}
+        </div>
+      </dialog>
 
       <PopUpTemplate
         isOpen={showLogoutConfirm}
@@ -384,13 +412,13 @@ export function SiteHeader() {
       >
         <button
           onClick={() => setShowLogoutConfirm(false)}
-          className="btn-ghost px-8 py-2.5 text-sm"
+          className="btn-ghost px-6 py-2.5 text-sm"
         >
           Cancel
         </button>
         <button
           onClick={confirmLogout}
-          className="btn-brand px-8 py-2.5 text-sm"
+          className="btn-brand px-6 py-2.5 text-sm"
         >
           <LogOut className="h-4 w-4" />
           Log Out

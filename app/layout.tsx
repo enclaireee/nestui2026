@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { MotionProvider } from "@/components/motion-provider";
 import { siteUrl } from "@/lib/utils";
@@ -34,6 +34,16 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title, description },
   robots: { index: true, follow: true },
+};
+
+// `viewportFit: "cover"` is not cosmetic — without it iOS reports every
+// env(safe-area-inset-*) as 0px, so the footer's links sit under the home
+// indicator and no amount of CSS can move them. Next's default viewport tag
+// omits it, which is why the whole app had zero safe-area handling.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 // Default font for the whole app. Drop the file(s) in app/fonts/.

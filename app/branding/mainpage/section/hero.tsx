@@ -49,29 +49,43 @@ export function Hero() {
   // — but backdrop-filter re-reads and re-blurs the whole region on every zoom
   // step, which is what made zooming lag.
   return (
-    <section className="mx-auto mt-8 flex w-fit max-w-6xl flex-col items-center rounded-3xl border border-white/40 bg-white/5 px-6 pb-8 pt-6 sm:px-10">
-      <div className="flex w-full flex-col items-center gap-8 md:flex-row md:gap-12">
+    <section className="mx-auto mt-4 flex w-fit max-w-6xl flex-col items-center rounded-3xl border border-white/40 bg-white/5 px-4 pb-6 pt-5 sm:mt-8 sm:px-10 sm:pb-8 sm:pt-6">
+      <div className="flex w-full flex-col items-center gap-5 sm:gap-8 md:flex-row md:gap-12">
         <Image
           src="/nestlogo.webp"
           alt="Nest UI 2026 logo"
           width={800}
           height={800}
           priority
-          className="hero-rise h-auto w-44 shrink-0 drop-shadow-2xl sm:w-56 md:w-72"
+          // THE LCP ELEMENT on mobile. Without `sizes`, next/image emits a
+          // fixed 1x/2x srcset off `width={800}`, so a DPR-3 phone downloaded
+          // the 1920w candidate (88KB, 2.4s on Slow 4G) for a 176px slot and
+          // LCP landed at 2792ms. These values are the rendered widths below.
+          sizes="(min-width: 768px) 288px, (min-width: 640px) 224px, 128px"
+          // w-32 on mobile, not w-44: the logo is the establishing shot, not
+          // the message, and at 176px it pushed the countdown below the fold.
+          className="hero-rise h-auto w-32 shrink-0 drop-shadow-2xl sm:w-56 md:w-72"
         />
 
         <div
           className="hero-rise flex max-w-2xl flex-1 flex-col items-start"
           style={{ animationDelay: "120ms" }}
         >
-          {/* Indent text to the blob's left lobe edge (88/760 ≈ 11.6%). */}
-          <div className="w-full pl-[11.6%]">
+          {/* Indent text to the blob's left lobe edge (88/760 ≈ 11.6%).
+              md-only: below that the column is ~320px wide and giving 11.6%
+              of it away to align with artwork nobody can see at that size just
+              made every line shorter for no reason. */}
+          <div className="w-full md:pl-[11.6%]">
           <Image
             src="/aboutheronest.webp"
             alt="NEST UI 2026"
             width={2769}
             height={576}
             priority
+            // Was shipping the 3840w candidate to a 265px slot — 14.5x
+            // oversampled, and `priority` put it on the critical path next to
+            // the real LCP image.
+            sizes="(min-width: 768px) 480px, 100vw"
             className="h-auto w-full max-w-[480px] drop-shadow-xl"
           />
 
@@ -154,7 +168,7 @@ function CountdownBlock({
         {/* Same glyph count as a real value, so the digits never reflow in. */}
         {value ?? "00"}
       </span>
-      <span className="mt-1.5 text-xs font-semibold text-gradient-brand sm:text-base md:text-lg">
+      <span className="mt-1.5 text-sm font-semibold text-gradient-brand sm:text-base md:text-lg">
         {label}
       </span>
     </div>

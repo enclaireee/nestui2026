@@ -6,7 +6,7 @@ import Image from "next/image";
 // "the site is broken" rather than "that address doesn't exist".
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-brand-green px-6 py-24 text-center">
+    <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-brand-green px-6 py-24 text-center">
       <Image
         src="/nestlogo.webp"
         alt=""

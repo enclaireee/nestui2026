@@ -18,7 +18,7 @@ const PARTNER_SUBJECT = "Partnership Inquiry — NEST UI 2026";
 
 export default function ContactPage() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden">
+    <main className="relative min-h-dvh overflow-x-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-20 transform-gpu [contain:paint] [&>svg]:h-full [&>svg]:w-full"

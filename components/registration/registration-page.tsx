@@ -18,7 +18,7 @@ import {
  */
 export function RegistrationPage({ category }: { category?: Category }) {
   return (
-    <main className="relative min-h-screen flex flex-col items-center overflow-x-hidden">
+    <main className="relative min-h-dvh flex flex-col items-center overflow-x-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-20 transform-gpu [contain:paint] [&>svg]:h-full [&>svg]:w-full"
@@ -51,7 +51,7 @@ export function RegistrationPage({ category }: { category?: Category }) {
 
 function WizardFallback() {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center px-4 pb-24 pt-24">
+    <div className="flex min-h-dvh w-full flex-col items-center justify-center px-4 pb-24 pt-24">
       <div className="h-10 w-64 animate-pulse rounded-lg bg-white/10" />
       <div className="mt-10 h-[28rem] w-full max-w-2xl animate-pulse rounded-[2rem] border border-white/20 bg-white/10" />
     </div>

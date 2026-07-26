@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <main
-      className="min-h-screen flex flex-col items-center bg-brand-green bg-top bg-no-repeat bg-[length:auto_100%] md:bg-[length:120%_auto]"
+      className="min-h-dvh flex flex-col items-center bg-brand-green bg-top bg-no-repeat bg-[length:auto_100%] md:bg-[length:120%_auto]"
       style={{ backgroundImage: "url('/aboutbackground.webp')" }}
     >
       <div className="flex-1 w-full max-w-5xl flex flex-col p-5">

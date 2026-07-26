@@ -258,7 +258,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
     // the same words appeared — it repeated the step label that the rail and
     // the card header both already show, and on a phone it pushed the first
     // field below the fold. The card header is now the single title.
-    <div className="relative flex min-h-screen w-full flex-col items-center px-4 pb-24 pt-28 md:px-8">
+    <div className="relative flex min-h-dvh w-full flex-col items-center px-4 pb-24 pt-28 md:px-8">
       {state.submittedCode ? (
         <AnimatePresence mode="wait">
           <motion.div

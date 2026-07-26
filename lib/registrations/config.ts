@@ -13,7 +13,14 @@ export interface CompetitionConfig {
   minSize: number;
   maxSize: number;
   hasMajor: boolean;
-  studentIdLabel: string; // NIM (undergrad) / Kartu Identitas Siswa (SMA)
+  /**
+   * Label of the student-number field. Null for competitions that don't collect
+   * one (highschool has no NIM equivalent) — the field is hidden and "N/A" is
+   * submitted, since the DB column is NOT NULL.
+   */
+  studentIdLabel: string | null;
+  /** ID document participants scan into their confirmation folder. */
+  idCardLabel: string; // KTM (undergrad) / Kartu Identitas Siswa (SMA)
   institutionLabel: string; // University / Sekolah
   blurb: string;
   logo: string; // path in /public
@@ -30,6 +37,8 @@ export interface CompetitionConfig {
    * sits next to the entry point rather than inside the wizard.
    */
   guidebookUrl: string;
+  /** Competition's twibbon folder (Google Drive) — linked from the confirmation checklist. */
+  twibbonUrl: string;
   /** Registration fee tiers, earliest first. See `currentFee`. */
   fees: FeeTier[];
 }
@@ -51,7 +60,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     minSize: 3,
     maxSize: 5,
     hasMajor: true,
-    studentIdLabel: "NIM (Student Registration Number)",
+    studentIdLabel: "Nomor Induk Mahasiswa (NIM)",
+    idCardLabel: "Kartu Tanda Mahasiswa (KTM)",
     institutionLabel: "University",
     blurb:
       "A team hackathon that challenges participants to develop healthcare-technology-based business solutions.",
@@ -61,6 +71,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "https://docs.google.com/document/d/12qEaJLfTeOMSdf9wCd50p3zsopmMw63A191xvI2QYpA/edit?usp=drivesdk",
     guidebookUrl:
       "https://drive.google.com/file/d/1_G3Ancvkj_6P_xzhrwJGJw0Kf8I_xmGR/view?usp=sharing",
+    twibbonUrl:
+      "https://drive.google.com/drive/folders/1R0d83qPL9xLZpXi6i3gIqx3XcuQKEvAR?usp=drive_link",
     fees: [
       { label: "Early Bird", amount: 200_000, until: "2026-08-02" },
       { label: "Normal", amount: 220_000, until: "2026-08-25" },
@@ -74,7 +86,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     minSize: 3,
     maxSize: 5,
     hasMajor: true,
-    studentIdLabel: "NIM (Student Registration Number)",
+    studentIdLabel: "Nomor Induk Mahasiswa (NIM)",
+    idCardLabel: "Kartu Tanda Mahasiswa (KTM)",
     institutionLabel: "University",
     blurb:
       "A team competition to develop healthcare technology solutions in the form of a scientific paper and prototype.",
@@ -84,6 +97,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "https://docs.google.com/document/d/1706y-HFKhKQvfAVP0-W47DuODTvm5cFnTFtPiblDFBA/edit?usp=drivesdk",
     guidebookUrl:
       "https://drive.google.com/file/d/1VQNpWrcQ4JSPgUojqUm6k3ctEg__Y7ob/view?usp=sharing",
+    twibbonUrl:
+      "https://drive.google.com/drive/folders/1ABVG-7Pz9Ce9yGEcHlP9rcuJub2mSEkp?usp=drive_link",
     fees: [
       { label: "Early Bird", amount: 175_000, until: "2026-08-02" },
       { label: "Normal", amount: 200_000, until: "2026-08-14" },
@@ -97,7 +112,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     minSize: 1,
     maxSize: 3,
     hasMajor: false,
-    studentIdLabel: "Kartu Identitas Siswa",
+    studentIdLabel: null,
+    idCardLabel: "Kartu Identitas Siswa",
     institutionLabel: "School",
     blurb:
       "A scientific paper competition for highschool students that encourages innovative ideas in healthcare.",
@@ -107,6 +123,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "https://docs.google.com/document/d/1Ei7ZYa37yngw3fgjnhtIgKXOFlvYnhKsxmruCTteX20/edit?usp=drivesdk",
     guidebookUrl:
       "https://drive.google.com/file/d/1Jmxf4J3TvJuj1DkLs_GGsOWKUSN0N992/view?usp=sharing",
+    twibbonUrl:
+      "https://drive.google.com/drive/folders/1T4IRIRlNDOmVTJWqzSB_6nkPoohQRXji?usp=drive_link",
     fees: [
       { label: "Early Bird", amount: 80_000, until: "2026-08-02" },
       { label: "Normal", amount: 100_000, until: "2026-08-14" },

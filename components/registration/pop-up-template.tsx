@@ -50,12 +50,15 @@ export function PopUpTemplate({
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
-      className="max-w-sm rounded-[2rem] border border-white/15 bg-brand-green/95 p-8 text-left text-white shadow-2xl ring-1 ring-white/5 backdrop:bg-black/60"
+      // p-6 below sm: the UA clamps a modal dialog to calc(100% - 6px - 2em),
+      // i.e. 322px at a 360px viewport — p-8 left only 258px of content, which
+      // two `px-8` buttons do not fit into.
+      className="max-w-sm rounded-[2rem] border border-white/15 bg-brand-green/95 p-6 text-left text-white shadow-2xl ring-1 ring-white/5 backdrop:bg-black/60 sm:p-8"
     >
       <button
         type="button"
         onClick={onClose}
-        className="absolute right-5 top-5 rounded-full text-white/60 transition-colors duration-150 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
+        className="tap-icon absolute right-2 top-2 rounded-full text-white/60 transition-colors duration-150 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
         aria-label="Close pop up"
       >
         <X className="h-5 w-5" />
@@ -70,7 +73,13 @@ export function PopUpTemplate({
 
       <p className="text-center text-sm leading-relaxed text-white/70">{content}</p>
 
-      {children && <div className="mt-8 flex justify-center gap-3">{children}</div>}
+      {/* flex-wrap so a Cancel/Confirm pair stacks instead of overflowing at
+          360px, where the content box is only ~270px wide. */}
+      {children && (
+        <div className="mt-8 flex flex-wrap justify-center gap-3 [&>*]:flex-1 sm:[&>*]:flex-none">
+          {children}
+        </div>
+      )}
     </dialog>
   );
 }
