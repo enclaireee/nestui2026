@@ -258,7 +258,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
     // the same words appeared — it repeated the step label that the rail and
     // the card header both already show, and on a phone it pushed the first
     // field below the fold. The card header is now the single title.
-    <div className="relative flex min-h-dvh w-full flex-col items-center px-4 pb-24 pt-28 md:px-8">
+    <div className="relative flex min-h-dvh w-full flex-col items-center px-4 pb-16 pt-24 sm:pb-24 sm:pt-28 md:px-8">
       {state.submittedCode ? (
         <AnimatePresence mode="wait">
           <motion.div
@@ -274,10 +274,14 @@ export function RegistrationClient({ category }: { category?: Category }) {
         // Rail left, card right, on one grid. Was `md:w-1/3` + `md:w-2/3`
         // with a `gap-24` trench between them, which left the card visually
         // adrift from its own steps.
-        <div className="grid w-full max-w-5xl grid-cols-1 items-start gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:gap-10 lg:gap-12">
-          {/* Sticky so the step artwork stays in view through the long
+        <div className="grid w-full max-w-5xl grid-cols-1 items-start gap-5 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:gap-10 lg:gap-12">
+          {/* order-2 below md. The rail is desktop context, but in a single
+              column it took the priority slot: a 288px decorative image plus
+              pt-28 meant ~400px of chrome before the first field on an 800px
+              screen. On a phone the form goes first and the artwork follows.
+              Sticky (desktop only) so it stays in view through the long
               Member step. */}
-          <div className="md:sticky md:top-28">
+          <div className="order-2 md:order-none md:sticky md:top-28">
             <StepIndicator currentStep={TIMELINE_INDEX[step]} />
           </div>
 
@@ -285,21 +289,21 @@ export function RegistrationClient({ category }: { category?: Category }) {
               same bright backdrop the rest of the site does, and translucent
               white over it left labels and helper text far under AA; and
               a solid surface needs no backdrop-filter at all. */}
-          <div className="overflow-hidden rounded-2xl border border-brand-cream/12 bg-brand-green/95 shadow-2xl shadow-black/30">
+          <div className="order-1 overflow-hidden rounded-2xl border border-brand-cream/12 bg-brand-green/95 shadow-2xl shadow-black/30 md:order-none">
             {/* Card header: the step's identity, and how far along you are. */}
-            <div className="border-b border-brand-cream/10 px-6 py-5 sm:px-8">
+            <div className="border-b border-brand-cream/10 px-5 py-4 sm:px-8 sm:py-5">
               <div className="flex items-baseline justify-between gap-4">
                 <h1 className="text-lg font-bold text-brand-cream sm:text-xl">
                   {STEP_LABELS[step]}
                 </h1>
-                <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-brand-cream/45">
+                <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-brand-cream/55">
                   Step {state.stepIndex + 1} of {steps.length}
                 </span>
               </div>
               <p className="mt-1 text-sm text-brand-cream/50">{STEP_HINTS[step]}</p>
             </div>
 
-            <div className="px-6 py-7 sm:px-8">
+            <div className="px-5 py-6 sm:px-8 sm:py-7">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
@@ -386,11 +390,15 @@ export function RegistrationClient({ category }: { category?: Category }) {
 
 function NavButtons({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
   return (
-    <div className="flex justify-end gap-4">
-      <button type="button" onClick={onBack} className="btn-ghost px-10 py-2.5 text-sm">
+    // Reversed column on mobile: Next is the primary action, so it's the one
+    // that should be full-width and lowest on screen — after up to 28 fields
+    // of scrolling, a `px-10` button in the top-right corner is the hardest
+    // place on the phone to reach one-handed. Desktop keeps the inline pair.
+    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-4">
+      <button type="button" onClick={onBack} className="btn-ghost px-10 py-3 text-sm">
         Back
       </button>
-      <button type="button" onClick={onNext} className="btn-brand px-10 py-2.5 text-sm">
+      <button type="button" onClick={onNext} className="btn-brand px-10 py-3 text-sm">
         Next
       </button>
     </div>

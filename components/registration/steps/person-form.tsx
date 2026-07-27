@@ -92,6 +92,9 @@ export function PersonForm({
           <RegistrationInput
             tone="dark"
             icon={IdCard}
+            // NIM/NISN are digit strings — inputMode (not type="number", which
+            // would strip leading zeros and add a spinner) gets the numeric pad.
+            inputMode="numeric"
             label={cfg.studentIdLabel}
             placeholder={cfg.studentIdLabel}
             value={person.studentId}

@@ -170,7 +170,7 @@ function TeamCard({ reg, members }: { reg: Registration; members: MemberRow[] })
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
-      <div className="flex items-center gap-4 border-b border-white/10 p-6">
+      <div className="flex items-center gap-4 border-b border-white/10 p-5 sm:p-6">
         {cfg && (
           <div className="relative h-14 w-14 shrink-0">
             <Image src={cfg.logo} alt={`${cfg.name} logo`} fill sizes="56px" className="object-contain" />
@@ -184,7 +184,7 @@ function TeamCard({ reg, members }: { reg: Registration; members: MemberRow[] })
         </div>
       </div>
 
-      <div className="border-b border-white/10 p-6">
+      <div className="border-b border-white/10 p-5 sm:p-6">
         <h3 className="mb-3 text-sm font-bold text-brand-lime">Team members</h3>
         <ul className="flex flex-col gap-2">
           <MemberRowView name={reg.leader_name} email={reg.leader_email} leader />
@@ -194,11 +194,11 @@ function TeamCard({ reg, members }: { reg: Registration; members: MemberRow[] })
         </ul>
       </div>
 
-      <div className="p-6">
+      <div className="p-5 sm:p-6">
         <h3 className="mb-3 text-sm font-bold text-brand-lime">Contact person</h3>
         <p className="font-semibold text-white">{reg.leader_name}</p>
         <p className="mt-0.5 text-sm text-white/60">
-          <a href={`mailto:${reg.leader_email}`} className="hover:text-brand-lime">
+          <a href={`mailto:${reg.leader_email}`} className="inline-flex min-h-11 items-center break-all hover:text-brand-lime">
             {reg.leader_email}
           </a>{" "}
           · {reg.leader_phone}
@@ -231,7 +231,7 @@ function MemberRowView({
             </span>
           )}
         </p>
-        <p className="truncate text-xs text-white/45">{email}</p>
+        <p className="truncate text-xs text-white/55">{email}</p>
       </div>
     </li>
   );
@@ -246,7 +246,7 @@ function Submissions({
 }) {
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-white">Submissions</h2>
         <Link
           href={`/protected/resubmit/${registrationId}`}
@@ -262,7 +262,7 @@ function Submissions({
         ))}
       </div>
 
-      <p className="mt-3 text-xs text-white/40">
+      <p className="mt-3 text-xs text-white/55">
         Each submission needs its own paid fee and is reviewed separately.
       </p>
     </div>
@@ -285,7 +285,7 @@ function EntryCard({ entry, index }: { entry: Entry; index: number }) {
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-white">
           Submission {index}
-          <span className="ml-2 text-xs font-normal text-white/40">
+          <span className="ml-2 text-xs font-normal text-white/55">
             {new Date(entry.submittedAt).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "short",

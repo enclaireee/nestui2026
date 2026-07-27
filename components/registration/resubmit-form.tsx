@@ -54,31 +54,31 @@ export function ResubmitForm({
         </div>
         {fee && (
           <div className="mb-3 border-b border-white/10 pb-3">
-            <p className="text-xs font-bold uppercase tracking-wider text-white/45">
+            <p className="text-xs font-bold uppercase tracking-wider text-white/55">
               Amount to transfer
             </p>
             <p className="mt-0.5 text-2xl font-bold text-brand-lime">{formatIDR(fee.amount)}</p>
-            <p className="mt-0.5 text-xs text-white/45">
+            <p className="mt-0.5 text-xs text-white/55">
               {fee.label} rate · each entry needs its own paid fee.
             </p>
           </div>
         )}
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-          <dt className="text-white/45">Bank</dt>
+          <dt className="text-white/55">Bank</dt>
           <dd className="font-medium text-white">{PAYMENT_INFO.bank}</dd>
-          <dt className="text-white/45">Account</dt>
+          <dt className="text-white/55">Account</dt>
           <dd className="flex items-center gap-2 font-mono font-medium text-white">
             {PAYMENT_INFO.accountNumber}
             <button
               type="button"
               onClick={copyAccount}
-              className="text-white/40 transition-colors hover:text-brand-lime"
+              className="tap-icon -my-3 rounded-lg text-white/55 transition-colors hover:text-brand-lime active:bg-white/5"
               aria-label="Copy account number"
             >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </button>
           </dd>
-          <dt className="text-white/45">Holder</dt>
+          <dt className="text-white/55">Holder</dt>
           <dd className="font-medium text-white">{PAYMENT_INFO.accountHolder}</dd>
         </dl>
       </div>
@@ -111,19 +111,19 @@ export function ResubmitForm({
         </p>
       )}
 
-      <div className="flex justify-end gap-4">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-4">
         <button
           type="button"
           onClick={() => router.push("/protected")}
           disabled={submitting}
-          className="btn-ghost-muted px-8 py-2.5 text-sm"
+          className="btn-ghost-muted px-8 py-3 text-sm"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={submitting || !payment.trim() || !submission.trim()}
-          className="btn-brand px-8 py-2.5 text-sm"
+          className="btn-brand px-8 py-3 text-sm"
         >
           {submitting ? "Submitting…" : "Submit entry"}
         </button>

@@ -75,7 +75,7 @@ export function AuthForm({
       )}
 
       {footer && (
-        <div className="mt-7 border-t border-brand-cream/10 pt-5 text-center text-sm text-brand-cream/55">
+        <div className="mt-7 border-t border-brand-cream/10 pt-5 text-center text-sm leading-[44px] text-brand-cream/55 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
           {footer}
         </div>
       )}

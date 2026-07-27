@@ -7,6 +7,7 @@ import {
   type AdminSubmissionDetail,
 } from "@/lib/admin/types";
 import { StatusBadge } from "@/components/status-badge";
+import { ArrowUpRight } from "lucide-react";
 
 const PAGE_SIZE = 20;
 
@@ -60,24 +61,24 @@ export default async function AdminDashboard({
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <form method="get" className="flex gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <form method="get" className="flex w-full gap-2 sm:w-auto">
           {view !== "teams" && <input type="hidden" name="view" value={view} />}
           {competition && <input type="hidden" name="competition" value={competition} />}
           <input
             name="q"
             defaultValue={q}
             placeholder="Search team, code, or leader email"
-            className="h-10 w-72 rounded-lg border border-white/15 bg-white/5 px-3 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
+            className="h-11 w-full min-w-0 rounded-lg border border-white/15 bg-white/5 px-3 text-base text-white placeholder:text-white/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime sm:w-72 sm:text-sm"
           />
-          <button className="rounded-lg bg-white/10 px-4 text-sm font-semibold hover:bg-white/20">
+          <button className="min-h-11 shrink-0 rounded-lg bg-white/10 px-4 text-sm font-semibold hover:bg-white/20">
             Search
           </button>
         </form>
 
         <a
           href={`/admin/export${competition ? `?competition=${competition}` : ""}`}
-          className="btn-brand px-4 py-2 text-sm"
+          className="btn-brand w-full px-4 py-2 text-sm sm:w-auto"
         >
           Export CSV{competition ? ` · ${COMPETITIONS[competition].name}` : " · All"}
         </a>
@@ -144,7 +145,60 @@ async function TeamsTable({
     <>
       {error && <p className="text-sm text-red-400">Failed to load: {error.message}</p>}
 
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      {/* MOBILE: cards, not a 9-column table squeezed into 360px with no hint
+          that seven of the columns exist. Same data, ranked — team and status
+          first, the rest as labelled rows. */}
+      <ul className="flex flex-col gap-3 md:hidden">
+        {rows.length === 0 && (
+          <li className="rounded-xl border border-white/10 px-4 py-8 text-center text-white/50">
+            No registrations found.
+          </li>
+        )}
+        {rows.map((r) => (
+          <li key={r.id} className="rounded-xl border border-white/10 bg-white/[0.03]">
+            <Link
+              href={`/admin/registrations/${r.id}`}
+              className="flex items-start justify-between gap-3 border-b border-white/10 p-4"
+            >
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-white">{r.team_name}</span>
+                <span className="mt-0.5 block font-mono text-xs text-white/50">{r.code}</span>
+              </span>
+              <StatusBadge status={r.status} />
+            </Link>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 p-4 text-sm">
+              <dt className="text-white/55">Competition</dt>
+              <dd className="text-right text-white/85">
+                {COMPETITIONS[r.competition]?.name ?? r.competition}
+              </dd>
+              <dt className="text-white/55">Members</dt>
+              <dd className="text-right text-white/85">{r.team_size}</dd>
+              <dt className="text-white/55">Submissions</dt>
+              <dd className="text-right text-white/85">{entryCount.get(r.id) ?? 1}</dd>
+              <dt className="text-white/55">Registered</dt>
+              <dd className="text-right text-white/85">
+                {new Date(r.submitted_at).toLocaleDateString()}
+              </dd>
+            </dl>
+            <div className="flex flex-col gap-1 border-t border-white/10 px-4 py-2">
+              <a
+                href={`mailto:${r.leader_email}`}
+                className="inline-flex min-h-11 items-center break-all text-sm text-brand-lime"
+              >
+                {r.leader_email}
+              </a>
+              <a
+                href={`tel:${r.leader_phone}`}
+                className="inline-flex min-h-11 items-center text-sm text-brand-lime"
+              >
+                {r.leader_phone}
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden overflow-x-auto rounded-xl border border-white/10 md:block">
         <table className="w-full text-left text-sm">
           <thead className="bg-white/5 text-white/60">
             <tr>
@@ -253,7 +307,46 @@ async function SubmissionsTable({
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      {/* Same card treatment as Teams — see the note there. */}
+      <ul className="flex flex-col gap-3 md:hidden">
+        {rows.length === 0 && !error && (
+          <li className="rounded-xl border border-white/10 px-4 py-8 text-center text-white/50">
+            No submissions found.
+          </li>
+        )}
+        {rows.map((s) => (
+          <li key={s.submission_id} className="rounded-xl border border-white/10 bg-white/[0.03]">
+            <Link
+              href={`/admin/registrations/${s.registration_id}`}
+              className="flex items-start justify-between gap-3 border-b border-white/10 p-4"
+            >
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-white">{s.team_name}</span>
+                <span className="mt-0.5 block font-mono text-xs text-white/50">{s.code}</span>
+              </span>
+              <StatusBadge status={s.status} />
+            </Link>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 p-4 text-sm">
+              <dt className="text-white/55">Entry</dt>
+              <dd className="text-right text-white/85">{s.entry_no}</dd>
+              <dt className="text-white/55">Competition</dt>
+              <dd className="text-right text-white/85">
+                {COMPETITIONS[s.competition]?.name ?? s.competition}
+              </dd>
+              <dt className="text-white/55">Submitted</dt>
+              <dd className="text-right text-white/85">
+                {new Date(s.submitted_at).toLocaleString()}
+              </dd>
+            </dl>
+            <div className="flex gap-2 border-t border-white/10 p-3">
+              <LinkCell href={s.payment_proof_url} label="Payment" />
+              <LinkCell href={s.submission_url} label="Submission" />
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden overflow-x-auto rounded-xl border border-white/10 md:block">
         <table className="w-full text-left text-sm">
           <thead className="bg-white/5 text-white/60">
             <tr>
@@ -286,7 +379,7 @@ async function SubmissionsTable({
                   >
                     {s.team_name}
                   </Link>
-                  <span className="ml-2 font-mono text-xs text-white/40">{s.code}</span>
+                  <span className="ml-2 font-mono text-xs text-white/55">{s.code}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-bold">
@@ -297,10 +390,10 @@ async function SubmissionsTable({
                   {COMPETITIONS[s.competition]?.name ?? s.competition}
                 </td>
                 <td className="px-4 py-3">
-                  <LinkCell href={s.payment_proof_url} />
+                  <LinkCell href={s.payment_proof_url} label="Payment" />
                 </td>
                 <td className="px-4 py-3">
-                  <LinkCell href={s.submission_url} />
+                  <LinkCell href={s.submission_url} label="Submission" />
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={s.status} />
@@ -331,19 +424,19 @@ function Pager({
 }) {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   return (
-    <div className="flex items-center justify-between text-sm text-white/60">
+    <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
       <span>
         {total} {unit}
         {total === 1 ? "" : "s"} · page {page} of {pageCount}
       </span>
       <div className="flex gap-2">
         {page > 1 && (
-          <Link href={qs({ page: page - 1 })} className="rounded-lg bg-white/10 px-3 py-1.5 hover:bg-white/20">
+          <Link href={qs({ page: page - 1 })} className="inline-flex min-h-11 items-center rounded-lg bg-white/10 px-4 hover:bg-white/20">
             Previous
           </Link>
         )}
         {page < pageCount && (
-          <Link href={qs({ page: page + 1 })} className="rounded-lg bg-white/10 px-3 py-1.5 hover:bg-white/20">
+          <Link href={qs({ page: page + 1 })} className="inline-flex min-h-11 items-center rounded-lg bg-white/10 px-4 hover:bg-white/20">
             Next
           </Link>
         )}
@@ -357,7 +450,7 @@ function ModeTab({ href, active, label }: { href: string; active: boolean; label
     <Link
       href={href}
       className={
-        "rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors " +
+        "inline-flex min-h-11 items-center rounded-lg px-4 text-sm font-semibold transition-colors " +
         (active ? "bg-brand-lime text-brand-teal" : "text-white/70 hover:bg-white/10 hover:text-white")
       }
     >
@@ -371,7 +464,7 @@ function Tab({ href, active, label }: { href: string; active: boolean; label: st
     <Link
       href={href}
       className={
-        "rounded-full px-4 py-1.5 text-sm font-semibold transition-colors " +
+        "inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold transition-colors " +
         (active ? "bg-brand-lime text-brand-teal" : "bg-white/10 text-white/80 hover:bg-white/20")
       }
     >
@@ -384,8 +477,10 @@ function Th({ children }: { children: React.ReactNode }) {
   return <th className="px-4 py-3 font-semibold">{children}</th>;
 }
 
-// Compact clickable link cell — truncates long Google-Drive URLs, full URL on hover.
-function LinkCell({ href }: { href: string }) {
+// Compact clickable link cell. Was a truncated URL whose only way to be read
+// in full was a `title` tooltip — a hover affordance, i.e. nothing at all on a
+// phone. A stable label plus the tooltip works on both.
+function LinkCell({ href, label = "Open" }: { href: string; label?: string }) {
   if (!href) return <span className="text-white/30">—</span>;
   return (
     <a
@@ -393,9 +488,10 @@ function LinkCell({ href }: { href: string }) {
       target="_blank"
       rel="noopener noreferrer"
       title={href}
-      className="block max-w-[12rem] truncate text-brand-lime hover:underline"
+      className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-lg bg-white/5 px-3 text-sm font-semibold text-brand-lime ring-1 ring-white/10 hover:bg-white/10 md:min-h-0 md:flex-none md:justify-start md:bg-transparent md:px-0 md:ring-0 md:hover:bg-transparent md:hover:underline"
     >
-      {href}
+      {label}
+      <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
     </a>
   );
 }

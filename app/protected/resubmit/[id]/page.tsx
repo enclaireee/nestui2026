@@ -69,7 +69,7 @@ async function ResubmitBody({ params }: { params: Promise<{ id: string }> }) {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 md:p-8">
         <div className="mb-6 flex items-center gap-3 border-b border-white/10 pb-6">
           {cfg && (
             <div className="relative h-12 w-12 shrink-0">

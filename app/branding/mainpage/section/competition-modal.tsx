@@ -353,14 +353,14 @@ export function CompetitionModal({
                         <div className="min-w-0">
                           <p
                             className={`text-[11px] font-bold uppercase tracking-wide ${
-                              active ? "text-brand-lime/80" : "text-white/45"
+                              active ? "text-brand-lime/80" : "text-white/55"
                             }`}
                           >
                             {f.label}
                             {active && " · active now"}
                             {past && " · closed"}
                           </p>
-                          <p className="mt-0.5 text-[11px] text-white/40">until {f.until}</p>
+                          <p className="mt-0.5 text-[11px] text-white/55">until {f.until}</p>
                         </div>
                         <p
                           className={`shrink-0 text-base font-black ${

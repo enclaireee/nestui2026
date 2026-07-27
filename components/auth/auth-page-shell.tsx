@@ -29,7 +29,7 @@ interface AuthPageShellProps {
  */
 export function AuthPageShell({ heading, subheading, children }: AuthPageShellProps) {
   return (
-    <main className="relative isolate flex min-h-dvh w-full flex-col items-center justify-center overflow-x-hidden bg-brand-green px-5 pb-20 pt-28">
+    <main className="relative isolate flex min-h-dvh w-full flex-col items-center justify-center overflow-x-hidden bg-brand-green px-4 pb-14 pt-24 sm:px-5 sm:pb-20 sm:pt-28">
       {/* Brand backdrop, kept full-bleed. */}
       {/* eslint-disable-next-line @next/next/no-img-element -- decorative SVG backdrop; next/image does not optimise SVG. */}
       <img
@@ -53,7 +53,7 @@ export function AuthPageShell({ heading, subheading, children }: AuthPageShellPr
           before: with a busy backdrop behind the form again, the fields need
           their own dark surface to sit on. On a flat colour it was just a box
           drawn around nothing. */}
-      <div className="w-full max-w-[380px] rounded-2xl border border-brand-cream/12 bg-brand-green/95 p-7 shadow-2xl shadow-black/30 sm:p-8">
+      <div className="w-full max-w-[380px] rounded-2xl border border-brand-cream/12 bg-brand-green/95 p-6 shadow-2xl shadow-black/30 sm:p-8">
         <div className="flex flex-col items-center text-center">
           <Image
             src="/nestlogo.webp"
@@ -61,6 +61,7 @@ export function AuthPageShell({ heading, subheading, children }: AuthPageShellPr
             width={64}
             height={64}
             priority
+            sizes="44px"
             className="h-11 w-11 object-contain"
           />
           <h1 className="mt-5 text-2xl font-bold tracking-tight text-brand-cream">

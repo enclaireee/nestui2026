@@ -15,20 +15,20 @@ export default function AdminProtectedLayout({
   return (
     <div className="relative min-h-dvh text-white">
       <AdminBackground />
-      <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+      <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4">
         <Link href="/admin" className="text-lg font-bold text-gradient-brand">
           NEST UI 2026 · Admin
         </Link>
         <form action={adminLogout}>
           <button
             type="submit"
-            className="rounded-full border border-white/20 px-4 py-1.5 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 hover:text-red-300"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/20 px-4 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 hover:text-red-300"
           >
             Log out
           </button>
         </form>
       </header>
-      <main className="mx-auto max-w-6xl p-6">
+      <main className="mx-auto max-w-6xl p-4 sm:p-6">
         <Suspense fallback={<AdminLoading />}>
           <AdminGuard>{children}</AdminGuard>
         </Suspense>

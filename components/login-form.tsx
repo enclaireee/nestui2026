@@ -66,7 +66,7 @@ export function LoginForm() {
           shell, i.e. completely invisible. */}
       <Link
         href="/auth/forgot-password"
-        className="-mt-1 self-end text-xs font-medium text-brand-cream/55 underline-offset-4 transition-colors hover:text-brand-lime hover:underline"
+        className="-my-1 inline-flex min-h-11 items-center self-end text-xs font-medium text-brand-cream/55 underline-offset-4 transition-colors hover:text-brand-lime hover:underline"
       >
         Forgot password?
       </Link>

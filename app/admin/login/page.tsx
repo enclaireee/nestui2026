@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
             autoComplete="username"
             placeholder="Username"
             required
-            className="h-12 w-full rounded-xl border-none bg-white/90 px-4 text-sm text-brand-green placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
+            className="h-12 w-full rounded-xl border-none bg-white/90 px-4 text-base text-brand-green placeholder:text-gray-400 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
           />
           <input
             name="password"
@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
             autoComplete="current-password"
             placeholder="Password"
             required
-            className="h-12 w-full rounded-xl border-none bg-white/90 px-4 text-sm text-brand-green placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
+            className="h-12 w-full rounded-xl border-none bg-white/90 px-4 text-base text-brand-green placeholder:text-gray-400 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-lime"
           />
 
           {state.error && <p className="text-sm font-semibold text-red-400">{state.error}</p>}

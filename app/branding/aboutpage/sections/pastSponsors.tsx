@@ -30,7 +30,7 @@ export function PastSponsors() {
       initial="hidden"
       whileInView="show"
       viewport={inViewOnce}
-      className="flex w-full justify-center py-14 sm:py-24"
+      className="flex w-full justify-center py-10 sm:py-24"
     >
       <div className="w-full max-w-6xl">
 
@@ -58,7 +58,7 @@ export function PastSponsors() {
 
         <motion.div
           variants={fadeUp}
-          className="mt-10 sm:mt-14 rounded-3xl border border-white/10 bg-white/[0.07] p-4 sm:p-8"
+          className="mt-8 sm:mt-14 rounded-3xl border border-white/10 bg-white/[0.07] p-3 sm:p-8"
         >
           <motion.div
             variants={logoGrid}

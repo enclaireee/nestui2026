@@ -59,7 +59,7 @@ export function TeamSetup({
               {/* Category divider — keeps Undergraduate and Highschool
                   competitions from ever reading as one flat, unlabeled list. */}
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold uppercase tracking-[0.15em] text-brand-cream/45">
+                <span className="text-xs font-bold uppercase tracking-[0.15em] text-brand-cream/55">
                   {group.label}
                 </span>
                 <span className="h-px flex-1 bg-brand-cream/12" />
@@ -157,13 +157,13 @@ export function TeamSetup({
       <section className="flex flex-col gap-3">
         <SectionLabel icon={Users}>
           Team Size
-          <span className="ml-2 text-xs font-medium text-brand-cream/45">
+          <span className="ml-2 text-xs font-medium text-brand-cream/55">
             {cfg ? `including leader · ${cfg.minSize}–${cfg.maxSize}` : "pick a competition first"}
           </span>
         </SectionLabel>
         <div className="flex flex-wrap gap-3">
           {sizes.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-brand-cream/20 px-4 py-3 text-xs font-medium text-brand-cream/45">
+            <div className="rounded-2xl border border-dashed border-brand-cream/20 px-4 py-3 text-xs font-medium text-brand-cream/55">
               Select a competition to choose your team size.
             </div>
           )}
@@ -189,12 +189,12 @@ export function TeamSetup({
         </div>
       </section>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onNext}
           disabled={!canNext}
-          className="btn-brand px-10 py-2.5 text-sm"
+          className="btn-brand px-10 py-3 text-sm"
         >
           Next
         </button>
