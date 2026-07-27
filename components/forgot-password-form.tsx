@@ -57,7 +57,7 @@ export function ForgotPasswordForm() {
         tone="dark"
         className={authFieldClass}
       />
-      <p className="-mt-1 text-xs text-brand-cream/45">
+      <p className="-mt-1 text-xs text-brand-cream/55">
         Enter your email to send the verification link.
       </p>
     </AuthForm>

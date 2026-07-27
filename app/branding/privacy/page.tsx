@@ -37,7 +37,7 @@ export default function PrivacyPage() {
         dangerouslySetInnerHTML={{ __html: bgSvg }}
       />
 
-      <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 pb-24 pt-28 md:px-8">
+      <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 pb-16 pt-24 sm:gap-10 sm:pb-24 sm:pt-28 md:px-8">
         <header className="text-center">
           <Reveal>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-lime">
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
             </p>
           </Reveal>
           <Reveal delay={0.24}>
-            <p className="mt-2 text-xs text-white/40">Last updated: {LAST_UPDATED}</p>
+            <p className="mt-2 text-xs text-white/55">Last updated: {LAST_UPDATED}</p>
           </Reveal>
         </header>
 
@@ -186,7 +186,7 @@ export default function PrivacyPage() {
             <div className="flex flex-col gap-2">
               <a
                 href={`mailto:${GENERAL_CONTACT.email}`}
-                className="flex w-fit items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
+                className="inline-flex min-h-11 w-fit items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
               >
                 <Mail className="h-4 w-4 text-brand-lime" />
                 {GENERAL_CONTACT.email}
@@ -195,7 +195,7 @@ export default function PrivacyPage() {
                 href={GENERAL_CONTACT.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-fit text-sm text-white/80 transition-colors hover:text-brand-lime"
+                className="inline-flex min-h-11 w-fit items-center text-sm text-white/80 transition-colors hover:text-brand-lime"
               >
                 {GENERAL_CONTACT.instagramHandle} on Instagram
               </a>

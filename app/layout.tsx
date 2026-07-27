@@ -53,16 +53,23 @@ export const viewport: Viewport = {
 const oddval = localFont({
   variable: "--font-oddval",
   display: "swap",
+  // WOFF2, not the raw TTF. The TTF was 231KB on disk and 94KB over the wire
+  // (gzip), and took 2.0–2.3s to arrive on Slow 4G on EVERY route — the second
+  // largest resource on the site. WOFF2 is brotli-compressed in the container,
+  // so it ships at 73KB with no server config and no decompression step.
+  // preload because it's the only face on the page: the swap is guaranteed,
+  // so the only question is how early it resolves.
+  preload: true,
   src: [
     {
-      path: "./fonts/Oddval-Semibold.ttf",
+      path: "./fonts/Oddval-Semibold.woff2",
       weight: "100 900",
       style: "normal",
     },
     // When you get more real weights, replace the single entry above with
     // one entry per file, e.g.:
-    // { path: "./fonts/Oddval-Regular.ttf", weight: "400", style: "normal" },
-    // { path: "./fonts/Oddval-Bold.ttf", weight: "700", style: "normal" },
+    // { path: "./fonts/Oddval-Regular.woff2", weight: "400", style: "normal" },
+    // { path: "./fonts/Oddval-Bold.woff2", weight: "700", style: "normal" },
   ],
 });
 

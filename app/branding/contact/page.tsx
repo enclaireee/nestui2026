@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Mail, Phone, Instagram, Linkedin, Handshake } from "lucide-react";
+import { Mail, Phone, Instagram, Linkedin, Handshake, ArrowUpRight } from "lucide-react";
 import { COMPETITIONS, COMPETITION_IDS } from "@/lib/registrations/config";
 import { COMPETITION_CONTACTS, GENERAL_CONTACT, waLink } from "@/lib/contacts";
 import { Reveal } from "@/components/reveal";
@@ -39,7 +39,7 @@ export default function ContactPage() {
         <img src="/rightfloaterreg.svg" alt="" aria-hidden className="h-auto w-full" />
       </ParallaxFloat>
 
-      <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 pb-24 pt-28 md:px-8">
+      <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 pb-16 pt-24 sm:gap-10 sm:pb-24 sm:pt-28 md:px-8">
         <header className="text-center">
           <Reveal>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-lime">Contact</p>
@@ -77,7 +77,7 @@ export default function ContactPage() {
             <CardHead icon={Mail} title="General & Socials" />
             <a
               href={`mailto:${GENERAL_CONTACT.email}`}
-              className="flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
             >
               <Mail className="h-4 w-4 text-brand-lime" />
               {GENERAL_CONTACT.email}
@@ -86,7 +86,7 @@ export default function ContactPage() {
               href={GENERAL_CONTACT.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
             >
               <Instagram className="h-4 w-4 text-brand-lime" />
               {GENERAL_CONTACT.instagramHandle}
@@ -95,7 +95,7 @@ export default function ContactPage() {
               href={GENERAL_CONTACT.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-white/80 transition-colors hover:text-brand-lime"
             >
               <Linkedin className="h-4 w-4 text-brand-lime" />
               NEST UI on LinkedIn
@@ -139,10 +139,13 @@ export default function ContactPage() {
                         href={waLink(c.phone)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm ring-1 ring-white/10 transition-colors hover:bg-white/10"
+                        className="flex min-h-11 items-center justify-between gap-2 rounded-lg bg-white/5 px-3 py-2.5 text-sm ring-1 ring-white/10 transition-colors hover:bg-white/10 active:bg-white/[0.14]"
                       >
                         <span className="font-semibold text-white">{c.name}</span>
-                        <span className="text-xs text-white/60">{c.phone}</span>
+                        <span className="flex items-center gap-1.5 text-xs text-white/60">
+                          {c.phone}
+                          <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-brand-lime" />
+                        </span>
                       </a>
                     ))}
                   </div>
@@ -150,7 +153,6 @@ export default function ContactPage() {
               );
             })}
           </div>
-          <p className="text-xs text-white/40">Names link to WhatsApp.</p>
         </section>
       </div>
     </main>
@@ -162,7 +164,7 @@ function Card({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
     // The hover lift lives on an inner div: framer leaves an inline transform
     // on the Reveal element itself, which would override a CSS translate there.
     <Reveal delay={delay} className="flex">
-      <div className="flex flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-6 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-brand-lime/30">
+      <div className="flex flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-5 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-brand-lime/30 sm:p-6">
         {children}
       </div>
     </Reveal>

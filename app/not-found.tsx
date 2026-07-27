@@ -13,6 +13,11 @@ export default function NotFound() {
         aria-hidden
         width={600}
         height={580}
+        sizes="96px"
+        // First element on the page, so it's this route's LCP — without this it
+        // was lazy-loaded and Next flagged it. `priority` sets loading="eager"
+        // plus fetchpriority="high", which is what an LCP image wants.
+        priority
         className="h-auto w-24 opacity-90 drop-shadow-xl"
       />
 

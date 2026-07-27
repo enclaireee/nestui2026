@@ -36,7 +36,7 @@ const TONE = {
   },
   dark: {
     label: "text-brand-cream/55",
-    hint: "text-brand-cream/45",
+    hint: "text-brand-cream/55",
     icon: "text-brand-cream/35",
     input:
       "border-none bg-brand-cream/[0.06] text-brand-cream placeholder:text-brand-cream/30 ring-1 ring-brand-cream/15 hover:ring-brand-cream/25 focus-visible:ring-2 focus-visible:ring-brand-lime",
@@ -76,7 +76,13 @@ export const RegistrationInput = React.forwardRef<
           aria-invalid={error ? true : props["aria-invalid"]}
           aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined}
           className={cn(
-            "flex h-12 w-full rounded-xl px-4 py-2 text-sm transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&:user-invalid]:ring-2 [&:user-invalid]:ring-red-400 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-400",
+            // text-base, NOT text-sm. iOS Safari zooms the viewport on focus
+            // for any input under 16px and never zooms back out — leaving the
+            // user panned into a horizontally-scrolled page, once per field.
+            // This component renders every input in the app (wizard, both auth
+            // forms, resubmit), so this one word is the whole fix.
+            // sm:text-sm keeps the tighter desktop look, where no zoom happens.
+            "flex h-12 w-full rounded-xl px-4 py-2 text-base transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm [&:user-invalid]:ring-2 [&:user-invalid]:ring-red-400 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-400",
             t.input,
             Icon && "pl-10",
             className

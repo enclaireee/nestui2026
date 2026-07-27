@@ -11,7 +11,7 @@ export function Vision() {
       initial="hidden"
       whileInView="show"
       viewport={inViewOnce}
-      className="flex w-full justify-center pt-12 pb-24 sm:pt-16 sm:pb-32"
+      className="flex w-full justify-center pt-8 pb-14 sm:pt-16 sm:pb-32"
     >
       <div className="flex w-full max-w-4xl flex-col items-center gap-4 sm:flex-row sm:gap-12">
         <motion.div variants={fadeRight}>
@@ -20,7 +20,8 @@ export function Vision() {
             alt="Nest UI logo"
             width={320}
             height={320}
-            className="h-44 w-44 shrink-0 object-contain sm:h-60 sm:w-60"
+            sizes="(min-width: 640px) 240px, 176px"
+            className="h-36 w-36 shrink-0 object-contain sm:h-60 sm:w-60"
           />
         </motion.div>
         <div className="flex flex-1 flex-col">
@@ -36,7 +37,7 @@ export function Vision() {
           </motion.h2>
           <motion.p
             variants={fadeUp}
-            className="mt-5 text-justify text-base font-semibold leading-loose text-white sm:text-lg"
+            className="mt-4 text-left text-base font-semibold leading-relaxed text-white sm:mt-5 sm:text-justify sm:text-lg sm:leading-loose"
           >
             To become a national competition platform that drives the emergence
             of inclusive, collaborative, and impactful healthcare technology

@@ -18,7 +18,7 @@ export function Mission() {
       initial="hidden"
       whileInView="show"
       viewport={inViewOnce}
-      className="flex w-full flex-col pt-12 pb-24 sm:pt-16 sm:pb-32"
+      className="flex w-full flex-col pt-8 pb-14 sm:pt-16 sm:pb-32"
     >
       <motion.h2
         variants={fadeUp}
@@ -31,7 +31,7 @@ export function Mission() {
         THE MISSION
       </motion.h2>
 
-      <div className="mt-8 flex flex-col gap-5 sm:gap-6">
+      <div className="mt-6 flex flex-col gap-4 sm:mt-8 sm:gap-6">
         {MISSIONS.map((text, i) => (
           // Alternating entry sides turn five identical pills into a weave.
           <motion.div key={i} variants={i % 2 ? fadeLeft : fadeRight} className="flex items-stretch">

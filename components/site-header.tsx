@@ -194,7 +194,7 @@ export function SiteHeader() {
       initial={{ y: -24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className="sticky top-0 z-50 w-full px-4 pt-3 sm:pt-4"
+      className="sticky top-0 z-50 w-full px-4 pt-3 [@media(max-height:500px)]:pt-1.5 sm:pt-4"
     >
       {/* Scroll progress — a full-bleed hairline at the very top edge. With a
           split dock there is no single pill to hang it off, and stretching it
@@ -235,7 +235,7 @@ export function SiteHeader() {
           // branch had dropped ring-white/5). A ring draws on every edge, so
           // that was the hairline seam straight down the middle of the merged
           // pill. The ring is now declared only in the branch that wants one.
-          className={`flex h-12 shrink-0 items-center border py-0 pl-4 pr-4 transition-[background-color,border-color,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`flex h-12 shrink-0 items-center border py-0 pl-4 pr-4 [@media(max-height:500px)]:h-10 transition-[background-color,border-color,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             scrolled
               ? // Inner edge loses its radius AND its border, so the two halves
                 // read as one continuous pill with no seam down the middle.
@@ -274,7 +274,7 @@ export function SiteHeader() {
           // Tighter horizontal padding below sm. The hamburger went from 32px
           // to a legal 44px box, and at 360px the two pills were already
           // spanning x=16→344 of 360 — this is where the 12px comes from.
-          className={`relative flex h-12 items-center gap-1.5 border py-0 pl-3 pr-1.5 transition-[background-color,border-color,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:gap-2 sm:pl-4 sm:pr-2 ${
+          className={`relative flex h-12 items-center gap-1.5 border py-0 pl-3 pr-1.5 [@media(max-height:500px)]:h-10 transition-[background-color,border-color,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:gap-2 sm:pl-4 sm:pr-2 ${
             scrolled
               ? "rounded-l-none rounded-r-full border-l-0 border-white/20 bg-brand-green shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)]"
               : "rounded-full border-white/15 bg-brand-green/80 shadow-lg shadow-black/10 ring-1 ring-white/5"
@@ -291,7 +291,13 @@ export function SiteHeader() {
               dashboard glyph (logged in) are the only per-state differences. */}
           <Link
             href={isLoggedIn ? "/protected" : "/auth/login"}
-            className={`group relative inline-flex min-h-11 items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-sm font-semibold text-brand-teal shadow-sm ring-1 ring-black/5 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 sm:px-5 ${
+            // min-h-9 on mobile, not min-h-11: at 44px the chip filled the
+            // 48px pill top to bottom and read as a second bar rather than a
+            // button. 36px leaves 6px of breathing room each side.
+            // ponytail: 36px is under the 44px touch ideal, accepted here
+            // because the target is ~90px wide and isolated — the hamburger
+            // beside it (the easiest thing to mis-tap) is a full 44.
+            className={`group relative inline-flex min-h-9 items-center gap-1.5 overflow-hidden rounded-full px-3 py-1 text-xs font-semibold text-brand-teal shadow-sm ring-1 ring-black/5 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 sm:min-h-11 sm:px-5 sm:py-1.5 sm:text-sm ${
               isLoggedIn
                 ? "bg-gradient-to-r from-brand-lime to-brand-cream hover:shadow-lg hover:shadow-brand-lime/40"
                 : "bg-brand-cream hover:shadow-lg hover:shadow-brand-lime/25"
@@ -301,7 +307,7 @@ export function SiteHeader() {
               aria-hidden
               className="pointer-events-none absolute inset-0 -translate-x-[120%] bg-gradient-to-r from-transparent via-white/60 to-transparent transition-transform duration-[600ms] ease-out group-hover:translate-x-[120%]"
             />
-            {isLoggedIn && <LayoutDashboard className="relative h-4 w-4" />}
+            {isLoggedIn && <LayoutDashboard className="relative h-3.5 w-3.5 sm:h-4 sm:w-4" />}
             {/* "Login Now" → "Login" below sm. The label is the cheapest 35px
                 to give back, and it's the reason a 44px hamburger fits at 360. */}
             <span className="relative">
@@ -309,7 +315,7 @@ export function SiteHeader() {
               {!isLoggedIn && <span className="hidden sm:inline"> Now</span>}
             </span>
             {!isLoggedIn && (
-              <ArrowRight className="relative h-4 w-4 -mr-0.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+              <ArrowRight className="relative h-3.5 w-3.5 -mr-0.5 transition-transform duration-200 group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
             )}
           </Link>
 

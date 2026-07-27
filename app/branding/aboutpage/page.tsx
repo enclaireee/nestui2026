@@ -20,7 +20,7 @@ export default function AboutPage() {
       className="min-h-dvh flex flex-col items-center bg-brand-green bg-top bg-no-repeat bg-[length:auto_100%] md:bg-[length:120%_auto]"
       style={{ backgroundImage: "url('/aboutbackground.webp')" }}
     >
-      <div className="flex-1 w-full max-w-5xl flex flex-col p-5">
+      <div className="flex-1 w-full max-w-5xl flex flex-col px-4 py-5 sm:p-5">
         <Description />
         <Vision />
         <Mission />

@@ -66,7 +66,7 @@
   }
 
   /* Vestibular safety. This site has scroll-reveals, a wizard step transition,
-     hover-scale on nearly every button and an infinite sponsor marquee — for
+     hover-scale on nearly every button and a stack of scroll-reveals — for
      anyone who asked the OS for less motion, none of that is optional to them.
      Near-zero rather than `none` so transitionend/animationend still fire and
      no JS that waits on them can hang. */

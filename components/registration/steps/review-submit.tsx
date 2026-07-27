@@ -31,13 +31,13 @@ export function ReviewSubmit({
   const fee = draft.competition ? currentFee(draft.competition) : null;
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-md">
+    <div className="flex w-full flex-col gap-6 md:max-w-md">
       <div className="flex flex-col gap-3">
         <SectionLabel icon={Wallet}>Payment</SectionLabel>
         <div className="rounded-2xl bg-brand-cream/[0.05] p-4 border border-brand-cream/15">
           {fee && (
             <div className="mb-3 border-b border-brand-green/10 pb-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-brand-cream/45">
+              <p className="text-xs font-bold uppercase tracking-wider text-brand-cream/55">
                 Amount to transfer
               </p>
               <p className="mt-0.5 text-2xl font-bold text-brand-cream">
@@ -55,11 +55,11 @@ export function ReviewSubmit({
             </div>
           )}
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-            <dt className="text-brand-cream/45">Bank</dt>
+            <dt className="text-brand-cream/55">Bank</dt>
             <dd className="font-semibold text-brand-cream">{PAYMENT_INFO.bank}</dd>
-            <dt className="text-brand-cream/45">Account</dt>
+            <dt className="text-brand-cream/55">Account</dt>
             <dd className="font-mono font-semibold text-brand-cream">{PAYMENT_INFO.accountNumber}</dd>
-            <dt className="text-brand-cream/45">Holder</dt>
+            <dt className="text-brand-cream/55">Holder</dt>
             <dd className="font-semibold text-brand-cream">{PAYMENT_INFO.accountHolder}</dd>
           </dl>
         </div>
@@ -120,12 +120,12 @@ export function ReviewSubmit({
         </p>
       )}
 
-      <div className="flex justify-end gap-4">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-4">
         <button
           type="button"
           onClick={onBack}
           disabled={submitting}
-          className="btn-ghost px-10 py-2.5 text-sm"
+          className="btn-ghost px-10 py-3 text-sm"
         >
           Back
         </button>
@@ -133,7 +133,7 @@ export function ReviewSubmit({
           type="button"
           onClick={onSubmit}
           disabled={submitting}
-          className="btn-brand px-10 py-2.5 text-sm"
+          className="btn-brand px-10 py-3 text-sm"
         >
           {submitting ? "Submitting..." : "Submit"}
         </button>

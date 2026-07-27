@@ -44,7 +44,7 @@ export default async function RegistrationDetail({
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/admin" className="text-sm text-white/60 hover:text-brand-lime">
+      <Link href="/admin" className="inline-flex min-h-11 w-fit items-center text-sm text-white/60 hover:text-brand-lime">
         ← Back to all registrations
       </Link>
 
@@ -83,7 +83,7 @@ export default async function RegistrationDetail({
           {entries.map((e) => (
             <SubmissionCard key={e.submission_id} entry={e} registrationId={reg.id} />
           ))}
-          <p className="text-xs text-white/40">
+          <p className="text-xs text-white/55">
             Each submission is reviewed separately — set a status per entry.
           </p>
         </div>
@@ -129,7 +129,7 @@ function SubmissionCard({
             {new Date(entry.submitted_at).toLocaleString()}
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={entry.status} />
           <StatusForm entry={entry} registrationId={registrationId} />
         </div>
@@ -178,13 +178,13 @@ function StatusForm({
       <select
         name="status"
         defaultValue={entry.status}
-        className="h-9 rounded-lg border border-white/15 bg-brand-green px-2 text-sm text-white"
+        className="h-11 rounded-lg border border-white/15 bg-brand-green px-2 text-base text-white sm:h-9 sm:text-sm"
       >
         <option value="pending">pending</option>
         <option value="verified">verified</option>
         <option value="rejected">rejected</option>
       </select>
-      <button className="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold hover:bg-white/20">
+      <button className="min-h-11 rounded-lg bg-white/10 px-4 text-sm font-semibold hover:bg-white/20">
         Update
       </button>
     </form>
@@ -193,7 +193,7 @@ function StatusForm({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-white/10 p-5">
+    <section className="rounded-xl border border-white/10 p-4 sm:p-5">
       <h2 className="mb-4 text-lg font-bold text-brand-lime">{title}</h2>
       {children}
     </section>
