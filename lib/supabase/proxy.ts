@@ -57,10 +57,14 @@ export async function updateSession(request: NextRequest) {
 
   // Already signed in — no reason to see the login/sign-up/forgot-password forms again.
   if (user && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = safeNextPath(request.nextUrl.searchParams.get("next"));
-    url.search = "";
-    return NextResponse.redirect(url);
+    // safeNextPath returns path + query, and `next` is set above as
+    // `pathname + search` — so assigning it to url.pathname percent-encoded the
+    // "?" and produced a 404 (/branding/registration%3Ffoo=1). Resolving it as
+    // a URL against our own origin keeps the query intact, and safeNextPath has
+    // already guaranteed it can't point anywhere else.
+    return NextResponse.redirect(
+      new URL(safeNextPath(request.nextUrl.searchParams.get("next")), request.nextUrl.origin),
+    );
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

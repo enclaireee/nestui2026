@@ -18,6 +18,13 @@ export function SiteFooter() {
             width={56}
             height={56}
             sizes="44px"
+            // RevealFooter renders this footer `position: fixed; bottom: 0`, so
+            // it sits in the initial viewport on EVERY route — and Chrome does
+            // not occlusion-test LCP candidates, so being painted behind the
+            // page content doesn't exempt it. That made this lazy 44px logo the
+            // LCP element site-wide, which is what Next was warning about.
+            // At 44px the eager fetch is ~2KB.
+            priority
             className="h-11 w-11 object-contain"
           />
           <div className="flex flex-col leading-tight">

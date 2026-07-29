@@ -275,13 +275,14 @@ export function RegistrationClient({ category }: { category?: Category }) {
         // with a `gap-24` trench between them, which left the card visually
         // adrift from its own steps.
         <div className="grid w-full max-w-5xl grid-cols-1 items-start gap-5 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:gap-10 lg:gap-12">
-          {/* order-2 below md. The rail is desktop context, but in a single
-              column it took the priority slot: a 288px decorative image plus
-              pt-28 meant ~400px of chrome before the first field on an 800px
-              screen. On a phone the form goes first and the artwork follows.
-              Sticky (desktop only) so it stays in view through the long
-              Member step. */}
-          <div className="order-2 md:order-none md:sticky md:top-28">
+          {/* Desktop only. The rail is a ~500px decorative illustration: at the
+              top of a phone it pushed the first field ~400px down, and moved to
+              the bottom it was a stranded graphic below the submit buttons.
+              Neither is worth its 209-278KB on mobile, so phones get the
+              segmented progress bar in the card header instead — same
+              information, ~0 bytes. Sticky so it stays in view through the
+              long Member step. */}
+          <div className="hidden md:block md:sticky md:top-28">
             <StepIndicator currentStep={TIMELINE_INDEX[step]} />
           </div>
 
@@ -289,7 +290,7 @@ export function RegistrationClient({ category }: { category?: Category }) {
               same bright backdrop the rest of the site does, and translucent
               white over it left labels and helper text far under AA; and
               a solid surface needs no backdrop-filter at all. */}
-          <div className="order-1 overflow-hidden rounded-2xl border border-brand-cream/12 bg-brand-green/95 shadow-2xl shadow-black/30 md:order-none">
+          <div className="overflow-hidden rounded-2xl border border-brand-cream/12 bg-brand-green/95 shadow-2xl shadow-black/30">
             {/* Card header: the step's identity, and how far along you are. */}
             <div className="border-b border-brand-cream/10 px-5 py-4 sm:px-8 sm:py-5">
               <div className="flex items-baseline justify-between gap-4">
@@ -301,6 +302,20 @@ export function RegistrationClient({ category }: { category?: Category }) {
                 </span>
               </div>
               <p className="mt-1 text-sm text-brand-cream/50">{STEP_HINTS[step]}</p>
+
+              {/* Mobile progress. The step artwork is desktop-only, so without
+                  this a phone's only progress cue is the "Step 2 of 4" text.
+                  One segment per step, filled up to the current one. */}
+              <div className="mt-3 flex gap-1.5 md:hidden" aria-hidden>
+                {steps.map((s, i) => (
+                  <span
+                    key={s}
+                    className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                      i <= state.stepIndex ? "bg-brand-lime" : "bg-brand-cream/15"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
 
             <div className="px-5 py-6 sm:px-8 sm:py-7">

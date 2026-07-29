@@ -2,15 +2,13 @@
 
 import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { AuthForm, authFieldClass } from "@/components/auth/auth-form";
+import { AuthForm, authFieldClass, redirectAfterAuth } from "@/components/auth/auth-form";
 import { RegistrationInput } from "@/components/registration/registration-input";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const router = useRouter();
 
   async function updatePassword() {
     if (password.length < 8) throw new Error("Password must be at least 8 characters");
@@ -19,7 +17,8 @@ export function UpdatePasswordForm() {
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
-    router.push("/protected");
+    // Hard navigation — see the note in login-form.tsx.
+    return redirectAfterAuth("/protected");
   }
 
   return (

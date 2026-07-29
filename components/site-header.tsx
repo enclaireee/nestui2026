@@ -5,7 +5,7 @@ import { motion, useScroll } from "framer-motion";
 import { LogOut, LayoutDashboard, Menu, X, ArrowRight, ChevronRight, Home, Users, ClipboardList, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PopUpTemplate } from "@/components/registration/pop-up-template";
 
@@ -126,7 +126,6 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const sheetRef = useRef<HTMLDialogElement>(null);
-  const router = useRouter();
 
   // Drives the hairline progress bar along the top edge. Reads scroll position
   // directly into a MotionValue — never through React state — so scrolling
@@ -186,7 +185,11 @@ export function SiteHeader() {
     const supabase = createClient();
     await supabase.auth.signOut();
     setIsLoggedIn(false);
-    router.push("/auth/login");
+    // Hard navigation, mirror of login — see login-form.tsx. Without it the
+    // Router Cache keeps serving the logged-IN payload of any protected page
+    // still in the back/forward history. A full load also drops every piece of
+    // client state, which is what you want on sign-out.
+    window.location.replace("/auth/login");
   };
 
   return (
