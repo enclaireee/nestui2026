@@ -54,8 +54,8 @@ export function Hero() {
         <Image
           src="/nestlogo.webp"
           alt="Nest UI 2026 logo"
-          width={800}
-          height={800}
+          width={600}
+          height={580}
           priority
           // THE LCP ELEMENT on mobile. Without `sizes`, next/image emits a
           // fixed 1x/2x srcset off `width={800}`, so a DPR-3 phone downloaded
@@ -117,6 +117,9 @@ export function Hero() {
               aria-hidden="true"
               fill
               priority
+              // Vector: nothing for the optimizer to do, but it was still
+              // being routed through /_next/image and billed per transform.
+              unoptimized
               className="object-contain"
             />
 
@@ -140,6 +143,7 @@ export function Hero() {
           width={200}
           height={60}
           priority
+          unoptimized
           className="h-auto w-[160px] drop-shadow-lg"
         />
       </Link>

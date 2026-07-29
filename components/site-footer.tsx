@@ -15,8 +15,8 @@ export function SiteFooter() {
           <Image
             src="/nestlogo.webp"
             alt="Nest UI logo"
-            width={56}
-            height={56}
+            width={600}
+            height={580}
             sizes="44px"
             // RevealFooter renders this footer `position: fixed; bottom: 0`, so
             // it sits in the initial viewport on EVERY route — and Chrome does

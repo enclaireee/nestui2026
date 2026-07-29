@@ -58,8 +58,8 @@ export function AuthPageShell({ heading, subheading, children }: AuthPageShellPr
           <Image
             src="/nestlogo.webp"
             alt="Nest UI 2026"
-            width={64}
-            height={64}
+            width={600}
+            height={580}
             priority
             sizes="44px"
             className="h-11 w-11 object-contain"

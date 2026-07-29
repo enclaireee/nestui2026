@@ -18,8 +18,8 @@ export function Vision() {
           <Image
             src="/nestlogo.webp"
             alt="Nest UI logo"
-            width={320}
-            height={320}
+            width={600}
+            height={580}
             sizes="(min-width: 640px) 240px, 176px"
             className="h-36 w-36 shrink-0 object-contain sm:h-60 sm:w-60"
           />
