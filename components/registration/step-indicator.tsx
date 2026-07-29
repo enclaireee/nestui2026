@@ -32,10 +32,10 @@ export function StepIndicator({ currentStep, className }: StepIndicatorProps) {
             alt={`Step ${stepNumber} Indicator`}
             width={600}
             height={600}
-            // No `priority`: this sits below the header and is never the LCP,
-            // but it IS a 209-278KB webp on the critical path of the form.
-            sizes="(min-width: 1024px) 600px, (min-width: 768px) 500px, 224px"
-            className="w-56 sm:w-96 md:w-[500px] lg:w-[600px] h-auto object-contain drop-shadow-lg"
+            // Rendered only from md up (the rail is display:none below it), so
+            // phones never fetch these 209-278KB files at all.
+            sizes="(min-width: 1024px) 600px, 500px"
+            className="w-[500px] lg:w-[600px] h-auto object-contain drop-shadow-lg"
           />
         </motion.div>
       </AnimatePresence>

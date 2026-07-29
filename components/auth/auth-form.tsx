@@ -85,3 +85,44 @@ export function AuthForm({
 
 /** Every auth field is the same input at the same size, on the dark shell. */
 export const authFieldClass = "h-12";
+
+/** How long to keep the button pending before assuming the redirect died. */
+const REDIRECT_TIMEOUT_MS = 10_000;
+
+/**
+ * Leave the app for `href` after a successful auth change, and hold the form's
+ * pending state until the page actually goes away.
+ *
+ * A hard navigation (rather than router.push) because every destination is a
+ * server component calling getUser(), and Next's Router Cache would otherwise
+ * serve the RSC payload it prefetched while logged out — that was the "logged
+ * in but still on the login page until I refresh" bug.
+ *
+ * `location.replace` doesn't block, so returning normally here would let
+ * AuthForm's `finally { setIsLoading(false) }` fire immediately and flip the
+ * button back to a clickable "Login" for the whole unload window — a
+ * double-submit on a slow phone. So we await instead.
+ *
+ * But awaiting forever means a navigation that never happens leaves the user
+ * staring at a spinner with no way out. So it's a timeout, not an infinite
+ * hang: if we're still alive after 10s the redirect clearly failed, and the
+ * returned node replaces the form with a manual link. The user IS authenticated
+ * at this point — the sign-in already succeeded — so the only thing lost is the
+ * automatic hop.
+ */
+export async function redirectAfterAuth(href: string): Promise<ReactNode> {
+  window.location.replace(href);
+  await new Promise((resolve) => setTimeout(resolve, REDIRECT_TIMEOUT_MS));
+  return (
+    <div className="flex flex-col gap-3 text-center">
+      <p className="text-sm leading-relaxed text-brand-cream/70">
+        You&rsquo;re signed in, but we couldn&rsquo;t send you on automatically.
+      </p>
+      {/* Plain <a>, not next/link: the whole point is a fresh document request,
+          so the server re-reads the new auth cookie. */}
+      <a href={href} className="btn-brand px-8 py-3 text-sm">
+        Continue
+      </a>
+    </div>
+  );
+}

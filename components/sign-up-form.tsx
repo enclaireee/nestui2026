@@ -2,10 +2,9 @@
 
 import { Mail, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { AuthForm, authFieldClass } from "@/components/auth/auth-form";
+import { AuthForm, authFieldClass, redirectAfterAuth } from "@/components/auth/auth-form";
 import { RegistrationInput } from "@/components/registration/registration-input";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { safeNextPath } from "@/lib/sanitize";
 import { useState } from "react";
 
@@ -13,7 +12,6 @@ export function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const router = useRouter();
 
   async function signUp() {
     // Real enforcement is Supabase Auth → Policies → minimum password length
@@ -29,7 +27,11 @@ export function SignUpForm() {
     // valid session — same destination as a normal login.
     // ?next= is set by the proxy when it bounced an unauthenticated visitor
     // off a protected page — send them back there, not to the dashboard.
-    router.push(safeNextPath(new URLSearchParams(window.location.search).get("next")));
+    // Hard navigation for the same reason as login-form — see the long note
+    // there. The Router Cache would otherwise serve the logged-out payload.
+    return redirectAfterAuth(
+      safeNextPath(new URLSearchParams(window.location.search).get("next")),
+    );
   }
 
   return (
