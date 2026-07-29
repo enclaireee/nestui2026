@@ -253,8 +253,8 @@ export function SiteHeader() {
             <Image
               src="/nestlogo.webp"
               alt="Nest UI logo"
-              width={32}
-              height={32}
+              width={600}
+              height={580}
               sizes="24px"
               className="h-6 w-6 object-contain transition-transform duration-300 group-hover:rotate-[8deg] group-hover:scale-110"
               priority
