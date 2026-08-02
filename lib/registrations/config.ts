@@ -96,7 +96,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     originalityTemplateUrl:
       "https://docs.google.com/document/d/1706y-HFKhKQvfAVP0-W47DuODTvm5cFnTFtPiblDFBA/edit?usp=drivesdk",
     guidebookUrl:
-      "https://drive.google.com/file/d/1rGFtyXwTXU6wt-6KU7rdVFIh76pkKDeI/view?usp=drive_link",
+      "https://drive.google.com/file/d/1rD-HNaMw-xL_GGEj8yzIfWDOXkQuyxYa/view",
     twibbonUrl:
       "https://drive.google.com/drive/folders/1ABVG-7Pz9Ce9yGEcHlP9rcuJub2mSEkp?usp=drive_link",
     fees: [
