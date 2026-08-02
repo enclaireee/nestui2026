@@ -70,7 +70,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     originalityTemplateUrl:
       "https://docs.google.com/document/d/12qEaJLfTeOMSdf9wCd50p3zsopmMw63A191xvI2QYpA/edit?usp=drivesdk",
     guidebookUrl:
-      "https://drive.google.com/file/d/1_G3Ancvkj_6P_xzhrwJGJw0Kf8I_xmGR/view?usp=sharing",
+      "https://drive.google.com/file/d/19ko907svALA_953JGGza_Q3RsIAi0qdV/view?usp=drive_link",
     twibbonUrl:
       "https://drive.google.com/drive/folders/1R0d83qPL9xLZpXi6i3gIqx3XcuQKEvAR?usp=drive_link",
     fees: [
@@ -96,7 +96,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     originalityTemplateUrl:
       "https://docs.google.com/document/d/1706y-HFKhKQvfAVP0-W47DuODTvm5cFnTFtPiblDFBA/edit?usp=drivesdk",
     guidebookUrl:
-      "https://drive.google.com/file/d/1VQNpWrcQ4JSPgUojqUm6k3ctEg__Y7ob/view?usp=sharing",
+      "https://drive.google.com/file/d/1rGFtyXwTXU6wt-6KU7rdVFIh76pkKDeI/view?usp=drive_link",
     twibbonUrl:
       "https://drive.google.com/drive/folders/1ABVG-7Pz9Ce9yGEcHlP9rcuJub2mSEkp?usp=drive_link",
     fees: [
@@ -122,7 +122,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
     originalityTemplateUrl:
       "https://docs.google.com/document/d/1Ei7ZYa37yngw3fgjnhtIgKXOFlvYnhKsxmruCTteX20/edit?usp=drivesdk",
     guidebookUrl:
-      "https://drive.google.com/file/d/1Jmxf4J3TvJuj1DkLs_GGsOWKUSN0N992/view?usp=sharing",
+      "https://drive.google.com/file/d/1zeHckzyYUSdZHNGRwgByTdgvjtk0GJP5/view?usp=drive_link",
     twibbonUrl:
       "https://drive.google.com/drive/folders/1T4IRIRlNDOmVTJWqzSB_6nkPoohQRXji?usp=drive_link",
     fees: [
