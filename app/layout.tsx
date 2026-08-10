@@ -66,10 +66,6 @@ const oddval = localFont({
       weight: "100 900",
       style: "normal",
     },
-    // When you get more real weights, replace the single entry above with
-    // one entry per file, e.g.:
-    // { path: "./fonts/Oddval-Regular.woff2", weight: "400", style: "normal" },
-    // { path: "./fonts/Oddval-Bold.woff2", weight: "700", style: "normal" },
   ],
 });
 
