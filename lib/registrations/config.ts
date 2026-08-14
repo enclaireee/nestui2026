@@ -101,7 +101,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "https://drive.google.com/drive/folders/1ABVG-7Pz9Ce9yGEcHlP9rcuJub2mSEkp?usp=drive_link",
     fees: [
       { label: "Early Bird", amount: 175_000, until: "2026-08-02" },
-      { label: "Normal", amount: 200_000, until: "2026-08-14" },
+      { label: "Normal", amount: 200_000, until: "2026-08-21" },
     ],
   },
   healthynovation: {
@@ -127,7 +127,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       "https://drive.google.com/drive/folders/1T4IRIRlNDOmVTJWqzSB_6nkPoohQRXji?usp=drive_link",
     fees: [
       { label: "Early Bird", amount: 80_000, until: "2026-08-02" },
-      { label: "Normal", amount: 100_000, until: "2026-08-14" },
+      { label: "Normal", amount: 100_000, until: "2026-08-21" },
     ],
   },
 };

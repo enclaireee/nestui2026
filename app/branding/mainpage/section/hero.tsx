@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const DEADLINE = new Date("2026-08-14T23:59:00+07:00");
+const DEADLINE = new Date("2026-08-21T23:59:00+07:00");
 
 type Remaining = { days: number; hours: number; minutes: number };
 
@@ -94,13 +94,13 @@ export function Hero() {
           </p>
 
           <p className={`mt-5 text-2xl font-semibold text-gradient-brand sm:text-3xl md:text-4xl ${GLOW}`}>
-            Registration closes in
+            Registration extended — closes in
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-semibold sm:text-base md:text-lg">
             <span className="flex items-center gap-1.5 text-gradient-brand">
               <CalendarIcon />
-              14 August 2026
+              21 August 2026
             </span>
             <span className="flex items-center gap-1.5 text-gradient-brand">
               <ClockIcon />

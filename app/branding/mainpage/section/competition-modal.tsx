@@ -93,7 +93,7 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
     ],
     timeline: [
       { label: "Early Bird Registration + Abstract Submission", date: "20 July – 2 August 2026", highlight: true },
-      { label: "Normal Registration + Abstract Submission", date: "3 – 14 August 2026", highlight: true },
+      { label: "Normal Registration + Abstract Submission", date: "3 – 21 August 2026 (Extended)", highlight: true },
       { label: "Semifinalist Announcement", date: "29 August 2026" },
       { label: "Technical Meeting I & Mentoring I", date: "30 August 2026" },
       { label: "Full Paper Submission", date: "31 August – 13 September 2026" },
@@ -127,7 +127,7 @@ const DETAILS: Record<CompetitionId, CompetitionDetail> = {
     ],
     timeline: [
       { label: "Early Bird Registration + Abstract Submission", date: "20 July – 2 August 2026", highlight: true },
-      { label: "Normal Registration + Abstract Submission", date: "3 – 14 August 2026", highlight: true },
+      { label: "Normal Registration + Abstract Submission", date: "3 – 21 August 2026 (Extended)", highlight: true },
       { label: "Semifinalist Announcement", date: "29 August 2026" },
       { label: "Technical Meeting I & Mentoring I", date: "30 August 2026" },
       { label: "Full Paper Submission", date: "31 August – 13 September 2026" },
