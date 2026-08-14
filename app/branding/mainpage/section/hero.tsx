@@ -93,8 +93,12 @@ export function Hero() {
             NEST UI is the largest series of scientific competitions and festivals facilitated by IME FTUI, serving as a platform to develop the potential of undergraduate and highschool students across Indonesia.
           </p>
 
-          <p className={`mt-5 text-2xl font-semibold text-gradient-brand sm:text-3xl md:text-4xl ${GLOW}`}>
-            Registration extended — closes in
+          <span className="mt-5 inline-block rounded-full bg-brand-lime px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-green sm:text-sm">
+            Deadline extended
+          </span>
+
+          <p className={`mt-2 text-2xl font-semibold text-gradient-brand sm:text-3xl md:text-4xl ${GLOW}`}>
+            Registration closes in
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-semibold sm:text-base md:text-lg">
