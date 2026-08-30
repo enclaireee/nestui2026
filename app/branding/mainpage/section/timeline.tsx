@@ -283,7 +283,7 @@ export default function TimelineSection() {
             id="milestone-1"
             delay={0.15}
             date="20 July - 25 August"
-            details={["Medhack only"]}
+            details={["Closed"]}
             title={
               <>
                 Open Registration
@@ -410,7 +410,7 @@ export default function TimelineSection() {
           </div>
 
           {[
-            { left: "30%", top: "17.3%", date: "20 July - 25 August", title: (<>Open Registration<br />& Preliminary</>), glow: false, details: ["Medhack only"] as string[] | undefined },
+            { left: "30%", top: "17.3%", date: "20 July - 25 August", title: (<>Open Registration<br />& Preliminary</>), glow: false, details: ["Closed"] as string[] | undefined },
             { left: "68.2%", top: "47.1%", date: "29 August - 13 September", title: "Semifinal", glow: false, details: undefined },
             { left: "44.1%", top: "76.9%", date: "3 October", title: "Main Event", glow: true, details: ["Final Presentation", "Booth Exhibition", "Main Conference", "Awarding"] },
           ].map((item, idx) => (

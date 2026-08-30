@@ -4,7 +4,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { COMPETITIONS, isCompetitionId } from "@/lib/registrations/config";
 import { csvSafe } from "@/lib/sanitize";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
-import type { AdminRegistration, AdminSubmissionDetail } from "@/lib/admin/types";
+import type {
+  AdminRegistration,
+  AdminSubmissionDetail,
+  PaperSubmissionRow,
+} from "@/lib/admin/types";
 
 // One row per team (leader + members flattened into columns), followed by every
 // submission that team made flattened into per-entry columns (Entry 1 inline +
@@ -52,6 +56,13 @@ export async function GET(request: NextRequest) {
     list.push(s);
     byReg.set(s.registration_id, list);
   }
+  // The paper round, keyed by registration. Absent until the Step 21 migration
+  // runs, in which case the paper columns come out empty.
+  const paperByReg = new Map<string, PaperSubmissionRow>();
+  const { data: paperData } = await supabase.from("paper_submissions").select("*");
+  for (const pp of (paperData as PaperSubmissionRow[] | null) ?? [])
+    paperByReg.set(pp.registration_id, pp);
+
   const entriesFor = (r: AdminRegistration): AdminSubmissionDetail[] =>
     byReg.get(r.id) ?? [
       {
@@ -109,6 +120,7 @@ export async function GET(request: NextRequest) {
       `Entry${i}_SubmissionUrl`,
     );
   }
+  header.push("Paper_Status", "Paper_SubmittedAt", "Paper_Url", "Paper_VideoUrl");
 
   const lines = [header.map(csvSafe).join(",")];
   for (const r of teams) {
@@ -149,6 +161,13 @@ export async function GET(request: NextRequest) {
         e?.submission_url ?? "",
       );
     }
+    const paper = paperByReg.get(r.id);
+    cells.push(
+      paper?.status ?? "",
+      paper?.submitted_at ?? "",
+      paper?.paper_url ?? "",
+      paper?.video_url ?? "",
+    );
     lines.push(cells.map(csvSafe).join(","));
   }
 

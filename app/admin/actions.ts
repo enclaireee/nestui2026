@@ -64,3 +64,27 @@ export async function setSubmissionStatus(
   revalidatePath(`/admin/registrations/${registrationId}`);
 }
 
+
+// Verify/reject a team's paper (the round after selection). `registrationId` is
+// passed only so the team detail page can be revalidated — the RPC keys off the
+// paper id.
+export async function setPaperStatus(
+  id: string,
+  status: string,
+  registrationId: string,
+): Promise<void> {
+  if (!(await isAdminAuthed())) redirect("/admin/login");
+  if (!STATUSES.includes(status as Status)) return;
+
+  const admin = createAdminClient();
+  const { error } = await admin.rpc("set_paper_status", {
+    p_id: id,
+    p_status: status,
+  });
+  if (error) {
+    console.error("set_paper_status failed:", error.message);
+    return;
+  }
+  revalidatePath("/admin");
+  revalidatePath(`/admin/registrations/${registrationId}`);
+}

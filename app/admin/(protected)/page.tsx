@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { COMPETITIONS, COMPETITION_IDS, isCompetitionId } from "@/lib/registrations/config";
 import {
   sanitizeSearch,
+  type AdminPaperDetail,
   type AdminRegistration,
   type AdminSubmissionDetail,
 } from "@/lib/admin/types";
@@ -13,13 +14,31 @@ const PAGE_SIZE = 20;
 
 type ViewMode = "teams" | "submissions";
 
+// Which round the whole panel is looking at. Preliminary is the abstract that
+// came with registration (plus any paid re-entries); Semifinal is the paper
+// round. The switch changes what BOTH views show, so an admin reviewing one
+// round never has the other's statuses on screen.
+type Round = "prelim" | "semifinal";
+
+const ROUND_LABEL: Record<Round, string> = {
+  prelim: "Preliminary",
+  semifinal: "Semifinal",
+};
+
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; competition?: string; q?: string; page?: string }>;
+  searchParams: Promise<{
+    view?: string;
+    round?: string;
+    competition?: string;
+    q?: string;
+    page?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const view: ViewMode = sp.view === "submissions" ? "submissions" : "teams";
+  const round: Round = sp.round === "semifinal" ? "semifinal" : "prelim";
   const competition = isCompetitionId(sp.competition) ? sp.competition : null;
   const q = sanitizeSearch(sp.q ?? "");
   const page = Math.max(1, Number(sp.page ?? "1") || 1);
@@ -28,6 +47,7 @@ export default async function AdminDashboard({
   const qs = (extra: Record<string, string | number>) => {
     const params = new URLSearchParams();
     if (view !== "teams") params.set("view", view);
+    if (round !== "prelim") params.set("round", round);
     if (competition) params.set("competition", competition);
     if (q) params.set("q", q);
     for (const [k, v] of Object.entries(extra)) {
@@ -40,6 +60,19 @@ export default async function AdminDashboard({
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex w-fit gap-1 rounded-xl border border-brand-lime/25 bg-brand-lime/[0.07] p-1">
+        <RoundTab
+          href={qs({ round: "prelim", page: 1 })}
+          active={round === "prelim"}
+          label={ROUND_LABEL.prelim}
+        />
+        <RoundTab
+          href={qs({ round: "semifinal", page: 1 })}
+          active={round === "semifinal"}
+          label={ROUND_LABEL.semifinal}
+        />
+      </div>
+
       <div className="flex w-fit gap-1 rounded-xl bg-white/5 p-1">
         <ModeTab href={qs({ view: "teams", page: 1 })} active={view === "teams"} label="Teams" />
         <ModeTab
@@ -64,6 +97,7 @@ export default async function AdminDashboard({
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <form method="get" className="flex w-full gap-2 sm:w-auto">
           {view !== "teams" && <input type="hidden" name="view" value={view} />}
+          {round !== "prelim" && <input type="hidden" name="round" value={round} />}
           {competition && <input type="hidden" name="competition" value={competition} />}
           <input
             name="q"
@@ -85,7 +119,9 @@ export default async function AdminDashboard({
       </div>
 
       {view === "teams" ? (
-        <TeamsTable competition={competition} q={q} page={page} qs={qs} />
+        <TeamsTable competition={competition} q={q} page={page} qs={qs} round={round} />
+      ) : round === "semifinal" ? (
+        <PapersTable competition={competition} q={q} page={page} qs={qs} />
       ) : (
         <SubmissionsTable competition={competition} q={q} page={page} qs={qs} />
       )}
@@ -101,11 +137,13 @@ async function TeamsTable({
   q,
   page,
   qs,
+  round,
 }: {
   competition: string | null;
   q: string;
   page: number;
   qs: (extra: Record<string, string | number>) => string;
+  round: Round;
 }) {
   const from = (page - 1) * PAGE_SIZE;
   const supabase = createAdminClient();
@@ -129,6 +167,7 @@ async function TeamsTable({
   // Falls back to 1 if the submissions view isn't present yet — Entry 1 always
   // exists inline on the registration.
   const entryCount = new Map<string, number>();
+  const paperStatus = new Map<string, string>();
   if (rows.length) {
     const { data: subs } = await supabase
       .from("admin_submissions_detail")
@@ -139,6 +178,18 @@ async function TeamsTable({
       );
     for (const s of (subs as { registration_id: string }[] | null) ?? [])
       entryCount.set(s.registration_id, (entryCount.get(s.registration_id) ?? 0) + 1);
+
+    // Paper round status per team. Absent until the Step 21 migration runs, in
+    // which case every team simply shows no paper.
+    const { data: papers } = await supabase
+      .from("paper_submissions")
+      .select("registration_id, status")
+      .in(
+        "registration_id",
+        rows.map((r) => r.id),
+      );
+    for (const pp of (papers as { registration_id: string; status: string }[] | null) ?? [])
+      paperStatus.set(pp.registration_id, pp.status);
   }
 
   return (
@@ -164,7 +215,7 @@ async function TeamsTable({
                 <span className="block truncate font-semibold text-white">{r.team_name}</span>
                 <span className="mt-0.5 block font-mono text-xs text-white/50">{r.code}</span>
               </span>
-              <StatusBadge status={r.status} />
+              <TeamStatus round={round} reg={r} paperStatus={paperStatus.get(r.id)} />
             </Link>
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 p-4 text-sm">
               <dt className="text-white/55">Competition</dt>
@@ -253,7 +304,7 @@ async function TeamsTable({
                   {new Date(r.submitted_at).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3">
-                  <StatusBadge status={r.status} />
+                  <TeamStatus round={round} reg={r} paperStatus={paperStatus.get(r.id)} />
                 </td>
               </tr>
             ))}
@@ -262,6 +313,158 @@ async function TeamsTable({
       </div>
 
       <Pager total={total} page={page} unit="team" qs={qs} />
+    </>
+  );
+}
+
+// ── Semifinal submissions ────────────────────────────────────────────────────
+// Every paper across all teams, newest first. Click through to the team.
+
+async function PapersTable({
+  competition,
+  q,
+  page,
+  qs,
+}: {
+  competition: string | null;
+  q: string;
+  page: number;
+  qs: (extra: Record<string, string | number>) => string;
+}) {
+  const from = (page - 1) * PAGE_SIZE;
+  const supabase = createAdminClient();
+
+  let query = supabase
+    .from("admin_papers_detail")
+    .select("*", { count: "exact" })
+    .order("submitted_at", { ascending: false })
+    .range(from, from + PAGE_SIZE - 1);
+  if (competition) query = query.eq("competition", competition);
+  if (q)
+    query = query.or(
+      `team_name.ilike."%${q}%",code.ilike."%${q}%",leader_email.ilike."%${q}%"`,
+    );
+
+  const { data, count, error } = await query;
+  const rows = (data as AdminPaperDetail[] | null) ?? [];
+  const total = count ?? 0;
+
+  return (
+    <>
+      {error && (
+        <p className="text-sm text-red-400">
+          Failed to load papers: {error.message}. Run the Step 21 SQL in BACKEND.md if you
+          haven&apos;t yet.
+        </p>
+      )}
+
+      {/* Same card treatment as Teams — see the note there. */}
+      <ul className="flex flex-col gap-3 md:hidden">
+        {rows.length === 0 && !error && (
+          <li className="rounded-xl border border-white/10 px-4 py-8 text-center text-white/50">
+            No papers submitted yet.
+          </li>
+        )}
+        {rows.map((pp) => (
+          <li key={pp.paper_id} className="rounded-xl border border-white/10 bg-white/[0.03]">
+            <Link
+              href={`/admin/registrations/${pp.registration_id}`}
+              className="flex items-start justify-between gap-3 border-b border-white/10 p-4"
+            >
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-white">{pp.team_name}</span>
+                <span className="mt-0.5 block font-mono text-xs text-white/50">{pp.code}</span>
+              </span>
+              <StatusBadge status={pp.status} />
+            </Link>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 p-4 text-sm">
+              <dt className="text-white/55">Competition</dt>
+              <dd className="text-right text-white/85">
+                {COMPETITIONS[pp.competition]?.name ?? pp.competition}
+              </dd>
+              <dt className="text-white/55">Submitted</dt>
+              <dd className="text-right text-white/85">
+                {new Date(pp.submitted_at).toLocaleString()}
+              </dd>
+              {pp.updated_at !== pp.submitted_at && (
+                <>
+                  <dt className="text-white/55">Replaced</dt>
+                  <dd className="text-right text-white/85">
+                    {new Date(pp.updated_at).toLocaleString()}
+                  </dd>
+                </>
+              )}
+            </dl>
+            <div className="flex gap-2 border-t border-white/10 p-3">
+              <LinkCell href={pp.paper_url} label="Paper" />
+              {pp.video_url && <LinkCell href={pp.video_url} label="Video" />}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden overflow-x-auto rounded-xl border border-white/10 md:block">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-white/5 text-white/60">
+            <tr>
+              <Th>Submitted</Th>
+              <Th>Team</Th>
+              <Th>Competition</Th>
+              <Th>Paper</Th>
+              <Th>Video</Th>
+              <Th>Status</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 && !error && (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-white/50">
+                  No papers submitted yet.
+                </td>
+              </tr>
+            )}
+            {rows.map((pp) => (
+              <tr key={pp.paper_id} className="border-t border-white/5 hover:bg-white/5">
+                <td className="whitespace-nowrap px-4 py-3 text-white/70">
+                  {new Date(pp.submitted_at).toLocaleString()}
+                  {pp.updated_at !== pp.submitted_at && (
+                    <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/60">
+                      replaced
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <Link
+                    href={`/admin/registrations/${pp.registration_id}`}
+                    className="font-semibold hover:text-brand-lime"
+                  >
+                    {pp.team_name}
+                  </Link>
+                  <span className="ml-2 font-mono text-xs text-white/55">{pp.code}</span>
+                </td>
+                <td className="px-4 py-3">
+                  {COMPETITIONS[pp.competition]?.name ?? pp.competition}
+                </td>
+                <td className="px-4 py-3">
+                  <LinkCell href={pp.paper_url} label="Paper" />
+                </td>
+                <td className="px-4 py-3">
+                  {pp.video_url ? (
+                    <LinkCell href={pp.video_url} label="Video" />
+                  ) : (
+                    <span className="text-xs text-white/30">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={pp.status} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Pager total={total} page={page} unit="paper" qs={qs} />
     </>
   );
 }
@@ -445,6 +648,24 @@ function Pager({
   );
 }
 
+// Deliberately styled differently from ModeTab: this switch changes what every
+// number on the page means, so it must not read as just another view toggle.
+function RoundTab({ href, active, label }: { href: string; active: boolean; label: string }) {
+  return (
+    <Link
+      href={href}
+      className={
+        "inline-flex min-h-11 items-center rounded-lg px-5 text-sm font-bold transition-colors " +
+        (active
+          ? "bg-brand-lime text-brand-teal"
+          : "text-brand-lime/70 hover:bg-brand-lime/10 hover:text-brand-lime")
+      }
+    >
+      {label}
+    </Link>
+  );
+}
+
 function ModeTab({ href, active, label }: { href: string; active: boolean; label: string }) {
   return (
     <Link
@@ -471,6 +692,40 @@ function Tab({ href, active, label }: { href: string; active: boolean; label: st
       {label}
     </Link>
   );
+}
+
+// The Status column follows the selected round: registration status under
+// Preliminary, paper status under Semifinal. Medhack has no paper round, so it
+// reads n/a there rather than an empty or misleading badge.
+function TeamStatus({
+  round,
+  reg,
+  paperStatus,
+}: {
+  round: Round;
+  reg: AdminRegistration;
+  paperStatus?: string;
+}) {
+  if (round === "prelim") return <StatusBadge status={reg.status} />;
+  if (!COMPETITIONS[reg.competition]?.paperSubmission)
+    return (
+      <span className="rounded-full bg-white/[0.07] px-2.5 py-0.5 text-xs font-semibold text-white/30">
+        n/a
+      </span>
+    );
+  return <PaperCell status={paperStatus} />;
+}
+
+// Paper round at a glance. "none" is a real state worth seeing in the list —
+// it's how an admin spots teams that haven't submitted before the deadline.
+function PaperCell({ status }: { status?: string }) {
+  if (!status)
+    return (
+      <span className="rounded-full bg-white/[0.07] px-2.5 py-0.5 text-xs font-semibold text-white/40">
+        none
+      </span>
+    );
+  return <StatusBadge status={status} />;
 }
 
 function Th({ children }: { children: React.ReactNode }) {

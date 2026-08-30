@@ -876,3 +876,255 @@ join information_schema.role_routine_grants g on g.routine_name = p.proname
 join pg_roles r on r.rolname = g.grantee
 where p.proname in ('submit_registration','check_rate_limit');
 ```
+
+## Step 21 — Paper round (full paper + video) — **required for the paper submission feature**
+
+The round that follows selection: Healthineer submits a **paper + video** link, Healthynovation a **paper** link. Medhack has no paper round (it runs a video submission instead) and is excluded in the app by `paperSubmission: null` in `lib/registrations/config.ts`.
+
+Deliberately a **separate table** rather than a `stage` column on `submissions`. That table means "an extra *paid* entry" — its `payment_proof_url` is `not null` and `admin_submissions_detail` numbers its rows as Entry 2, 3, … A paper is free, there is at most **one per team**, and it can be replaced until the deadline, so it does not fit that shape.
+
+**Safe to deploy the code before running this** — until the table exists the dashboard and admin panel treat the paper round as "not set up yet" and everything else keeps working, the same way `submissions` degrades before Step 15.
+
+```sql
+create table if not exists public.paper_submissions (
+  id              uuid primary key default gen_random_uuid(),
+  -- one paper per team; re-submitting replaces it (see the RPC's upsert)
+  registration_id uuid not null unique references public.registrations(id) on delete cascade,
+  paper_url       text not null,
+  video_url       text,                      -- Healthineer only; null for Healthynovation
+  status          registration_status not null default 'pending',
+  submitted_at    timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+alter table public.paper_submissions enable row level security;
+
+-- a team can read its own paper (dashboard)
+drop policy if exists paper_select_own on public.paper_submissions;
+create policy paper_select_own on public.paper_submissions
+  for select to authenticated
+  using (exists (
+    select 1 from public.registrations r
+    where r.id = paper_submissions.registration_id and r.user_id = auth.uid()
+  ));
+
+-- clients get SELECT only (RLS-filtered); writes go through the RPC
+revoke all on public.paper_submissions from anon, authenticated;
+grant  select on public.paper_submissions to authenticated;
+```
+
+`upsert_paper_submission` validates ownership, then inserts **or replaces** the team's paper. A replacement resets `status` to `pending`: a paper already verified must not stay verified after its contents change.
+
+```sql
+create or replace function public.upsert_paper_submission(
+  p_user_id         uuid,
+  p_registration_id uuid,
+  p_paper_url       text,
+  p_video_url       text
+) returns uuid
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_owner uuid;
+  v_id    uuid;
+begin
+  select user_id into v_owner from public.registrations where id = p_registration_id;
+  if v_owner is null then
+    raise exception 'registration_not_found';
+  end if;
+  if v_owner <> p_user_id then
+    raise exception 'not_registration_owner';
+  end if;
+
+  insert into public.paper_submissions (registration_id, paper_url, video_url)
+  values (p_registration_id, p_paper_url, p_video_url)
+  on conflict (registration_id) do update
+    set paper_url  = excluded.paper_url,
+        video_url  = excluded.video_url,
+        status     = 'pending',
+        updated_at = now()
+  returning id into v_id;
+
+  return v_id;
+end$$;
+
+revoke all on function public.upsert_paper_submission(uuid, uuid, text, text) from public, anon, authenticated;
+grant  execute on function public.upsert_paper_submission(uuid, uuid, text, text) to service_role;
+```
+
+Per-paper status setter for the admin panel — same shape as `set_submission_status` (Step 16a).
+
+```sql
+create or replace function public.set_paper_status(
+  p_id uuid, p_status registration_status
+) returns void
+language plpgsql security definer set search_path = public
+as $$
+begin
+  update public.paper_submissions set status = p_status where id = p_id;
+end$$;
+
+revoke all on function public.set_paper_status(uuid, registration_status) from public, anon, authenticated;
+grant  execute on function public.set_paper_status(uuid, registration_status) to service_role;
+```
+
+**Flattened "all papers" view** — one row per paper across every team, carrying the owning team's identifying columns so the admin Semifinal list can filter, search and paginate on its own (the same reason `admin_submissions_detail` carries them). Server-only reads, same lockdown as the other admin views.
+
+```sql
+create or replace view public.admin_papers_detail
+with (security_invoker = true) as
+select
+  p.id            as paper_id,
+  p.registration_id,
+  r.code,
+  r.team_name,
+  r.competition,
+  r.leader_email,
+  p.paper_url,
+  p.video_url,
+  p.status,
+  p.submitted_at,
+  p.updated_at
+from public.paper_submissions p
+join public.registrations r on r.id = p.registration_id;
+
+revoke all on public.admin_papers_detail from anon, authenticated;
+```
+
+The app degrades gracefully if the table and view are absent: the dashboard and team detail show "no paper yet", the Teams list shows every team as `none` under the Semifinal round, and the Semifinal submissions list shows an inline "run the Step 21 SQL" notice.
+
+---
+
+## Step 22 — Test paper submissions — **development only, safe to delete**
+
+Three independent scripts. Run **22a** and/or **22b** to seed a fake semifinalist, and **22c** to remove them. Each seed script is self-contained — you can run one without the other.
+
+| Script | Team | Competition | Paper round |
+|---|---|---|---|
+| **22a** | `ZZ TEST — Healthineer` | healthineer | paper **+ video** |
+| **22b** | `ZZ TEST — Healthynovation` | healthynovation | paper only |
+| **22c** | — | — | deletes both |
+
+Healthineer is the only competition that collects a video, so running both covers both shapes of the form.
+
+> **These write into the same tables as real entrants.** The fake teams appear in the admin Teams list, the Semifinal list, team counts, and the CSV export. They are named `ZZ TEST — …` so they sort last, and their codes are `NEST2026-TEST-*` rather than real ones — the Step 7 trigger skips generation when `code` is supplied, so **they do not consume a real code number**. Run 22c when you're done.
+
+Both seed scripts need the test account to exist in `auth.users` — sign up with that email first, or the block raises rather than inserting half a fixture. Both are idempotent: re-running updates the same team instead of creating another.
+
+### 22a — Healthineer test team (paper + video)
+
+Team of 3, so it also exercises the members list on the admin team detail page.
+
+```sql
+do $$
+declare
+  v_email text := 'muhfatihzamzami@gmail.com';   -- the test account
+  v_user  uuid;
+  v_reg   uuid;
+begin
+  select id into v_user from auth.users where lower(email) = lower(v_email);
+  if v_user is null then
+    raise exception 'No auth user for %. Sign up with that email first.', v_email;
+  end if;
+
+  insert into public.registrations (
+    code, user_id, competition, team_name, team_size,
+    leader_name, leader_email, leader_phone, leader_student_id,
+    leader_institution, leader_major, leader_confirmation_url,
+    payment_proof_url, submission_url, status
+  ) values (
+    'NEST2026-TEST-HTN', v_user, 'healthineer', 'ZZ TEST — Healthineer', 3,
+    'Test Leader', v_email, '081200000000', '0000000000',
+    'Test University', 'Test Major', 'https://example.com/confirmation',
+    'https://example.com/payment', 'https://example.com/abstract', 'verified'
+  )
+  on conflict (user_id, competition) do update
+    set team_name = excluded.team_name
+  returning id into v_reg;
+
+  -- team_size 3 means two non-leader members; without them the team detail
+  -- page shows a team of three with nobody in it.
+  insert into public.team_members (
+    registration_id, member_index, name, email, phone,
+    student_id, institution, major, confirmation_url
+  )
+  select v_reg, i, 'Test Member ' || i, 'test.member' || i || '@example.com',
+         '081200000000', '000000000' || i, 'Test University', 'Test Major',
+         'https://example.com/confirmation'
+  from generate_series(1, 2) as i
+  on conflict (registration_id, member_index) do nothing;
+
+  insert into public.paper_submissions (registration_id, paper_url, video_url)
+  values (v_reg, 'https://example.com/test-full-paper', 'https://example.com/test-video')
+  on conflict (registration_id) do update
+    set paper_url  = excluded.paper_url,
+        video_url  = excluded.video_url,
+        updated_at = now();
+
+  raise notice 'Seeded Healthineer test team % for %', v_reg, v_email;
+end$$;
+```
+
+### 22b — Healthynovation test team (paper only)
+
+Team of 1, the smallest a Healthynovation team may be, so no member rows are needed. `video_url` stays null — the form does not collect one for this competition.
+
+```sql
+do $$
+declare
+  v_email text := 'muhfatihzamzami@gmail.com';   -- the test account
+  v_user  uuid;
+  v_reg   uuid;
+begin
+  select id into v_user from auth.users where lower(email) = lower(v_email);
+  if v_user is null then
+    raise exception 'No auth user for %. Sign up with that email first.', v_email;
+  end if;
+
+  insert into public.registrations (
+    code, user_id, competition, team_name, team_size,
+    leader_name, leader_email, leader_phone, leader_student_id,
+    leader_institution, leader_major, leader_confirmation_url,
+    payment_proof_url, submission_url, status
+  ) values (
+    'NEST2026-TEST-HNV', v_user, 'healthynovation', 'ZZ TEST — Healthynovation', 1,
+    'Test Leader', v_email, '081200000000', 'N/A',
+    'Test School', null, 'https://example.com/confirmation',
+    'https://example.com/payment', 'https://example.com/abstract', 'verified'
+  )
+  on conflict (user_id, competition) do update
+    set team_name = excluded.team_name
+  returning id into v_reg;
+
+  insert into public.paper_submissions (registration_id, paper_url, video_url)
+  values (v_reg, 'https://example.com/test-full-paper', null)
+  on conflict (registration_id) do update
+    set paper_url  = excluded.paper_url,
+        video_url  = excluded.video_url,
+        updated_at = now();
+
+  raise notice 'Seeded Healthynovation test team % for %', v_reg, v_email;
+end$$;
+```
+
+### 22c — Delete the test data
+
+The `NEST2026-TEST-` prefix can never match a real entrant, whose codes are `NEST2026-HTN-…` / `NEST2026-HNV-…` / `NEST2026-MDH-…`.
+
+**Remove the test teams entirely** — `on delete cascade` takes their members and papers with them:
+
+```sql
+delete from public.registrations where code like 'NEST2026-TEST-%';
+```
+
+**Or clear just the test papers**, keeping the fake teams so you can submit again through the dashboard form:
+
+```sql
+delete from public.paper_submissions
+where registration_id in (
+  select id from public.registrations where code like 'NEST2026-TEST-%'
+);
+```
+
+Either can be narrowed to one competition by using the full code — `'NEST2026-TEST-HTN'` or `'NEST2026-TEST-HNV'` — in place of the `like` pattern.
+

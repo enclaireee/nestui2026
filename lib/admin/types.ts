@@ -45,6 +45,36 @@ export interface AdminSubmissionDetail {
   submitted_at: string;
 }
 
+// One row of the `paper_submissions` table — a team's paper for the round that
+// follows selection. At most one per team; re-submitting replaces it.
+// `video_url` is Healthineer-only and null for Healthynovation.
+export interface PaperSubmissionRow {
+  id: string;
+  registration_id: string;
+  paper_url: string;
+  video_url: string | null;
+  status: "pending" | "verified" | "rejected";
+  submitted_at: string;
+  updated_at: string;
+}
+
+// One row of the admin_papers_detail view: every paper across all teams, with
+// the owning team's identifying columns so the Semifinal list can sort/search
+// on its own. `video_url` is Healthineer-only.
+export interface AdminPaperDetail {
+  paper_id: string;
+  registration_id: string;
+  code: string;
+  team_name: string;
+  competition: CompetitionId;
+  leader_email: string;
+  paper_url: string;
+  video_url: string | null;
+  status: "pending" | "verified" | "rejected";
+  submitted_at: string;
+  updated_at: string;
+}
+
 // One row of the admin_registrations_detail view (registration + members[]).
 export interface AdminRegistration {
   id: string;
