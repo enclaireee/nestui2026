@@ -2,12 +2,18 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { COMPETITIONS } from "@/lib/registrations/config";
-import type { AdminRegistration, MemberRow, SubmissionRow } from "@/lib/admin/types";
+import { COMPETITIONS, paperPhase } from "@/lib/registrations/config";
+import type {
+  AdminRegistration,
+  MemberRow,
+  PaperSubmissionRow,
+  SubmissionRow,
+} from "@/lib/admin/types";
 import { StatusBadge } from "@/components/status-badge";
 import { LinkRow } from "@/components/link-row";
+import { Reveal } from "@/components/reveal";
 import { GENERAL_CONTACT } from "@/lib/contacts";
 
 // The plain `registrations` table row (unlike admin_registrations_detail) has no `members` join.
@@ -58,9 +64,11 @@ function buildEntries(reg: Registration, extra: SubmissionRow[]): Entry[] {
 async function DashboardContent({
   searchParams,
 }: {
-  searchParams: Promise<{ submitted?: string }>;
+  searchParams: Promise<{ submitted?: string; paper?: string }>;
 }) {
-  const submitted = (await searchParams).submitted === "1";
+  const sp = await searchParams;
+  const submitted = sp.submitted === "1";
+  const paperSubmitted = sp.paper === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -76,15 +84,18 @@ async function DashboardContent({
 
   const membersByReg = new Map<string, MemberRow[]>();
   const subsByReg = new Map<string, SubmissionRow[]>();
+  const paperByReg = new Map<string, PaperSubmissionRow>();
   if (registrations.length) {
     const ids = registrations.map((r) => r.id);
 
     // Independent queries — no reason to pay two round-trips in series.
     // `submissions` may not exist until the Step 15 migration is run, so its
     // absence is tolerated rather than thrown.
-    const [{ data: members }, { data: subs }] = await Promise.all([
+    // `paper_submissions` likewise may not exist until the Step 21 migration.
+    const [{ data: members }, { data: subs }, { data: papers }] = await Promise.all([
       supabase.from("team_members").select("*").in("registration_id", ids).order("member_index"),
       supabase.from("submissions").select("*").in("registration_id", ids),
+      supabase.from("paper_submissions").select("*").in("registration_id", ids),
     ]);
 
     for (const m of (members as MemberRow[] | null) ?? []) {
@@ -97,6 +108,10 @@ async function DashboardContent({
       const list = subsByReg.get(s.registration_id) ?? [];
       list.push(s);
       subsByReg.set(s.registration_id, list);
+    }
+
+    for (const pp of (papers as PaperSubmissionRow[] | null) ?? []) {
+      paperByReg.set(pp.registration_id, pp);
     }
   }
 
@@ -127,6 +142,16 @@ async function DashboardContent({
         </p>
       )}
 
+      {paperSubmitted && (
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-brand-lime/30 bg-brand-lime/10 px-4 py-3 text-sm font-semibold text-brand-lime"
+        >
+          <Check className="h-4 w-4 shrink-0 stroke-[3]" />
+          Paper received. It&apos;s listed below and now waiting for review.
+        </p>
+      )}
+
       {registrations.length === 0 ? (
         <EmptyState />
       ) : (
@@ -134,6 +159,7 @@ async function DashboardContent({
           {registrations.map((reg) => (
             <div key={reg.id} className="flex flex-col gap-4">
               <TeamCard reg={reg} members={membersByReg.get(reg.id) ?? []} />
+              <PaperRound reg={reg} paper={paperByReg.get(reg.id) ?? null} />
               <Submissions
                 registrationId={reg.id}
                 entries={buildEntries(reg, subsByReg.get(reg.id) ?? [])}
@@ -269,6 +295,121 @@ function Submissions({
   );
 }
 
+const WIB_DATE: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Asia/Jakarta",
+};
+
+// The round that follows selection. Only rendered for competitions that have
+// one — Medhack's `paperSubmission` is null, so it never shows there.
+//
+// The congratulatory framing is gated on a *verified* registration. There is no
+// semifinalist flag in the schema, so "verified" (payment confirmed) is the
+// closest available signal — teams still pending or rejected get neutral
+// wording instead of being told they advanced.
+function PaperRound({
+  reg,
+  paper,
+}: {
+  reg: Registration;
+  paper: PaperSubmissionRow | null;
+}) {
+  const cfg = COMPETITIONS[reg.competition];
+  const window = cfg?.paperSubmission;
+  if (!window) return null;
+
+  const phase = paperPhase(reg.competition);
+  const cleared = reg.status === "verified";
+  const deliverable = window.video ? "full paper and video" : "full paper";
+  const opens = new Date(`${window.opens}T00:00:00+07:00`).toLocaleDateString("en-GB", WIB_DATE);
+  const closes = new Date(`${window.closes}T23:59:59+07:00`).toLocaleDateString("en-GB", WIB_DATE);
+
+  // Once the paper is in, the card stops celebrating and becomes a receipt.
+  const submitted = Boolean(paper);
+
+  return (
+    <Reveal className="overflow-hidden rounded-2xl border border-brand-lime/25 bg-brand-lime/[0.04]">
+      <div className="p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h2
+            className={`text-gradient-brand text-2xl font-bold leading-tight sm:text-3xl ${
+              submitted ? "" : "drop-shadow-[0_2px_12px_rgb(var(--brand-lime)/0.25)]"
+            }`}
+          >
+            Semifinal
+          </h2>
+          {paper && <StatusBadge status={paper.status} />}
+        </div>
+
+        <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-white/70">
+          <FileText className="h-4 w-4 shrink-0 text-brand-lime" />
+          {window.video ? "Full paper & video" : "Full paper"}
+        </p>
+
+        {/* Congratulations only before submitting — afterwards this is a receipt. */}
+        {!submitted && phase !== "closed" && (
+          <p className="mt-4 text-base leading-relaxed text-white/80">
+            {cleared ? (
+              <>
+                <span className="font-bold text-brand-lime">Congratulations</span> — you&apos;re
+                through to the semifinal.{" "}
+              </>
+            ) : null}
+            {phase === "before"
+              ? `Submission for your ${deliverable} opens ${opens}.`
+              : `Submit your ${deliverable} by ${closes}, 23:59 WIB.`}
+          </p>
+        )}
+
+        {submitted && (
+          <p className="mt-3 text-sm leading-relaxed text-white/60">
+            Received{" "}
+            {new Date(paper!.submitted_at).toLocaleDateString("en-GB", WIB_DATE)}
+            {paper!.updated_at !== paper!.submitted_at && " · replaced since"}. We&apos;ll be in
+            touch after review.
+          </p>
+        )}
+
+        {phase === "closed" && !submitted && (
+          <p className="mt-4 text-base leading-relaxed text-white/70">
+            Submission closed {closes}, 23:59 WIB. Nothing was received from your team — email{" "}
+            {GENERAL_CONTACT.email} if that&apos;s wrong.
+          </p>
+        )}
+
+        {paper && (
+          <div className="mt-4 flex flex-col gap-1.5 text-sm">
+            <LinkRow label="Full paper" href={paper.paper_url} />
+            {window.video && <LinkRow label="Video" href={paper.video_url ?? ""} />}
+          </div>
+        )}
+
+        {phase === "open" &&
+          (submitted ? (
+            <Link
+              href={`/protected/paper/${reg.id}`}
+              className="mt-4 inline-flex min-h-11 w-fit items-center text-sm font-semibold text-white/55 underline underline-offset-4 transition-colors hover:text-brand-lime"
+            >
+              Replace paper
+            </Link>
+          ) : (
+            <Link href={`/protected/paper/${reg.id}`} className="btn-brand mt-5 w-fit px-6 py-2.5 text-sm">
+              Submit {window.video ? "paper & video" : "paper"}
+            </Link>
+          ))}
+
+        {phase === "before" && !submitted && (
+          <p className="mt-3 text-xs text-white/45">
+            The form opens here once the window starts.
+          </p>
+        )}
+      </div>
+    </Reveal>
+  );
+}
+
 // A bare status word tells a participant nothing about what happens next, and
 // "rejected" with no explanation and no route forward is the worst of the three.
 const STATUS_HELP: Record<string, string> = {
@@ -317,7 +458,7 @@ function EntryCard({ entry, index }: { entry: Entry; index: number }) {
 export default function ProtectedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ submitted?: string }>;
+  searchParams: Promise<{ submitted?: string; paper?: string }>;
 }) {
   // The promise is handed down rather than awaited here: awaiting it in the
   // page body would put request-time data outside the boundary and block the

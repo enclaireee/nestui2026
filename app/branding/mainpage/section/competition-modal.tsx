@@ -418,10 +418,21 @@ export function CompetitionModal({
             <BookOpen className="h-5 w-5" />
             Guidebook
           </a>
-          <Link href={registerHref} className="btn-brand py-3.5 text-sm">
-            Register
-            <ArrowRight className="h-5 w-5 stroke-[3]" />
-          </Link>
+          {activeFee ? (
+            <Link href={registerHref} className="btn-brand py-3.5 text-sm">
+              Register
+              <ArrowRight className="h-5 w-5 stroke-[3]" />
+            </Link>
+          ) : (
+            // No live fee tier means the server action rejects the submission,
+            // so the entry point is disabled rather than leading to a dead end.
+            <span
+              aria-disabled="true"
+              className="flex cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-white/[0.06] py-3.5 text-sm font-bold text-white/40 ring-1 ring-white/10"
+            >
+              Registration closed
+            </span>
+          )}
         </div>
       </div>
     </div>

@@ -4,7 +4,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const DEADLINE = new Date("2026-08-25T23:59:00+07:00");
+// The countdown's on/off switch. true counts down to COUNTDOWN below; false
+// swaps in the "registration has closed" section instead. Both states are kept
+// in place, so switching rounds (or shutting the countdown off once the final
+// deliverable is in) is this one flip plus the COUNTDOWN values.
+const SHOW_COUNTDOWN = true;
+
+// The deadline the countdown runs to when enabled. The display date is written
+// out rather than derived from the ISO string on purpose: this component
+// prerenders, and toLocaleDateString across server and client is a hydration
+// mismatch waiting to happen. Keep both in step with whichever window in
+// lib/registrations/config.ts actually gates submission — currently the paper
+// round's `closes` (2026-09-13).
+const COUNTDOWN = { iso: "2026-09-13T23:59:00+07:00", date: "13 September 2026" };
+
+const DEADLINE = SHOW_COUNTDOWN ? new Date(COUNTDOWN.iso) : null;
 
 type Remaining = { days: number; hours: number; minutes: number };
 
@@ -17,7 +31,7 @@ function remaining(target: Date): Remaining {
   };
 }
 
-function useCountdown(target: Date): Remaining | null {
+function useCountdown(target: Date | null): Remaining | null {
   // Deliberately NOT seeded from Date.now() in the initializer. This is a client
   // component on a statically prerendered page: reading the clock during render
   // makes the whole hero request-time under `cacheComponents`, which would push
@@ -28,6 +42,7 @@ function useCountdown(target: Date): Remaining | null {
   const [time, setTime] = useState<Remaining | null>(null);
 
   useEffect(() => {
+    if (!target) return;
     const tick = () => setTime(remaining(target));
     tick();
     const id = setInterval(tick, 60_000);
@@ -38,6 +53,15 @@ function useCountdown(target: Date): Remaining | null {
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+// Shown by the closed section. Mirrors the final `until` of each competition's
+// last fee tier in lib/registrations/config.ts — `currentFee` is the real gate,
+// this is just the human-readable record of when each one shut.
+const CLOSED = [
+  { name: "Medhack", closed: "25 August 2026" },
+  { name: "Healthineer", closed: "14 August 2026" },
+  { name: "Healthynovation", closed: "14 August 2026" },
+];
 
 const GLOW = "drop-shadow-[0_2px_12px_rgb(var(--brand-lime)/0.35)]";
 
@@ -93,26 +117,49 @@ export function Hero() {
             NEST UI is the largest series of scientific competitions and festivals facilitated by IME FTUI, serving as a platform to develop the potential of undergraduate and highschool students across Indonesia.
           </p>
 
-          <span className="mt-5 inline-block rounded-full bg-brand-lime px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-green sm:text-sm">
-            Medhack only
-          </span>
+          {SHOW_COUNTDOWN ? (
+            <>
+              <p className={`mt-5 text-2xl font-semibold text-gradient-brand sm:text-3xl md:text-4xl ${GLOW}`}>
+                Semifinal submission closes in
+              </p>
 
-          <p className={`mt-2 text-2xl font-semibold text-gradient-brand sm:text-3xl md:text-4xl ${GLOW}`}>
-            Medhack registration closes in
-          </p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-semibold sm:text-base md:text-lg">
+                <span className="flex items-center gap-1.5 text-gradient-brand">
+                  <CalendarIcon />
+                  {COUNTDOWN.date}
+                </span>
+                <span className="flex items-center gap-1.5 text-gradient-brand">
+                  <ClockIcon />
+                  23:59 WIB
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="mt-5 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-cream/70 ring-1 ring-white/20 sm:text-sm">
+                Closed
+              </span>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-semibold sm:text-base md:text-lg">
-            <span className="flex items-center gap-1.5 text-gradient-brand">
-              <CalendarIcon />
-              25 August 2026
-            </span>
-            <span className="flex items-center gap-1.5 text-gradient-brand">
-              <ClockIcon />
-              23:59 WIB
-            </span>
+              <p className={`mt-2 text-2xl font-semibold text-gradient-brand sm:text-3xl md:text-4xl ${GLOW}`}>
+                Registration has closed
+              </p>
+
+              <p className="mt-3 text-base font-medium leading-relaxed text-brand-cream/70 sm:text-lg">
+                Entries for all three competitions are now closed. Thank you to
+                everyone who registered — see you at the Main Event.
+              </p>
+
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-semibold sm:text-base md:text-lg">
+                <span className="flex items-center gap-1.5 text-gradient-brand">
+                  <CalendarIcon />
+                  Main Event · 3 October 2026
+                </span>
+              </div>
+            </>
+          )}
           </div>
-          </div>
 
+          {SHOW_COUNTDOWN ? (
           <div className="relative -mt-6 aspect-[760/297] w-full">
             {/* Group 701 already includes the blob, colons and floaters. */}
             <Image
@@ -133,6 +180,23 @@ export function Hero() {
             <CountdownBlock value={time && pad(time.hours)} label="Hours" className="absolute left-[49%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
             <CountdownBlock value={time && pad(time.minutes)} label="Minutes" className="absolute left-[77%] top-[44%] z-10 -translate-x-1/2 -translate-y-1/2" />
           </div>
+          ) : (
+          <div className="mt-6 w-full rounded-2xl border border-white/15 bg-white/[0.04] p-5 md:pl-[11.6%]">
+            <p className="text-xs font-black uppercase tracking-wider text-brand-cream/50">
+              Registration closed
+            </p>
+            <ul className="mt-3 flex flex-col gap-2">
+              {CLOSED.map((c) => (
+                <li key={c.name} className="flex items-baseline justify-between gap-4 text-sm sm:text-base">
+                  <span className="font-bold text-brand-cream/80">{c.name}</span>
+                  <span className="shrink-0 font-semibold text-brand-cream/45">
+                    closed {c.closed}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          )}
         </div>
       </div>
 

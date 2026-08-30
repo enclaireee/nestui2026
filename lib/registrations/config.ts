@@ -41,6 +41,22 @@ export interface CompetitionConfig {
   twibbonUrl: string;
   /** Registration fee tiers, earliest first. See `currentFee`. */
   fees: FeeTier[];
+  /**
+   * The post-selection paper round, or null for competitions that don't have
+   * one (Medhack runs a video submission instead). Separate from `fees`: this
+   * round is free, so it must NOT be gated on a fee tier the way the initial
+   * submission is.
+   */
+  paperSubmission: PaperSubmission | null;
+}
+
+export interface PaperSubmission {
+  /** Inclusive first day, `YYYY-MM-DD` in WIB. */
+  opens: string;
+  /** Inclusive last day, `YYYY-MM-DD` in WIB. */
+  closes: string;
+  /** Healthineer collects a video link alongside the paper; Healthynovation doesn't. */
+  video: boolean;
 }
 
 export interface FeeTier {
@@ -77,6 +93,8 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       { label: "Early Bird", amount: 200_000, until: "2026-08-02" },
       { label: "Normal", amount: 220_000, until: "2026-08-25" },
     ],
+    // Medhack's second round is a video submission, not a paper.
+    paperSubmission: null,
   },
   healthineer: {
     id: "healthineer",
@@ -103,6 +121,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       { label: "Early Bird", amount: 175_000, until: "2026-08-02" },
       { label: "Late Registration", amount: 200_000, until: "2026-08-14" },
     ],
+    paperSubmission: { opens: "2026-08-31", closes: "2026-09-13", video: true },
   },
   healthynovation: {
     id: "healthynovation",
@@ -129,6 +148,7 @@ export const COMPETITIONS: Record<CompetitionId, CompetitionConfig> = {
       { label: "Early Bird", amount: 80_000, until: "2026-08-02" },
       { label: "Late Registration", amount: 100_000, until: "2026-08-14" },
     ],
+    paperSubmission: { opens: "2026-08-31", closes: "2026-09-13", video: false },
   },
 };
 
@@ -165,4 +185,23 @@ export function currentFee(id: CompetitionId, now: Date = new Date()): FeeTier |
   return (
     COMPETITIONS[id].fees.find((t) => now <= new Date(`${t.until}T23:59:59+07:00`)) ?? null
   );
+}
+
+/** Where `now` sits relative to a competition's paper round. */
+export type PaperPhase = "none" | "before" | "open" | "closed";
+
+/**
+ * Gate for the paper round. Deliberately NOT `currentFee`: that tracks the
+ * registration fee window, which has already lapsed by the time papers are due
+ * — reusing it would reject every paper.
+ *
+ * Same WIB convention as the fee tiers: opens 00:00:00 on `opens`, shuts after
+ * 23:59:59 on `closes`.
+ */
+export function paperPhase(id: CompetitionId, now: Date = new Date()): PaperPhase {
+  const p = COMPETITIONS[id].paperSubmission;
+  if (!p) return "none";
+  if (now < new Date(`${p.opens}T00:00:00+07:00`)) return "before";
+  if (now > new Date(`${p.closes}T23:59:59+07:00`)) return "closed";
+  return "open";
 }

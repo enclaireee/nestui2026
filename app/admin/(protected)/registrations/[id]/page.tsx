@@ -6,8 +6,9 @@ import type {
   AdminRegistration,
   AdminSubmissionDetail,
   MemberRow,
+  PaperSubmissionRow,
 } from "@/lib/admin/types";
-import { setRegistrationStatus, setSubmissionStatus } from "@/app/admin/actions";
+import { setPaperStatus, setRegistrationStatus, setSubmissionStatus } from "@/app/admin/actions";
 import { StatusBadge } from "@/components/status-badge";
 import { LinkRow } from "@/components/link-row";
 
@@ -21,7 +22,7 @@ export default async function RegistrationDetail({
   // Neither query depends on the other's result — both are keyed off `id`
   // from params — so run them concurrently instead of paying two round trips
   // in serial.
-  const [{ data }, { data: subData }] = await Promise.all([
+  const [{ data }, { data: subData }, { data: paperData }] = await Promise.all([
     supabase.from("admin_registrations_detail").select("*").eq("id", id).maybeSingle(),
     // Every submission for this team — Entry 1 (inline) + resubmissions. If the
     // submissions view isn't present yet, fall back to the inline Entry 1 so
@@ -31,11 +32,15 @@ export default async function RegistrationDetail({
       .select("*")
       .eq("registration_id", id)
       .order("entry_no", { ascending: true }),
+    // The paper round. Absent until the Step 21 migration runs, and null for
+    // teams that haven't submitted one — both render as "nothing yet".
+    supabase.from("paper_submissions").select("*").eq("registration_id", id).maybeSingle(),
   ]);
 
   const reg = data as AdminRegistration | null;
   if (!reg) notFound();
 
+  const paper = paperData as PaperSubmissionRow | null;
   const cfg = COMPETITIONS[reg.competition];
   const entries: AdminSubmissionDetail[] =
     (subData as AdminSubmissionDetail[] | null)?.length
@@ -75,6 +80,34 @@ export default async function RegistrationDetail({
               <PersonCard key={m.id} person={m} hasMajor={cfg?.hasMajor ?? false} labels={cfg} />
             ))}
           </div>
+        </Section>
+      )}
+
+      {cfg?.paperSubmission && (
+        <Section title={`Full paper${cfg.paperSubmission.video ? " & video" : ""}`}>
+          {paper ? (
+            <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs text-white/50">
+                  submitted {new Date(paper.submitted_at).toLocaleString()}
+                  {paper.updated_at !== paper.submitted_at &&
+                    ` · replaced ${new Date(paper.updated_at).toLocaleString()}`}
+                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <StatusBadge status={paper.status} />
+                  <PaperStatusForm paper={paper} registrationId={reg.id} />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 text-sm">
+                <LinkRow label="Full paper" href={paper.paper_url} />
+                {cfg.paperSubmission.video && (
+                  <LinkRow label="Video" href={paper.video_url ?? ""} />
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-white/55">No paper submitted yet.</p>
+          )}
         </Section>
       )}
 
@@ -178,6 +211,37 @@ function StatusForm({
       <select
         name="status"
         defaultValue={entry.status}
+        className="h-11 rounded-lg border border-white/15 bg-brand-green px-2 text-base text-white sm:h-9 sm:text-sm"
+      >
+        <option value="pending">pending</option>
+        <option value="verified">verified</option>
+        <option value="rejected">rejected</option>
+      </select>
+      <button className="min-h-11 rounded-lg bg-white/10 px-4 text-sm font-semibold hover:bg-white/20">
+        Update
+      </button>
+    </form>
+  );
+}
+
+function PaperStatusForm({
+  paper,
+  registrationId,
+}: {
+  paper: PaperSubmissionRow;
+  registrationId: string;
+}) {
+  return (
+    <form
+      action={async (formData: FormData) => {
+        "use server";
+        await setPaperStatus(paper.id, String(formData.get("status")), registrationId);
+      }}
+      className="flex items-center gap-2"
+    >
+      <select
+        name="status"
+        defaultValue={paper.status}
         className="h-11 rounded-lg border border-white/15 bg-brand-green px-2 text-base text-white sm:h-9 sm:text-sm"
       >
         <option value="pending">pending</option>
