@@ -4,11 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, Plus, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { COMPETITIONS, paperPhase } from "@/lib/registrations/config";
+import {
+  COMPETITIONS,
+  FINAL_PPT_DEADLINE,
+  finalPhase,
+  isFinalistTeam,
+  paperPhase,
+} from "@/lib/registrations/config";
 import type {
   AdminRegistration,
   MemberRow,
   PaperSubmissionRow,
+  PresentationSubmissionRow,
   SubmissionRow,
 } from "@/lib/admin/types";
 import { StatusBadge } from "@/components/status-badge";
@@ -64,11 +71,12 @@ function buildEntries(reg: Registration, extra: SubmissionRow[]): Entry[] {
 async function DashboardContent({
   searchParams,
 }: {
-  searchParams: Promise<{ submitted?: string; paper?: string }>;
+  searchParams: Promise<{ submitted?: string; paper?: string; ppt?: string }>;
 }) {
   const sp = await searchParams;
   const submitted = sp.submitted === "1";
   const paperSubmitted = sp.paper === "1";
+  const pptSubmitted = sp.ppt === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -85,17 +93,19 @@ async function DashboardContent({
   const membersByReg = new Map<string, MemberRow[]>();
   const subsByReg = new Map<string, SubmissionRow[]>();
   const paperByReg = new Map<string, PaperSubmissionRow>();
+  const presentationByReg = new Map<string, PresentationSubmissionRow>();
+
   if (registrations.length) {
     const ids = registrations.map((r) => r.id);
 
-    // Independent queries — no reason to pay two round-trips in series.
-    // `submissions` may not exist until the Step 15 migration is run, so its
-    // absence is tolerated rather than thrown.
-    // `paper_submissions` likewise may not exist until the Step 21 migration.
-    const [{ data: members }, { data: subs }, { data: papers }] = await Promise.all([
+    // Independent queries — no reason to pay round-trips in series.
+    // `submissions`, `paper_submissions`, and `presentation_submissions`
+    // degrade gracefully if migrations have not run yet.
+    const [{ data: members }, { data: subs }, { data: papers }, { data: ppts }] = await Promise.all([
       supabase.from("team_members").select("*").in("registration_id", ids).order("member_index"),
       supabase.from("submissions").select("*").in("registration_id", ids),
       supabase.from("paper_submissions").select("*").in("registration_id", ids),
+      supabase.from("presentation_submissions").select("*").in("registration_id", ids),
     ]);
 
     for (const m of (members as MemberRow[] | null) ?? []) {
@@ -112,6 +122,10 @@ async function DashboardContent({
 
     for (const pp of (papers as PaperSubmissionRow[] | null) ?? []) {
       paperByReg.set(pp.registration_id, pp);
+    }
+
+    for (const pt of (ppts as PresentationSubmissionRow[] | null) ?? []) {
+      presentationByReg.set(pt.registration_id, pt);
     }
   }
 
@@ -152,20 +166,43 @@ async function DashboardContent({
         </p>
       )}
 
+      {pptSubmitted && (
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-brand-lime/30 bg-brand-lime/10 px-4 py-3 text-sm font-semibold text-brand-lime"
+        >
+          <Check className="h-4 w-4 shrink-0 stroke-[3]" />
+          Presentation deck received. It&apos;s listed below and ready for the Grand Final review.
+        </p>
+      )}
+
       {registrations.length === 0 ? (
         <EmptyState />
       ) : (
         <div className="flex flex-col gap-10">
-          {registrations.map((reg) => (
-            <div key={reg.id} className="flex flex-col gap-4">
-              <TeamCard reg={reg} members={membersByReg.get(reg.id) ?? []} />
-              <PaperRound reg={reg} paper={paperByReg.get(reg.id) ?? null} />
-              <Submissions
-                registrationId={reg.id}
-                entries={buildEntries(reg, subsByReg.get(reg.id) ?? [])}
-              />
-            </div>
-          ))}
+          {registrations.map((reg) => {
+            const isFinalist = isFinalistTeam(reg.code, reg.is_finalist);
+            return (
+              <div key={reg.id} className="flex flex-col gap-4">
+                <TeamCard reg={reg} members={membersByReg.get(reg.id) ?? []} />
+                {isFinalist && (
+                  <FinalistRound
+                    reg={reg}
+                    presentation={presentationByReg.get(reg.id) ?? null}
+                  />
+                )}
+                <PaperRound
+                  reg={reg}
+                  paper={paperByReg.get(reg.id) ?? null}
+                  isFinalist={isFinalist}
+                />
+                <Submissions
+                  registrationId={reg.id}
+                  entries={buildEntries(reg, subsByReg.get(reg.id) ?? [])}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
     </section>
@@ -302,19 +339,104 @@ const WIB_DATE: Intl.DateTimeFormatOptions = {
   timeZone: "Asia/Jakarta",
 };
 
+function FinalistRound({
+  reg,
+  presentation,
+}: {
+  reg: Registration;
+  presentation: PresentationSubmissionRow | null;
+}) {
+  const phase = finalPhase();
+  const submitted = Boolean(presentation);
+  const deadlineStr = new Date(FINAL_PPT_DEADLINE).toLocaleDateString("en-GB", WIB_DATE);
+
+  return (
+    <Reveal className="overflow-hidden rounded-2xl border border-brand-lime/40 bg-brand-lime/[0.08] shadow-[0_0_35px_rgba(209,255,0,0.08)]">
+      <div className="p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-brand-lime px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-teal">
+                Finalist
+              </span>
+              <h2 className="text-gradient-brand text-2xl font-bold leading-tight sm:text-3xl drop-shadow-[0_2px_12px_rgb(var(--brand-lime)/0.3)]">
+                Grand Final (H-3)
+              </h2>
+            </div>
+            <p className="mt-1.5 flex items-center gap-2 text-sm font-semibold text-white/80">
+              <FileText className="h-4 w-4 shrink-0 text-brand-lime" />
+              Presentation Deck (PPT / Google Slides)
+            </p>
+          </div>
+          {presentation ? (
+            <StatusBadge status={presentation.status} />
+          ) : (
+            <span className="rounded-full border border-brand-lime/30 bg-brand-lime/10 px-3 py-1 text-xs font-semibold text-brand-lime">
+              Awaiting Upload
+            </span>
+          )}
+        </div>
+
+        {!submitted && phase !== "closed" && (
+          <p className="mt-4 text-base leading-relaxed text-white/90">
+            <span className="font-bold text-brand-lime">Congratulations!</span> Your team has officially advanced to the Grand Final of NEST 2026. Please upload your presentation deck (Google Drive / Google Slides link) by{" "}
+            <span className="font-semibold text-white">{deadlineStr}, 23:59 WIB</span>.
+          </p>
+        )}
+
+        {submitted && (
+          <p className="mt-3 text-sm leading-relaxed text-white/70">
+            Presentation deck received on{" "}
+            <span className="font-medium text-white">
+              {new Date(presentation!.submitted_at).toLocaleDateString("en-GB", WIB_DATE)}
+            </span>
+            {presentation!.updated_at !== presentation!.submitted_at && " · replaced since"}. We look forward to your presentation at the Main Event on 3 October 2026!
+          </p>
+        )}
+
+        {phase === "closed" && !submitted && (
+          <p className="mt-4 text-base leading-relaxed text-white/70">
+            Presentation submission closed on {deadlineStr}, 23:59 WIB. If you need assistance, please contact {GENERAL_CONTACT.email}.
+          </p>
+        )}
+
+        {presentation && (
+          <div className="mt-4 flex flex-col gap-1.5 text-sm">
+            <LinkRow label="Presentation deck (PPT / Slides)" href={presentation.ppt_url} />
+          </div>
+        )}
+
+        {phase === "open" &&
+          (submitted ? (
+            <Link
+              href={`/protected/presentation/${reg.id}`}
+              className="mt-4 inline-flex min-h-11 w-fit items-center text-sm font-semibold text-white/70 underline underline-offset-4 transition-colors hover:text-brand-lime"
+            >
+              Replace presentation deck
+            </Link>
+          ) : (
+            <Link
+              href={`/protected/presentation/${reg.id}`}
+              className="btn-brand mt-5 inline-flex w-fit items-center gap-2 px-6 py-2.5 text-sm shadow-lg shadow-brand-lime/20"
+            >
+              Submit presentation (PPT)
+            </Link>
+          ))}
+      </div>
+    </Reveal>
+  );
+}
+
 // The round that follows selection. Only rendered for competitions that have
 // one — Medhack's `paperSubmission` is null, so it never shows there.
-//
-// The congratulatory framing is gated on a *verified* registration. There is no
-// semifinalist flag in the schema, so "verified" (payment confirmed) is the
-// closest available signal — teams still pending or rejected get neutral
-// wording instead of being told they advanced.
 function PaperRound({
   reg,
   paper,
+  isFinalist,
 }: {
   reg: Registration;
   paper: PaperSubmissionRow | null;
+  isFinalist: boolean;
 }) {
   const cfg = COMPETITIONS[reg.competition];
   const window = cfg?.paperSubmission;
@@ -328,6 +450,7 @@ function PaperRound({
 
   // Once the paper is in, the card stops celebrating and becomes a receipt.
   const submitted = Boolean(paper);
+  const notQualified = submitted && !isFinalist;
 
   return (
     <Reveal className="overflow-hidden rounded-2xl border border-brand-lime/25 bg-brand-lime/[0.04]">
@@ -340,7 +463,11 @@ function PaperRound({
           >
             Semifinal
           </h2>
-          {paper && <StatusBadge status={paper.status} />}
+          {paper && (
+            <StatusBadge
+              status={isFinalist ? "verified" : paper.status === "verified" ? "verified" : "rejected"}
+            />
+          )}
         </div>
 
         <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-white/70">
@@ -363,13 +490,32 @@ function PaperRound({
           </p>
         )}
 
-        {submitted && (
-          <p className="mt-3 text-sm leading-relaxed text-white/60">
+        {submitted && isFinalist && (
+          <p className="mt-3 text-sm leading-relaxed text-white/80">
             Received{" "}
             {new Date(paper!.submitted_at).toLocaleDateString("en-GB", WIB_DATE)}
-            {paper!.updated_at !== paper!.submitted_at && " · replaced since"}. We&apos;ll be in
-            touch after review.
+            {paper!.updated_at !== paper!.submitted_at && " · replaced since"}.{" "}
+            <span className="font-semibold text-brand-lime">Verified</span> — your team has advanced to the Grand Final!
           </p>
+        )}
+
+        {submitted && notQualified && (
+          <div className="mt-3 flex flex-col gap-2">
+            <p className="text-sm leading-relaxed text-white/60">
+              Received{" "}
+              {new Date(paper!.submitted_at).toLocaleDateString("en-GB", WIB_DATE)}
+              {paper!.updated_at !== paper!.submitted_at && " · replaced since"}.
+            </p>
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-sm leading-relaxed text-white/75">
+              <p className="font-semibold text-white/95">Grand Final Announcement</p>
+              <p className="mt-1 text-white/70">
+                Finalists for the Grand Final have been announced. While your team did not qualify to advance to the finals this year, the NEST 2026 committee deeply appreciates your hard work, dedication, and participation. If you need a participation certificate or have any questions, please contact{" "}
+                <a href={`mailto:${GENERAL_CONTACT.email}`} className="text-brand-lime underline">
+                  {GENERAL_CONTACT.email}
+                </a>.
+              </p>
+            </div>
+          </div>
         )}
 
         {phase === "closed" && !submitted && (
@@ -458,7 +604,7 @@ function EntryCard({ entry, index }: { entry: Entry; index: number }) {
 export default function ProtectedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ submitted?: string; paper?: string }>;
+  searchParams: Promise<{ submitted?: string; paper?: string; ppt?: string }>;
 }) {
   // The promise is handed down rather than awaited here: awaiting it in the
   // page body would put request-time data outside the boundary and block the

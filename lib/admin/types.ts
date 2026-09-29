@@ -98,7 +98,33 @@ export interface AdminRegistration {
   status: "pending" | "verified" | "rejected";
   submitted_at: string;
   created_at: string;
+  is_finalist?: boolean;
   members: MemberRow[];
+}
+
+// One row of the `presentation_submissions` table — a finalist team's presentation deck (PPT/slides).
+// At most one per team; re-submitting replaces it.
+export interface PresentationSubmissionRow {
+  id: string;
+  registration_id: string;
+  ppt_url: string;
+  status: "pending" | "verified" | "rejected";
+  submitted_at: string;
+  updated_at: string;
+}
+
+// One row of the admin_presentations_detail view: every finalist presentation deck across all teams.
+export interface AdminPresentationDetail {
+  presentation_id: string;
+  registration_id: string;
+  code: string;
+  team_name: string;
+  competition: CompetitionId;
+  leader_email: string;
+  ppt_url: string;
+  status: "pending" | "verified" | "rejected";
+  submitted_at: string;
+  updated_at: string;
 }
 
 // Remove PostgREST filter metacharacters so a search term can't alter the

@@ -1,13 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminAuthed } from "@/lib/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { COMPETITIONS, isCompetitionId } from "@/lib/registrations/config";
+import { COMPETITIONS, isCompetitionId, isFinalistTeam } from "@/lib/registrations/config";
 import { csvSafe } from "@/lib/sanitize";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import type {
   AdminRegistration,
   AdminSubmissionDetail,
   PaperSubmissionRow,
+  PresentationSubmissionRow,
 } from "@/lib/admin/types";
 
 // One row per team (leader + members flattened into columns), followed by every
@@ -62,6 +63,12 @@ export async function GET(request: NextRequest) {
   const { data: paperData } = await supabase.from("paper_submissions").select("*");
   for (const pp of (paperData as PaperSubmissionRow[] | null) ?? [])
     paperByReg.set(pp.registration_id, pp);
+
+  // The finalist presentation round, keyed by registration. Absent until Step 24.
+  const presentationByReg = new Map<string, PresentationSubmissionRow>();
+  const { data: presentationData } = await supabase.from("presentation_submissions").select("*");
+  for (const pt of (presentationData as PresentationSubmissionRow[] | null) ?? [])
+    presentationByReg.set(pt.registration_id, pt);
 
   const entriesFor = (r: AdminRegistration): AdminSubmissionDetail[] =>
     byReg.get(r.id) ?? [
@@ -121,6 +128,7 @@ export async function GET(request: NextRequest) {
     );
   }
   header.push("Paper_Status", "Paper_SubmittedAt", "Paper_Url", "Paper_VideoUrl");
+  header.push("Is_Finalist", "Final_PPT_Status", "Final_PPT_SubmittedAt", "Final_PPT_Url");
 
   const lines = [header.map(csvSafe).join(",")];
   for (const r of teams) {
@@ -167,6 +175,14 @@ export async function GET(request: NextRequest) {
       paper?.submitted_at ?? "",
       paper?.paper_url ?? "",
       paper?.video_url ?? "",
+    );
+    const ppt = presentationByReg.get(r.id);
+    const isFinalist = isFinalistTeam(r.code, r.is_finalist);
+    cells.push(
+      isFinalist ? "true" : "false",
+      ppt?.status ?? "",
+      ppt?.submitted_at ?? "",
+      ppt?.ppt_url ?? "",
     );
     lines.push(cells.map(csvSafe).join(","));
   }

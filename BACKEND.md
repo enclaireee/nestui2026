@@ -554,7 +554,7 @@ Serverless (Vercel) spins up many short-lived instances, each opening its own Po
 - **Supabase Dashboard → Project Settings → Database → Connection string / Pooling.** Use the pooler host on port **6543** (transaction mode) for the app.
 - The Supabase JS client this app uses (`@supabase/supabase-js` over the REST/`NEXT_PUBLIC_SUPABASE_URL` endpoint) already goes through Supabase's connection management — you only need to switch to the pooled connection string if/when you add a **direct Postgres** connection (an ORM, a migration tool, an external worker). Use `:6543` for those; keep `:5432` only for one-off migrations that need a session (e.g. `prisma migrate`).
 
-                              
+
 ---
 
 ## Step 18 — (Optional) Audit log for admin mutations
@@ -1128,3 +1128,304 @@ where registration_id in (
 
 Either can be narrowed to one competition by using the full code — `'NEST2026-TEST-HTN'` or `'NEST2026-TEST-HNV'` — in place of the `like` pattern.
 
+
+---
+
+## Step 23 — Medhack cancelled: move its teams to Healthineer — **one-off, run once**
+
+Medhack was cancelled after registration closed. Its teams are moved to Healthineer rather than dropped, so their submissions, members and payment records stay intact — `team_members`, `submissions` and `paper_submissions` all key off `registration_id`, not the competition, so they follow the team with no further work.
+
+Both competitions allow a team size of 3–5, so no row can violate `team_size_range` on the way across. What *can* fail are the two uniqueness rules from Step 4: a team whose leader already has a Healthineer entry (`uq_reg_user_competition`), or whose leader email is already used by a Healthineer team (`uq_reg_comp_leader_email`). Run 23a first; it names any such row before the update touches anything.
+
+**Two things change in the app the moment 23b commits:**
+- Healthineer has a paper round (`paperSubmission` in `lib/registrations/config.ts`) and Medhack did not. Every moved team that is `verified` immediately sees the Semifinal card and, while `paperPhase()` is `open`, the paper + video form. Check the window's `closes` date before running this.
+- "Submit again" stays closed for them either way — `currentFee('healthineer')` lapsed on 2026-08-14.
+
+The `medhack` enum value is deliberately left in `competition_type`. Dropping a value from a Postgres enum means rebuilding the type, and nothing is gained: with no rows referencing it, it is inert.
+
+### 23a — Check for conflicts first
+
+Returns one row per Medhack team. Every `user_clash` and `email_clash` must read `false`. If one reads `true`, that team has to be resolved by hand (merge or rename the leader email) before 23b — otherwise the whole update aborts and nothing moves.
+
+```sql
+select
+  r.code,
+  r.team_name,
+  r.leader_email,
+  exists (
+    select 1 from public.registrations h
+     where h.competition = 'healthineer' and h.user_id = r.user_id
+  ) as user_clash,
+  exists (
+    select 1 from public.registrations h
+     where h.competition = 'healthineer' and lower(h.leader_email) = lower(r.leader_email)
+  ) as email_clash
+from public.registrations r
+where r.competition = 'medhack'
+order by r.code;
+```
+
+### 23b — The move
+
+One statement, one transaction: either every Medhack team moves or none does. Registration for Medhack closed on 2026-08-25, so no new row can appear behind this.
+
+```sql
+update public.registrations
+   set competition = 'healthineer'
+ where competition = 'medhack';
+```
+
+### Verify
+
+```sql
+-- should be 0
+select count(*) from public.registrations where competition = 'medhack';
+
+-- the moved teams, now under Healthineer (codes still read MDH — see 23c)
+select code, team_name, team_size, status, leader_email
+from public.registrations
+where competition = 'healthineer' and code like 'NEST2026-MDH-%'
+order by code;
+```
+
+### 23c — (Optional) Renumber the codes into the HTN sequence
+
+Skip this unless the `MDH` prefix is actually a problem. The teams have been told their code, it appears on their dashboard, and nothing in the app parses the prefix — renumbering means telling four teams their code changed. It is listed only because the Step 7 trigger fires `before insert` and so does **not** regenerate a code on update.
+
+Each moved team takes the next number from `reg_seq_healthineer`, in registration order, so the new codes slot in after the existing Healthineer ones instead of colliding with them.
+
+```sql
+update public.registrations r
+   set code = 'NEST2026-HTN-' || lpad(nextval('reg_seq_healthineer')::text, 4, '0')
+  from (
+    select id from public.registrations
+     where competition = 'healthineer' and code like 'NEST2026-MDH-%'
+     order by submitted_at
+  ) as ordered
+ where r.id = ordered.id;
+```
+
+### Rollback
+
+Only valid while the moved teams still carry their `NEST2026-MDH-` codes — i.e. if 23c has **not** been run. After 23c there is nothing left in the row that says where it came from.
+
+```sql
+update public.registrations
+   set competition = 'medhack'
+ where competition = 'healthineer' and code like 'NEST2026-MDH-%';
+```
+
+---
+
+## Step 24 — Finalist presentation (PPT) submission — H-3
+
+For the Grand Final, **11 finalist teams** (5 in Healthynovation, 6 in Healthineer) submit their presentation deck (Google Drive / Slides link).
+
+The finalist teams are:
+- **Healthynovation (5)**:
+  - `NEST2026-HNV-0010`: BioNexaS
+  - `NEST2026-HNV-0007`: NexThera
+  - `NEST2026-HNV-0022`: AERIS
+  - `NEST2026-HNV-0030`: GLUCOSENSE
+  - `NEST2026-HNV-0034`: H-3
+- **Healthineer (6)**:
+  - `NEST2026-HTN-0015`: Mama aku mw ke jkt
+  - `NEST2026-HTN-0003`: Garden House
+  - `NEST2026-HTN-0007`: Pilar Kehidupan
+  - `NEST2026-HTN-0005`: Say Wallahi
+  - `NEST2026-HTN-0006`: Posture Rangers
+  - `NEST2026-HTN-0013`: Adalah Pokoknya
+
+> **Run this block once in the Supabase SQL editor.** It creates the `presentation_submissions` table, adds `is_finalist` to `registrations`, updates `admin_registrations_detail`, creates the RPCs and view for admin review, and sets the finalist status flags.
+
+### 24a — Table and RLS
+
+```sql
+-- 1. Add is_finalist flag to registrations table
+alter table public.registrations
+  add column if not exists is_finalist boolean not null default false;
+
+-- 2. Create presentation_submissions table
+create table if not exists public.presentation_submissions (
+  id              uuid primary key default gen_random_uuid(),
+  registration_id uuid not null unique references public.registrations(id) on delete cascade,
+  ppt_url         text not null,
+  status          registration_status not null default 'pending',
+  submitted_at    timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
+  constraint chk_ppt_url_not_empty check (trim(ppt_url) <> '')
+);
+
+alter table public.presentation_submissions enable row level security;
+
+-- A team can read its own presentation (dashboard)
+drop policy if exists presentation_select_own on public.presentation_submissions;
+create policy presentation_select_own on public.presentation_submissions
+  for select to authenticated
+  using (exists (
+    select 1 from public.registrations r
+    where r.id = presentation_submissions.registration_id and r.user_id = auth.uid()
+  ));
+
+-- Authenticated users get SELECT only; submissions and updates go through the RPC
+revoke all on public.presentation_submissions from anon, authenticated;
+grant  select on public.presentation_submissions to authenticated;
+```
+
+### 24b — Upsert RPC and Admin Status Setter
+
+```sql
+-- Client RPC: submit or replace presentation deck
+create or replace function public.upsert_presentation_submission(
+  p_user_id         uuid,
+  p_registration_id uuid,
+  p_ppt_url         text
+) returns uuid
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_owner      uuid;
+  v_code       text;
+  v_is_final   boolean;
+  v_id         uuid;
+begin
+  select user_id, code, is_finalist
+    into v_owner, v_code, v_is_final
+    from public.registrations
+   where id = p_registration_id;
+
+  if v_owner is null then
+    raise exception 'registration_not_found';
+  end if;
+  if v_owner <> p_user_id then
+    raise exception 'not_registration_owner';
+  end if;
+
+  -- Validate finalist eligibility (either DB flag or known finalist code)
+  if not (v_is_final or v_code in (
+    'NEST2026-HNV-0010', 'NEST2026-HNV-0007', 'NEST2026-HNV-0022',
+    'NEST2026-HNV-0030', 'NEST2026-HNV-0034', 'NEST2026-HTN-0015',
+    'NEST2026-HTN-0003', 'NEST2026-HTN-0007', 'NEST2026-HTN-0005',
+    'NEST2026-HTN-0006', 'NEST2026-HTN-0013'
+  )) then
+    raise exception 'team_not_qualified_for_finals';
+  end if;
+
+  insert into public.presentation_submissions (registration_id, ppt_url)
+  values (p_registration_id, p_ppt_url)
+  on conflict (registration_id) do update
+    set ppt_url    = excluded.ppt_url,
+        status     = 'pending',
+        updated_at = now()
+  returning id into v_id;
+
+  return v_id;
+end$$;
+
+revoke all on function public.upsert_presentation_submission(uuid, uuid, text) from public, anon, authenticated;
+grant  execute on function public.upsert_presentation_submission(uuid, uuid, text) to service_role;
+
+-- Admin RPC: update presentation status
+create or replace function public.set_presentation_status(
+  p_id uuid, p_status registration_status
+) returns void
+language plpgsql security definer set search_path = public
+as $$
+begin
+  update public.presentation_submissions set status = p_status where id = p_id;
+end$$;
+
+revoke all on function public.set_presentation_status(uuid, registration_status) from public, anon, authenticated;
+grant  execute on function public.set_presentation_status(uuid, registration_status) to service_role;
+```
+
+### 24c — Views
+
+```sql
+-- 1. Rebuild admin_registrations_detail so is_finalist column is included
+drop view if exists public.admin_registrations_detail;
+
+create view public.admin_registrations_detail
+with (security_invoker = true) as
+select
+  r.*,
+  coalesce(
+    (select jsonb_agg(to_jsonb(tm) order by tm.member_index)
+       from public.team_members tm
+      where tm.registration_id = r.id),
+    '[]'::jsonb
+  ) as members
+from public.registrations r;
+
+revoke all on public.admin_registrations_detail from anon, authenticated;
+
+-- 2. Flattened "all presentations" view for admin Final (PPT) tab
+create or replace view public.admin_presentations_detail
+with (security_invoker = true) as
+select
+  pt.id           as presentation_id,
+  pt.registration_id,
+  r.code,
+  r.team_name,
+  r.competition,
+  r.leader_email,
+  pt.ppt_url,
+  pt.status,
+  pt.submitted_at,
+  pt.updated_at
+from public.presentation_submissions pt
+join public.registrations r on r.id = pt.registration_id;
+
+revoke all on public.admin_presentations_detail from anon, authenticated;
+```
+
+### 24d — Mark Finalists and Resolve Semifinal Papers
+
+Run this query once to mark the 11 finalist teams in the database, set their semifinal papers to `verified` (since they advanced to the Grand Final), and set the non-advancing semifinalists' papers to `rejected`:
+
+```sql
+-- 1. Flag the 11 finalist teams
+update public.registrations
+   set is_finalist = true
+ where code in (
+   'NEST2026-HNV-0010', -- BioNexaS
+   'NEST2026-HNV-0007', -- NexThera
+   'NEST2026-HNV-0022', -- AERIS
+   'NEST2026-HNV-0030', -- GLUCOSENSE
+   'NEST2026-HNV-0034', -- H-3
+   'NEST2026-HTN-0015', -- Mama aku mw ke jkt
+   'NEST2026-HTN-0003', -- Garden House
+   'NEST2026-HTN-0007', -- Pilar Kehidupan
+   'NEST2026-HTN-0005', -- Say Wallahi
+   'NEST2026-HTN-0006', -- Posture Rangers
+   'NEST2026-HTN-0013'  -- Adalah Pokoknya
+ );
+
+-- 2. Mark the 11 finalists' semifinal papers as verified
+update public.paper_submissions
+   set status = 'verified'
+ where registration_id in (
+   select id from public.registrations where is_finalist = true
+ );
+
+-- 3. Mark the non-finalist teams' semifinal papers as rejected (did not advance)
+update public.paper_submissions
+   set status = 'rejected'
+ where registration_id not in (
+   select id from public.registrations where is_finalist = true
+ )
+ and status = 'pending';
+```
+
+### Verify
+
+```sql
+-- Check that the 11 finalists are marked
+select code, team_name, competition, is_finalist
+from public.registrations
+where is_finalist = true
+order by competition, code;
+
+-- Check presentations view
+select count(*) from public.admin_presentations_detail;
+```
