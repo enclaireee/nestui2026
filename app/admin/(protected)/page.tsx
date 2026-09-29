@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { COMPETITIONS, COMPETITION_IDS, isCompetitionId } from "@/lib/registrations/config";
+import {
+  COMPETITIONS,
+  COMPETITION_IDS,
+  isCompetitionId,
+  isFinalistTeam,
+} from "@/lib/registrations/config";
 import {
   sanitizeSearch,
   type AdminPaperDetail,
+  type AdminPresentationDetail,
   type AdminRegistration,
   type AdminSubmissionDetail,
 } from "@/lib/admin/types";
@@ -14,15 +20,14 @@ const PAGE_SIZE = 20;
 
 type ViewMode = "teams" | "submissions";
 
-// Which round the whole panel is looking at. Preliminary is the abstract that
-// came with registration (plus any paid re-entries); Semifinal is the paper
-// round. The switch changes what BOTH views show, so an admin reviewing one
-// round never has the other's statuses on screen.
-type Round = "prelim" | "semifinal";
+// Which round the whole panel is looking at: Preliminary (abstract),
+// Semifinal (paper/video), or Final (presentation deck PPT).
+type Round = "prelim" | "semifinal" | "final";
 
 const ROUND_LABEL: Record<Round, string> = {
   prelim: "Preliminary",
   semifinal: "Semifinal",
+  final: "Final (PPT)",
 };
 
 export default async function AdminDashboard({
@@ -38,7 +43,8 @@ export default async function AdminDashboard({
 }) {
   const sp = await searchParams;
   const view: ViewMode = sp.view === "submissions" ? "submissions" : "teams";
-  const round: Round = sp.round === "semifinal" ? "semifinal" : "prelim";
+  const round: Round =
+    sp.round === "final" ? "final" : sp.round === "semifinal" ? "semifinal" : "prelim";
   const competition = isCompetitionId(sp.competition) ? sp.competition : null;
   const q = sanitizeSearch(sp.q ?? "");
   const page = Math.max(1, Number(sp.page ?? "1") || 1);
@@ -70,6 +76,11 @@ export default async function AdminDashboard({
           href={qs({ round: "semifinal", page: 1 })}
           active={round === "semifinal"}
           label={ROUND_LABEL.semifinal}
+        />
+        <RoundTab
+          href={qs({ round: "final", page: 1 })}
+          active={round === "final"}
+          label={ROUND_LABEL.final}
         />
       </div>
 
@@ -120,6 +131,8 @@ export default async function AdminDashboard({
 
       {view === "teams" ? (
         <TeamsTable competition={competition} q={q} page={page} qs={qs} round={round} />
+      ) : round === "final" ? (
+        <PresentationsTable competition={competition} q={q} page={page} qs={qs} />
       ) : round === "semifinal" ? (
         <PapersTable competition={competition} q={q} page={page} qs={qs} />
       ) : (
@@ -168,28 +181,23 @@ async function TeamsTable({
   // exists inline on the registration.
   const entryCount = new Map<string, number>();
   const paperStatus = new Map<string, string>();
+  const presentationStatus = new Map<string, string>();
   if (rows.length) {
-    const { data: subs } = await supabase
-      .from("admin_submissions_detail")
-      .select("registration_id")
-      .in(
-        "registration_id",
-        rows.map((r) => r.id),
-      );
+    const ids = rows.map((r) => r.id);
+    const [{ data: subs }, { data: papers }, { data: ppts }] = await Promise.all([
+      supabase.from("admin_submissions_detail").select("registration_id").in("registration_id", ids),
+      supabase.from("paper_submissions").select("registration_id, status").in("registration_id", ids),
+      supabase.from("presentation_submissions").select("registration_id, status").in("registration_id", ids),
+    ]);
+
     for (const s of (subs as { registration_id: string }[] | null) ?? [])
       entryCount.set(s.registration_id, (entryCount.get(s.registration_id) ?? 0) + 1);
 
-    // Paper round status per team. Absent until the Step 21 migration runs, in
-    // which case every team simply shows no paper.
-    const { data: papers } = await supabase
-      .from("paper_submissions")
-      .select("registration_id, status")
-      .in(
-        "registration_id",
-        rows.map((r) => r.id),
-      );
     for (const pp of (papers as { registration_id: string; status: string }[] | null) ?? [])
       paperStatus.set(pp.registration_id, pp.status);
+
+    for (const pt of (ppts as { registration_id: string; status: string }[] | null) ?? [])
+      presentationStatus.set(pt.registration_id, pt.status);
   }
 
   return (
@@ -205,48 +213,63 @@ async function TeamsTable({
             No registrations found.
           </li>
         )}
-        {rows.map((r) => (
-          <li key={r.id} className="rounded-xl border border-white/10 bg-white/[0.03]">
-            <Link
-              href={`/admin/registrations/${r.id}`}
-              className="flex items-start justify-between gap-3 border-b border-white/10 p-4"
-            >
-              <span className="min-w-0">
-                <span className="block truncate font-semibold text-white">{r.team_name}</span>
-                <span className="mt-0.5 block font-mono text-xs text-white/50">{r.code}</span>
-              </span>
-              <TeamStatus round={round} reg={r} paperStatus={paperStatus.get(r.id)} />
-            </Link>
-            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 p-4 text-sm">
-              <dt className="text-white/55">Competition</dt>
-              <dd className="text-right text-white/85">
-                {COMPETITIONS[r.competition]?.name ?? r.competition}
-              </dd>
-              <dt className="text-white/55">Members</dt>
-              <dd className="text-right text-white/85">{r.team_size}</dd>
-              <dt className="text-white/55">Submissions</dt>
-              <dd className="text-right text-white/85">{entryCount.get(r.id) ?? 1}</dd>
-              <dt className="text-white/55">Registered</dt>
-              <dd className="text-right text-white/85">
-                {new Date(r.submitted_at).toLocaleDateString()}
-              </dd>
-            </dl>
-            <div className="flex flex-col gap-1 border-t border-white/10 px-4 py-2">
-              <a
-                href={`mailto:${r.leader_email}`}
-                className="inline-flex min-h-11 items-center break-all text-sm text-brand-lime"
+        {rows.map((r) => {
+          const isFinalist = isFinalistTeam(r.code, r.is_finalist);
+          return (
+            <li key={r.id} className="rounded-xl border border-white/10 bg-white/[0.03]">
+              <Link
+                href={`/admin/registrations/${r.id}`}
+                className="flex items-start justify-between gap-3 border-b border-white/10 p-4"
               >
-                {r.leader_email}
-              </a>
-              <a
-                href={`tel:${r.leader_phone}`}
-                className="inline-flex min-h-11 items-center text-sm text-brand-lime"
-              >
-                {r.leader_phone}
-              </a>
-            </div>
-          </li>
-        ))}
+                <span className="min-w-0">
+                  <span className="flex items-center gap-1.5">
+                    <span className="block truncate font-semibold text-white">{r.team_name}</span>
+                    {isFinalist && (
+                      <span className="shrink-0 rounded-full bg-brand-lime px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-teal">
+                        Finalist
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-0.5 block font-mono text-xs text-white/50">{r.code}</span>
+                </span>
+                <TeamStatus
+                  round={round}
+                  reg={r}
+                  paperStatus={paperStatus.get(r.id)}
+                  presentationStatus={presentationStatus.get(r.id)}
+                />
+              </Link>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 p-4 text-sm">
+                <dt className="text-white/55">Competition</dt>
+                <dd className="text-right text-white/85">
+                  {COMPETITIONS[r.competition]?.name ?? r.competition}
+                </dd>
+                <dt className="text-white/55">Members</dt>
+                <dd className="text-right text-white/85">{r.team_size}</dd>
+                <dt className="text-white/55">Submissions</dt>
+                <dd className="text-right text-white/85">{entryCount.get(r.id) ?? 1}</dd>
+                <dt className="text-white/55">Registered</dt>
+                <dd className="text-right text-white/85">
+                  {new Date(r.submitted_at).toLocaleDateString()}
+                </dd>
+              </dl>
+              <div className="flex flex-col gap-1 border-t border-white/10 px-4 py-2">
+                <a
+                  href={`mailto:${r.leader_email}`}
+                  className="inline-flex min-h-11 items-center break-all text-sm text-brand-lime"
+                >
+                  {r.leader_email}
+                </a>
+                <a
+                  href={`tel:${r.leader_phone}`}
+                  className="inline-flex min-h-11 items-center text-sm text-brand-lime"
+                >
+                  {r.leader_phone}
+                </a>
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       <div className="hidden overflow-x-auto rounded-xl border border-white/10 md:block">
@@ -272,42 +295,57 @@ async function TeamsTable({
                 </td>
               </tr>
             )}
-            {rows.map((r) => (
-              <tr key={r.id} className="border-t border-white/5 hover:bg-white/5">
-                <td className="px-4 py-3 font-mono text-xs">
-                  <Link href={`/admin/registrations/${r.id}`} className="hover:text-brand-lime">
-                    {r.code}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 font-semibold">
-                  <Link href={`/admin/registrations/${r.id}`} className="hover:text-brand-lime">
-                    {r.team_name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">{COMPETITIONS[r.competition]?.name ?? r.competition}</td>
-                <td className="px-4 py-3">{r.team_size}</td>
-                <td className="px-4 py-3 text-white/70">
-                  <a href={`mailto:${r.leader_email}`} className="hover:text-brand-lime">
-                    {r.leader_email}
-                  </a>
-                </td>
-                <td className="px-4 py-3 text-white/70">{r.leader_phone}</td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/registrations/${r.id}`}
-                    className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-bold hover:bg-white/20"
-                  >
-                    {entryCount.get(r.id) ?? 1}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-white/70">
-                  {new Date(r.submitted_at).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-3">
-                  <TeamStatus round={round} reg={r} paperStatus={paperStatus.get(r.id)} />
-                </td>
-              </tr>
-            ))}
+            {rows.map((r) => {
+              const isFinalist = isFinalistTeam(r.code, r.is_finalist);
+              return (
+                <tr key={r.id} className="border-t border-white/5 hover:bg-white/5">
+                  <td className="px-4 py-3 font-mono text-xs">
+                    <Link href={`/admin/registrations/${r.id}`} className="hover:text-brand-lime">
+                      {r.code}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 font-semibold">
+                    <div className="flex items-center gap-2">
+                      <Link href={`/admin/registrations/${r.id}`} className="hover:text-brand-lime">
+                        {r.team_name}
+                      </Link>
+                      {isFinalist && (
+                        <span className="shrink-0 rounded-full border border-brand-lime/30 bg-brand-lime/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-lime">
+                          Finalist
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">{COMPETITIONS[r.competition]?.name ?? r.competition}</td>
+                  <td className="px-4 py-3">{r.team_size}</td>
+                  <td className="px-4 py-3 text-white/70">
+                    <a href={`mailto:${r.leader_email}`} className="hover:text-brand-lime">
+                      {r.leader_email}
+                    </a>
+                  </td>
+                  <td className="px-4 py-3 text-white/70">{r.leader_phone}</td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/admin/registrations/${r.id}`}
+                      className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-bold hover:bg-white/20"
+                    >
+                      {entryCount.get(r.id) ?? 1}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-white/70">
+                    {new Date(r.submitted_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <TeamStatus
+                      round={round}
+                      reg={r}
+                      paperStatus={paperStatus.get(r.id)}
+                      presentationStatus={presentationStatus.get(r.id)}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -465,6 +503,150 @@ async function PapersTable({
       </div>
 
       <Pager total={total} page={page} unit="paper" qs={qs} />
+    </>
+  );
+}
+
+// ── Final presentations (PPT) ────────────────────────────────────────────────
+// Every presentation deck across all finalist teams, newest first.
+
+async function PresentationsTable({
+  competition,
+  q,
+  page,
+  qs,
+}: {
+  competition: string | null;
+  q: string;
+  page: number;
+  qs: (extra: Record<string, string | number>) => string;
+}) {
+  const from = (page - 1) * PAGE_SIZE;
+  const supabase = createAdminClient();
+
+  let query = supabase
+    .from("admin_presentations_detail")
+    .select("*", { count: "exact" })
+    .order("submitted_at", { ascending: false })
+    .range(from, from + PAGE_SIZE - 1);
+  if (competition) query = query.eq("competition", competition);
+  if (q)
+    query = query.or(
+      `team_name.ilike."%${q}%",code.ilike."%${q}%",leader_email.ilike."%${q}%"`,
+    );
+
+  const { data, count, error } = await query;
+  const rows = (data as AdminPresentationDetail[] | null) ?? [];
+  const total = count ?? 0;
+
+  return (
+    <>
+      {error && (
+        <p className="text-sm text-red-400">
+          Failed to load presentations: {error.message}. Run the Step 24 SQL in BACKEND.md if you
+          haven&apos;t yet.
+        </p>
+      )}
+
+      {/* Mobile view */}
+      <ul className="flex flex-col gap-3 md:hidden">
+        {rows.length === 0 && !error && (
+          <li className="rounded-xl border border-white/10 px-4 py-8 text-center text-white/50">
+            No presentations submitted yet.
+          </li>
+        )}
+        {rows.map((pt) => (
+          <li key={pt.presentation_id} className="rounded-xl border border-white/10 bg-white/[0.03]">
+            <Link
+              href={`/admin/registrations/${pt.registration_id}`}
+              className="flex items-start justify-between gap-3 border-b border-white/10 p-4"
+            >
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-white">{pt.team_name}</span>
+                <span className="mt-0.5 block font-mono text-xs text-white/50">{pt.code}</span>
+              </span>
+              <StatusBadge status={pt.status} />
+            </Link>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 p-4 text-sm">
+              <dt className="text-white/55">Competition</dt>
+              <dd className="text-right text-white/85">
+                {COMPETITIONS[pt.competition]?.name ?? pt.competition}
+              </dd>
+              <dt className="text-white/55">Submitted</dt>
+              <dd className="text-right text-white/85">
+                {new Date(pt.submitted_at).toLocaleString()}
+              </dd>
+              {pt.updated_at !== pt.submitted_at && (
+                <>
+                  <dt className="text-white/55">Replaced</dt>
+                  <dd className="text-right text-white/85">
+                    {new Date(pt.updated_at).toLocaleString()}
+                  </dd>
+                </>
+              )}
+            </dl>
+            <div className="flex gap-2 border-t border-white/10 p-3">
+              <LinkCell href={pt.ppt_url} label="Presentation (PPT)" />
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop view */}
+      <div className="hidden overflow-x-auto rounded-xl border border-white/10 md:block">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-white/5 text-white/60">
+            <tr>
+              <Th>Submitted</Th>
+              <Th>Team</Th>
+              <Th>Competition</Th>
+              <Th>Presentation Deck</Th>
+              <Th>Status</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 && !error && (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-white/50">
+                  No presentations submitted yet.
+                </td>
+              </tr>
+            )}
+            {rows.map((pt) => (
+              <tr key={pt.presentation_id} className="border-t border-white/5 hover:bg-white/5">
+                <td className="whitespace-nowrap px-4 py-3 text-white/70">
+                  {new Date(pt.submitted_at).toLocaleString()}
+                  {pt.updated_at !== pt.submitted_at && (
+                    <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/60">
+                      replaced
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <Link
+                    href={`/admin/registrations/${pt.registration_id}`}
+                    className="font-semibold hover:text-brand-lime"
+                  >
+                    {pt.team_name}
+                  </Link>
+                  <span className="ml-2 font-mono text-xs text-white/55">{pt.code}</span>
+                </td>
+                <td className="px-4 py-3">
+                  {COMPETITIONS[pt.competition]?.name ?? pt.competition}
+                </td>
+                <td className="px-4 py-3">
+                  <LinkCell href={pt.ppt_url} label="Presentation (PPT)" />
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={pt.status} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Pager total={total} page={page} unit="presentation" qs={qs} />
     </>
   );
 }
@@ -695,18 +877,30 @@ function Tab({ href, active, label }: { href: string; active: boolean; label: st
 }
 
 // The Status column follows the selected round: registration status under
-// Preliminary, paper status under Semifinal. Medhack has no paper round, so it
-// reads n/a there rather than an empty or misleading badge.
+// Preliminary, paper status under Semifinal, presentation deck status under Final.
 function TeamStatus({
   round,
   reg,
   paperStatus,
+  presentationStatus,
 }: {
   round: Round;
   reg: AdminRegistration;
   paperStatus?: string;
+  presentationStatus?: string;
 }) {
   if (round === "prelim") return <StatusBadge status={reg.status} />;
+  if (round === "final") {
+    const isFinalist = isFinalistTeam(reg.code, reg.is_finalist);
+    if (!isFinalist) {
+      return (
+        <span className="rounded-full bg-white/[0.07] px-2.5 py-0.5 text-xs font-semibold text-white/30">
+          not qualified
+        </span>
+      );
+    }
+    return <PresentationCell status={presentationStatus} />;
+  }
   if (!COMPETITIONS[reg.competition]?.paperSubmission)
     return (
       <span className="rounded-full bg-white/[0.07] px-2.5 py-0.5 text-xs font-semibold text-white/30">
@@ -714,6 +908,16 @@ function TeamStatus({
       </span>
     );
   return <PaperCell status={paperStatus} />;
+}
+
+function PresentationCell({ status }: { status?: string }) {
+  if (!status)
+    return (
+      <span className="rounded-full bg-amber-400/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
+        awaiting upload
+      </span>
+    );
+  return <StatusBadge status={status} />;
 }
 
 // Paper round at a glance. "none" is a real state worth seeing in the list —

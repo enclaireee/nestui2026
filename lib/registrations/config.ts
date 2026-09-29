@@ -205,3 +205,40 @@ export function paperPhase(id: CompetitionId, now: Date = new Date()): PaperPhas
   if (now > new Date(`${p.closes}T23:59:59+07:00`)) return "closed";
   return "open";
 }
+
+/**
+ * The 11 teams selected as finalists for NEST 2026:
+ * Healthynovation (5): BioNexaS, NexThera, AERIS, GLUCOSENSE, H-3
+ * Healthineer (6): Mama aku mw ke jkt, Garden House, Pilar Kehidupan, Say Wallahi, Posture Rangers, Adalah Pokoknya
+ */
+export const FINALIST_CODES: ReadonlySet<string> = new Set([
+  "NEST2026-HNV-0010", // BioNexaS
+  "NEST2026-HNV-0007", // NexThera
+  "NEST2026-HNV-0022", // AERIS
+  "NEST2026-HNV-0030", // GLUCOSENSE
+  "NEST2026-HNV-0034", // H-3
+  "NEST2026-HTN-0015", // Mama aku mw ke jkt
+  "NEST2026-HTN-0003", // Garden House
+  "NEST2026-HTN-0007", // Pilar Kehidupan
+  "NEST2026-HTN-0005", // Say Wallahi
+  "NEST2026-HTN-0006", // Posture Rangers
+  "NEST2026-HTN-0013", // Adalah Pokoknya
+]);
+
+export function isFinalistTeam(code?: string | null, isFinalistCol?: boolean | null): boolean {
+  if (isFinalistCol === true) return true;
+  if (!code) return false;
+  return FINALIST_CODES.has(code);
+}
+
+/** Inclusive window to submit or replace the presentation deck (PPT/Slides link) in WIB */
+export const FINAL_PPT_OPENS = "2026-09-29T00:00:00+07:00";
+export const FINAL_PPT_DEADLINE = "2026-10-02T23:59:59+07:00";
+
+export type FinalPhase = "before" | "open" | "closed";
+
+export function finalPhase(now: Date = new Date()): FinalPhase {
+  if (now < new Date(FINAL_PPT_OPENS)) return "before";
+  if (now > new Date(FINAL_PPT_DEADLINE)) return "closed";
+  return "open";
+}

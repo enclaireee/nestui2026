@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { COMPETITIONS } from "@/lib/registrations/config";
+import { COMPETITIONS, isFinalistTeam } from "@/lib/registrations/config";
 import type {
   AdminRegistration,
   AdminSubmissionDetail,
   MemberRow,
   PaperSubmissionRow,
+  PresentationSubmissionRow,
 } from "@/lib/admin/types";
-import { setPaperStatus, setRegistrationStatus, setSubmissionStatus } from "@/app/admin/actions";
+import {
+  setPaperStatus,
+  setPresentationStatus,
+  setRegistrationStatus,
+  setSubmissionStatus,
+} from "@/app/admin/actions";
 import { StatusBadge } from "@/components/status-badge";
 import { LinkRow } from "@/components/link-row";
 
@@ -19,28 +25,29 @@ export default async function RegistrationDetail({
 }) {
   const { id } = await params;
   const supabase = createAdminClient();
-  // Neither query depends on the other's result — both are keyed off `id`
-  // from params — so run them concurrently instead of paying two round trips
-  // in serial.
-  const [{ data }, { data: subData }, { data: paperData }] = await Promise.all([
-    supabase.from("admin_registrations_detail").select("*").eq("id", id).maybeSingle(),
-    // Every submission for this team — Entry 1 (inline) + resubmissions. If the
-    // submissions view isn't present yet, fall back to the inline Entry 1 so
-    // the page still works.
-    supabase
-      .from("admin_submissions_detail")
-      .select("*")
-      .eq("registration_id", id)
-      .order("entry_no", { ascending: true }),
-    // The paper round. Absent until the Step 21 migration runs, and null for
-    // teams that haven't submitted one — both render as "nothing yet".
-    supabase.from("paper_submissions").select("*").eq("registration_id", id).maybeSingle(),
-  ]);
+  // Queries run concurrently instead of paying round trips in serial.
+  const [{ data }, { data: subData }, { data: paperData }, { data: presentationData }] =
+    await Promise.all([
+      supabase.from("admin_registrations_detail").select("*").eq("id", id).maybeSingle(),
+      supabase
+        .from("admin_submissions_detail")
+        .select("*")
+        .eq("registration_id", id)
+        .order("entry_no", { ascending: true }),
+      supabase.from("paper_submissions").select("*").eq("registration_id", id).maybeSingle(),
+      supabase
+        .from("presentation_submissions")
+        .select("*")
+        .eq("registration_id", id)
+        .maybeSingle(),
+    ]);
 
   const reg = data as AdminRegistration | null;
   if (!reg) notFound();
 
   const paper = paperData as PaperSubmissionRow | null;
+  const presentation = presentationData as PresentationSubmissionRow | null;
+  const isFinalist = isFinalistTeam(reg.code, reg.is_finalist);
   const cfg = COMPETITIONS[reg.competition];
   const entries: AdminSubmissionDetail[] =
     (subData as AdminSubmissionDetail[] | null)?.length
@@ -54,7 +61,14 @@ export default async function RegistrationDetail({
       </Link>
 
       <div>
-        <h1 className="text-2xl font-bold">{reg.team_name}</h1>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <h1 className="text-2xl font-bold">{reg.team_name}</h1>
+          {isFinalist && (
+            <span className="rounded-full bg-brand-lime px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-teal">
+              Finalist
+            </span>
+          )}
+        </div>
         <p className="font-mono text-sm text-white/60">
           {reg.code} · {cfg?.name ?? reg.competition} · {reg.team_size} members ·{" "}
           {entries.length} submission{entries.length === 1 ? "" : "s"}
@@ -80,6 +94,39 @@ export default async function RegistrationDetail({
               <PersonCard key={m.id} person={m} hasMajor={cfg?.hasMajor ?? false} labels={cfg} />
             ))}
           </div>
+        </Section>
+      )}
+
+      {isFinalist && (
+        <Section title="Grand Final Presentation (PPT)">
+          {presentation ? (
+            <div className="rounded-lg border border-brand-lime/25 bg-brand-lime/5 p-4">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs text-white/50">
+                  submitted {new Date(presentation.submitted_at).toLocaleString()}
+                  {presentation.updated_at !== presentation.submitted_at &&
+                    ` · replaced ${new Date(presentation.updated_at).toLocaleString()}`}
+                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <StatusBadge status={presentation.status} />
+                  <PresentationStatusForm
+                    presentation={presentation}
+                    registrationId={reg.id}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 text-sm">
+                <LinkRow label="Presentation deck (PPT / Slides)" href={presentation.ppt_url} />
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-white/15 p-4 text-center">
+              <p className="text-sm text-white/60">No presentation deck submitted yet.</p>
+              <p className="mt-1 text-xs text-white/40">
+                Finalist teams can submit their presentation deck via their team dashboard.
+              </p>
+            </div>
+          )}
         </Section>
       )}
 
@@ -242,6 +289,41 @@ function PaperStatusForm({
       <select
         name="status"
         defaultValue={paper.status}
+        className="h-11 rounded-lg border border-white/15 bg-brand-green px-2 text-base text-white sm:h-9 sm:text-sm"
+      >
+        <option value="pending">pending</option>
+        <option value="verified">verified</option>
+        <option value="rejected">rejected</option>
+      </select>
+      <button className="min-h-11 rounded-lg bg-white/10 px-4 text-sm font-semibold hover:bg-white/20">
+        Update
+      </button>
+    </form>
+  );
+}
+
+function PresentationStatusForm({
+  presentation,
+  registrationId,
+}: {
+  presentation: PresentationSubmissionRow;
+  registrationId: string;
+}) {
+  return (
+    <form
+      action={async (formData: FormData) => {
+        "use server";
+        await setPresentationStatus(
+          presentation.id,
+          String(formData.get("status")),
+          registrationId,
+        );
+      }}
+      className="flex items-center gap-2"
+    >
+      <select
+        name="status"
+        defaultValue={presentation.status}
         className="h-11 rounded-lg border border-white/15 bg-brand-green px-2 text-base text-white sm:h-9 sm:text-sm"
       >
         <option value="pending">pending</option>

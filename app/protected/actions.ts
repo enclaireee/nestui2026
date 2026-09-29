@@ -7,7 +7,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { stripHtml } from "@/lib/sanitize";
 import { URL_RE } from "@/lib/registrations/validate";
-import { COMPETITIONS, currentFee, isCompetitionId, paperPhase } from "@/lib/registrations/config";
+import {
+  COMPETITIONS,
+  currentFee,
+  finalPhase,
+  isCompetitionId,
+  isFinalistTeam,
+  paperPhase,
+} from "@/lib/registrations/config";
 
 export type AddSubmissionResult = { ok: true } | { ok: false; error: string };
 
@@ -134,6 +141,73 @@ export async function submitPaper(
     if (error.code === "42883" || msg.includes("upsert_paper_submission"))
       return { ok: false, error: "Paper submission isn't available yet. Please try again later." };
     console.error("upsert_paper_submission failed:", error);
+    return { ok: false, error: "Submission failed. Please try again." };
+  }
+
+  revalidatePath("/protected");
+  return { ok: true };
+}
+
+export type SubmitPresentationResult = { ok: true } | { ok: false; error: string };
+
+// The Grand Final presentation deck (PPT / Google Slides link) for finalists.
+export async function submitPresentation(
+  registrationId: string,
+  pptUrl: string,
+): Promise<SubmitPresentationResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "You must be logged in." };
+
+  const hdrs = await headers();
+  const allowed = await checkRateLimit(`ppt:${user.id}:${clientIp(hdrs)}`, 10, 3600);
+  if (!allowed)
+    return { ok: false, error: "Too many attempts. Please wait a while and try again." };
+
+  // RLS-scoped check: verify team ownership and finalist eligibility
+  const { data: reg } = await supabase
+    .from("registrations")
+    .select("id, code, is_finalist")
+    .eq("id", registrationId)
+    .maybeSingle();
+
+  if (!reg) return { ok: false, error: "You can only submit for your own team." };
+
+  if (!isFinalistTeam(reg.code, reg.is_finalist))
+    return { ok: false, error: "Only announced finalists can submit presentation slides." };
+
+  const phase = finalPhase();
+  if (phase === "before")
+    return { ok: false, error: "Presentation submission has not opened yet." };
+  if (phase === "closed")
+    return { ok: false, error: "Presentation submission has closed." };
+
+  const ppt = stripHtml(pptUrl);
+  if (!URL_RE.test(ppt))
+    return { ok: false, error: "Presentation must be a valid link." };
+
+  const admin = createAdminClient();
+  const { error } = await admin.rpc("upsert_presentation_submission", {
+    p_user_id: user.id,
+    p_registration_id: registrationId,
+    p_ppt_url: ppt,
+  });
+
+  if (error) {
+    const msg = error.message ?? "";
+    if (msg.includes("not_registration_owner") || msg.includes("registration_not_found"))
+      return { ok: false, error: "You can only submit for your own team." };
+    if (msg.includes("not_finalist"))
+      return { ok: false, error: "Only announced finalists can submit presentation slides." };
+    // Step 24 migration not run yet.
+    if (error.code === "42883" || msg.includes("upsert_presentation_submission"))
+      return {
+        ok: false,
+        error: "Presentation submission isn't available yet. Please try again later.",
+      };
+    console.error("upsert_presentation_submission failed:", error);
     return { ok: false, error: "Submission failed. Please try again." };
   }
 
